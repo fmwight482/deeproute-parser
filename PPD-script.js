@@ -5,7 +5,7 @@
 // @include     http://www.deeproute.com/?js=weekbyweek*
 // @include     http://deeproute.com/default.asp?js=weekbyweek*
 // @include     http://www.deeproute.com/default.asp?js=weekbyweek*
-// @version     1.6
+// @version     1.6.1
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
@@ -1094,6 +1094,13 @@ function parsePBP(intext) {
 		}
 		endptr=ptr2; 
 		ptr3=intext.lastIndexOf("<span style='font-size:13;'>", ptr2); // find start of the final PBP line from this play 
+
+		ptr7=intext.indexOf("Two Minute Warning", ptr3); // if imediately before the two minute warning, look for the line before it
+		if (ptr7!=-1 && ptr7 < endptr) {
+			ptr4=ptr3-28;
+			ptr3=intext.lastIndexOf("<span style='font-size:13;'>", ptr4);
+		}
+
 		ptr4=intext.indexOf("ouchdown", ptr3); // find next touchdown after start of the final PBP line 
 		if (ptr4>ptr3 && ptr4 < ptr2) { // if the touchdown is after the start of the final PBP line and before the package info
 			isTouchdown=1; 
@@ -1150,7 +1157,7 @@ function parsePBP(intext) {
 		gameTime=intext.substring(ptr4+3, ptr7); // store string with quarter and time remaining. 
 
 		ptr4=intext.indexOf("<b>", ptr7+4); // third bolding: down and distance
-		ptr7=intext.indexOf("</b>", ptr4+3); 
+		//ptr7=intext.indexOf("</b>", ptr4+3); 
 		down=intext.substring(ptr4+4, ptr4+7); // store down ("1st", "2nd", etc)
 		ptr7=intext.indexOf(";", ptr4); // find end of distance ("Foot~", "13+", etc)
 		togo=intext.substring(ptr4+12, ptr7); // store distance 
