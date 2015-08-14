@@ -291,7 +291,7 @@ function checkIDPList(id, name) {
     for (var x=0; x<IDPStats.length; x++) {
     	if (IDPStats[x][0] == id) {
         	index = x;
-            //alert("found reciever " + name + " on the reciever list");
+            //alert("found defender " + name + " on the defender list");
         }
     }
     if (index == -1) {
@@ -303,7 +303,7 @@ function checkIDPList(id, name) {
         IDPStats[index] = stats;
         IDPStats[index][0] = id;
         IDPStats[index][1] = name;
-        //alert("adding " + name + " to the reciever list");
+        //alert("adding " + name + " to the defender list");
     }
     return index;
 }
