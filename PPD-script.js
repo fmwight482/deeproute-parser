@@ -303,7 +303,7 @@ function checkIDPList(id, name) {
         IDPStats[index] = stats;
         IDPStats[index][0] = id;
         IDPStats[index][1] = name;
-        //alert("adding " + name + " to the defender list");
+        //alert("adding " + name + " with id = " + id + " to the defender list");
     }
     return index;
 }
@@ -1025,7 +1025,7 @@ function parsePBP(intext) {
 	var pkgid, defpkgid, formid, playid, downDistID, index, run, handoff, sneak, pass, att, tmparr, sack, GCOV;
     var pressScram, coverScram, throwAway, pdef, tkl;
     var WR, WRID, WRpID, WRName, GCOVd, GCOVdpID, GCOVdID, GCOVdName, GCOVer, GCOVerID, GCOVerName, passDefenderpID, passDefenderName;
-    var defPlaymaker, defPlaymakerpID, defPlaymakerName;
+    var defPlaymaker, defPlaymakerpID=-1, defPlaymakerName;
 	var startNext, startThis=0, attYard, attYard2, drop, hadYards, tempYardCounter=0;
 	var attempts=0, scrambles=0, sacks=0; 
 	var name1, name2, abbr1, abbr2, defAbbr, name1Index, name2Index;
@@ -1084,6 +1084,7 @@ function parsePBP(intext) {
 		else {
 			alert("could not find coin flip");
 		}
+		//alert("defPlaymakerpID = " + defPlaymakerpID);
 	}
 
 	while (1) {
