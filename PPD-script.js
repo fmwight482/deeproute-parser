@@ -1756,7 +1756,7 @@ function parsePBP(intext) {
         }
         
         if (conversions && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens) && (down == "3rd" || down == "4th")) {
-            var downDistID = get3rd4thDownDistID(distToGo);
+            downDistID = get3rd4thDownDistID(distToGo);
             if (downDistID == -1) {
                 alert("downDistID == -1"); 
             }
@@ -1772,9 +1772,9 @@ function parsePBP(intext) {
             }
         }
         
-        if (individualWRStats && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay == 0 || withPens) 
-        	&& (downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
-        	var index = -1;
+        if (individualWRStats && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens) &&
+        	(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
+        	index = -1;
             
             // player ID, name, 1st opt passes, targets, yards, successes, GCOVs, INTs, Drops, dump passes, dist downfield, position, catches
             if (GCOVdpID != -1) {
@@ -1787,13 +1787,13 @@ function parsePBP(intext) {
             	index = checkWRList(WRpID, WRName, WR);
                 WRPlayerStats[index][3]++; // increment targets
                 WRPlayerStats[index][4] += yard;
-                if (GCOV == 0 && dumpoff == 0) {
+                if (GCOV === 0 && dumpoff === 0) {
                 	WRPlayerStats[index][2]++; // increment 1st option passes
                 }
-                if (dumpoff == 0 && attYard != "" && !isNaN(attYard)) {
+                if (dumpoff === 0 && attYard !== "" && !isNaN(attYard)) {
                 	WRPlayerStats[index][10] += attYard;
                 }
-                else if (dumpoff == 0 && (attYard == "" || isNaN(attYard))) {
+                else if (dumpoff === 0 && (attYard === "" || isNaN(attYard))) {
                 	WRPlayerStats[index][8]++; // increment drops (and passes batted down at the line) 
                 }
                 else {
@@ -1820,7 +1820,7 @@ function parsePBP(intext) {
         
         if (individualDefenderStats && (showBothTeams || !correctAbbr(abbr, showOffense) || bothTeamsValid) && (noPlay === 0 || withPens) &&
         	(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
-        	var index = -1;
+        	index = -1;
             
             // player ID, name, 1st opt passes, targets, yards, successes, GCOVs, INTs, Drops, dump passes, dist downfield, catches
             if (GCOVerID != -1) {
@@ -1836,13 +1836,13 @@ function parsePBP(intext) {
             	index = checkIDPList(passDefenderpID, passDefenderName);
                 IDPStats[index][3]++; // increment targets
                 IDPStats[index][4] += yard;
-                if (GCOV == 0 && dumpoff == 0) {
+                if (GCOV === 0 && dumpoff === 0) {
                 	IDPStats[index][2]++; // increment 1st option passes
                 }
-                if (dumpoff == 0 && attYard != "") {
+                if (dumpoff === 0 && attYard !== "") {
                 	IDPStats[index][10] += attYard;
                 }
-                else if (dumpoff == 0 && attYard == "") {
+                else if (dumpoff === 0 && attYard === "") {
                 	IDPStats[index][8]++; // increment drops (and passes batted down at the line) 
                 }
                 else {
@@ -1892,8 +1892,8 @@ function parsePBP(intext) {
             }
         }
         
-        if (passDistSplits && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay == 0 || withPens) && (attYard != "" || dumpoff)
-        	&& (downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
+        if (passDistSplits && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens) && (attYard !== "" || dumpoff) &&
+        	(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
        		var distID = -1;
             if (dumpoff) {
             	distID = 0;
@@ -1902,7 +1902,7 @@ function parsePBP(intext) {
             	distID = getPassDistID(attYard);
             }
             
-            if (attYard == "") {
+            if (attYard === "") {
             	attYard = yard;
             }
             
@@ -1926,7 +1926,7 @@ function parsePBP(intext) {
             }
         }
         
-        if (sacks && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay == 0 || withPens)) {
+        if (sacks && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens)) {
         	// pass plays, passes, sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
             if (pass) {
             	sackStats[0]++; // increment passes
@@ -1987,20 +1987,21 @@ function parsePBP(intext) {
 		newDiv = document.getElementById('scout_count');
 		
 		if (runPassSplits) {
-			for (var a=0; a<7; a++) {
-				for (var c=0; c<2; c++) {
-					for (var d=0; d<3; d++) {
-						for (var b=0; b<8; b++) {
+			var a, b, c, d;
+			for (a=0; a<7; a++) {
+				for (c=0; c<2; c++) {
+					for (d=0; d<3; d++) {
+						for (b=0; b<8; b++) {
 							sumDownStats[a][c][d]+=detailedPackageStats[a][b][c][d]; 
 						}
 					}
 				}
 			}
 
-			for (var b=0; b<8; b++) {
-				for (var c=0; c<2; c++) {
-					for (var d=0; d<3; d++) {
-						for (var a=0; a<7; a++) {
+			for (b=0; b<8; b++) {
+				for (c=0; c<2; c++) {
+					for (d=0; d<3; d++) {
+						for (a=0; a<7; a++) {
 							sumPackageStats[b][c][d]+=detailedPackageStats[a][b][c][d]; 
 						}
 					}
@@ -2044,14 +2045,15 @@ function parsePBP(intext) {
 }
 
 function initializeArrays() {
+	var a, b, c, d, pkgs, plays, stats, tmp;
 	detailedPackageStats=new Array(7); // initialize stat array (1st down, 2nd & short, 2nd & medium, 2nd & long, 3rd/4th & short, 3rd/4th & medium, 3rd/4th & long) 
-	for (var a=0; a<7; a++) { 
-        var pkgs=new Array(8);  // initialize row of packages (HFT12, HFTt1, HTt12, HF123, HT123, H1234, T1234, 12345) 
-        for (var b=0; b<8; b++) {
-            var plays=new Array(2); // initialize row of play types (run/pass/unknown)
-            for (var c=0; c<2; c++) {
-                var stats=new Array(3); // initialize row of stats (plays, yards, successes) 
-                for (var d=0; d<3; d++) {
+	for (a=0; a<7; a++) { 
+        pkgs=new Array(8);  // initialize row of packages (HFT12, HFTt1, HTt12, HF123, HT123, H1234, T1234, 12345) 
+        for (b=0; b<8; b++) {
+            plays=new Array(2); // initialize row of play types (run/pass/unknown)
+            for (c=0; c<2; c++) {
+                stats=new Array(3); // initialize row of stats (plays, yards, successes) 
+                for (d=0; d<3; d++) {
                     stats[d]=0;  // initialize each slot in the array (filled in the ParsePBP function) 
                     
                 }
@@ -2063,11 +2065,11 @@ function initializeArrays() {
     } 
     
     packageStats=new Array(7); // initialize stat array (1st down, 2nd & short, 2nd & medium, 2nd & long, 3rd/4th & short, 3rd/4th & medium, 3rd/4th & long) 
-    for (var a=0; a<7; a++) { 
-        var pkgs=new Array(8);  // initialize row of packages (HFT12, HFTt1, HTt12, HF123, HT123, H1234, T1234, 12345) 
-        for (var b=0; b<8; b++) {
-            var tmp=new Array(2); // initialize row of play types (run/pass/unknown)
-            for (var c=0; c<2; c++) {
+    for (a=0; a<7; a++) { 
+        pkgs=new Array(8);  // initialize row of packages (HFT12, HFTt1, HTt12, HF123, HT123, H1234, T1234, 12345) 
+        for (b=0; b<8; b++) {
+            tmp=new Array(2); // initialize row of play types (run/pass/unknown)
+            for (c=0; c<2; c++) {
                 tmp[c]=0;  // initialize each slot in the array (filled in the ParsePBP function)  
             }
             pkgs[b]=tmp; 
@@ -2077,9 +2079,9 @@ function initializeArrays() {
     
     packageYards=new Array(7);
     for (var x=0; x<7; x++) { 
-        var pkgs=new Array(8);  
+        pkgs=new Array(8);  
         for (y=0; y<8; y++) {
-            var tmp=new Array(2); 
+            tmp=new Array(2); 
             for (var z=0; z<2; z++) {
                 tmp[z]=0;  
             }
@@ -2089,10 +2091,10 @@ function initializeArrays() {
     }
     
     sumPackageStats=new Array(8); 
-    for (var b=0; b<8; b++) {
-        var plays=new Array(2); 
+    for (b=0; b<8; b++) {
+        plays=new Array(2); 
         for (c=0; c<2; c++) {
-            var stats=new Array(3); 
+            stats=new Array(3); 
             for (d=0; d<3; d++) {
                 stats[d]=0; 
             }
@@ -2102,10 +2104,10 @@ function initializeArrays() {
 	}
 
 	sumDownStats=new Array(7); 
-    for (var a=0; a<7; a++) {
-		var plays=new Array(2); 
+    for (a=0; a<7; a++) {
+		plays=new Array(2); 
 		for (c=0; c<2; c++) {
-			var stats=new Array(3); 
+			stats=new Array(3); 
 			for (d=0; d<3; d++) {
 				stats[d]=0; 
 			}
@@ -2115,21 +2117,21 @@ function initializeArrays() {
 	}
     
     sumAllPackages = new Array(2);
-    for (var a=0; a<2; a++) {
-    	var stats = new Array(3);
-        for (var b=0; b<3; b++) {
+    for (a=0; a<2; a++) {
+    	stats = new Array(3);
+        for (b=0; b<3; b++) {
         	stats[b] = 0;
         }
         sumAllPackages[a] = stats;
     } // */
 
 	WRSplitStats= new Array(8); 
-	for (var a=0; a<8; a++) { // 8 packages 
+	for (a=0; a<8; a++) { // 8 packages 
 		var DDs=new Array(7); 
 		for (b=0; b<7; b++) { // 7 down and distance combos
 			var WRs=new Array(9); 
 			for (c=0; c<9; c++) { // 9 recievers 
-				var stats=new Array(9); 
+				stats=new Array(9); 
 				for (d=0; d<9; d++) { // 9 stats (to date) - GCOVs, 1st opt passes, dump passes, drops, dist downfield, targets, yards, successes, INTs. 
 					stats[d] = 0; 
 				}
@@ -2141,34 +2143,34 @@ function initializeArrays() {
 	}
     
     defPkgSplitStats= new Array(19);
-    for (var a=0; a<19; a++) {
-        var stats = new Array(3); // 3 stats: total snaps, run plays, pass plays. 
-        for (var b=0; b<3; b++) {
+    for (a=0; a<19; a++) {
+        stats = new Array(3); // 3 stats: total snaps, run plays, pass plays. 
+        for (b=0; b<3; b++) {
             stats[b] = 0;
         }
         defPkgSplitStats[a] = stats;
     }
     
     conversionStats = new Array(16);
-    for (var a=0; a<16; a++) {
-        var stats = new Array(4); // 4 stats: attempts, conversions, yards on conversions, yards on stops.
-        for (var b=0; b<4; b++) {
+    for (a=0; a<16; a++) {
+        stats = new Array(4); // 4 stats: attempts, conversions, yards on conversions, yards on stops.
+        for (b=0; b<4; b++) {
             stats[b] = 0;
         }
         conversionStats[a] = stats;
     }
     
     passDistSplitStats = new Array(18);
-    for (var a=0; a<18; a++) {
-    	var stats = new Array(); // att, comp, success, yards, attYards, YAC, YTG, INT, TD
-        for (var b=0; b<9; b++) {
+    for (a=0; a<18; a++) {
+    	stats = []; // att, comp, success, yards, attYards, YAC, YTG, INT, TD
+        for (b=0; b<9; b++) {
         	stats[b] = 0;
         }
         passDistSplitStats[a] = stats;
     } // */
     
     sackStats = new Array(8); // pass plays, passes, sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
-    for (var a=0; a<8; a++) {
+    for (a=0; a<8; a++) {
     	sackStats[a] = 0;
     }
 }
@@ -2213,7 +2215,7 @@ function startReadLog() {
     //alert("through startReadLog");
 
 	readLog();
-};
+}
 
 
 function parseStanding(intext)
@@ -2290,7 +2292,7 @@ function buildGameList(input)
 		 }
 	}
     
-    if (teams.length == 0) {
+    if (teams.length === 0) {
     	alert("Please select a valid team");
     }
 
@@ -2311,21 +2313,21 @@ function buildGameList(input)
 	}
 
 	if (Preseason) {
-        for (var i=0; i<4; i++) {
+        for (i=0; i<4; i++) {
             if (document.getElementById("X-" + (i+1)).checked) {
                 weeks[weeks.length]="X-" + (i+1) + "-".toString();
             }
         }
 	}
 	if (RegularSeason) {
-		for (var i=0; i<16; i++) {
+		for (i=0; i<16; i++) {
             if (document.getElementById("R-" + (i+1)).checked) {
                 weeks[weeks.length]="R-" + (i+1) + "-".toString();
             }
         }
 	} 
 	if (Postseason) {
-		for (var i=0; i<4; i++) {
+		for (i=0; i<4; i++) {
             if (document.getElementById("P-" + (i+1)).checked) {
                 weeks[weeks.length]="P-" + (i+1) + "-".toString();
             }
@@ -2359,19 +2361,20 @@ function buildGameList(input)
 
 
 function fillGames(season) {
+	var i;
     var string = "<br><table border=\x220\x22 cellpadding=\x221\x22 style=\x22margin-left:20px;\x22 id=\x22" + season + "_spoiler_table\x22><col width=\x2240\x22><col width=\x2240\x22>";
     if (season == "pre") {
-        for (var i=0; i<4; i++) {
+        for (i=0; i<4; i++) {
             string = string.concat("<tr><td colspan=\x222\x22><input type=\x22checkbox\x22 name=\x22week\x22 class=\x22pre_checkbox\x22 id=\x22X-" + (i+1) + "\x22 checked=\x22checked\x22>Week " + (i+1) + "</input></td>");
         }
     }
     else if (season == "reg") {
-    	for (var i=0; i<16; i++) {
+    	for (i=0; i<16; i++) {
             string = string.concat("<tr><td colspan=\x222\x22><input type=\x22checkbox\x22 name=\x22week\x22 class=\x22reg_checkbox\x22 id=\x22R-" + (i+1) + "\x22 checked=\x22checked\x22>Week " + (i+1) + "</input></td>");
         }
     }
     else if (season == "post") {
-		for (var i=0; i<4; i++) {
+		for (i=0; i<4; i++) {
             string = string.concat("<tr><td colspan=\x222\x22><input type=\x22checkbox\x22 name=\x22week\x22 class=\x22post_checkbox\x22 id=\x22P-" + (i+1) + "\x22 checked=\x22checked\x22>Week " + (i+1) + "</input></td>");
         }
     }
@@ -2424,9 +2427,10 @@ function makeButtontableTeamRows() {
 	buttontable.setAttribute('id', 'scout_button_table');
 
 	for (var z=0; z<teamlist.length; z++) {
-
-		if (z % 8 ==0) {
-			 var newtr2=document.createElement('tr');
+		var newtr2;
+		
+		if (z % 8 === 0) {
+			 newtr2=document.createElement('tr');
 			 buttontable.appendChild(newtr2);
 		}
 
@@ -2641,7 +2645,7 @@ function startFunc ()
             withPens = 0; 
         }
         
-        if (selectedTable == 0) {
+        if (selectedTable === 0) {
         	alert("You have not selected the statistics you want displayed");
         }
         else {
