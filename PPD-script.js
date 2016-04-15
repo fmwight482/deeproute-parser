@@ -5,7 +5,10 @@
 // @include     http://www.deeproute.com/?js=weekbyweek*
 // @include     http://deeproute.com/default.asp?js=weekbyweek*
 // @include     http://www.deeproute.com/default.asp?js=weekbyweek*
-// @version     1.6.1
+// @include     http://deeproute.com/?js=scrimmine
+// @grant		GM_xmlhttpRequest
+// @connect	    deeproute.com
+// @version     1.6.2
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
