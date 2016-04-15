@@ -9,6 +9,12 @@
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
+// temporary down/distance parameters to be modified 
+var downMin = 1;
+var downMax = 4;
+var distMin = -10; // -10 default is arbitrary "smallest possible" value
+var distMax = 100; // 100 default is arbitrary "largest possible" value
+
 var teamlist=[];
 var abbrlist=[];
 
@@ -52,17 +58,17 @@ var isFirstRun = 1;
 
 function getElementsByClassName(classname, par){
 	 var a=[];
-	 var re = new RegExp('\\b' + classname + '\\b'); 
-	 var els = par.getElementsByTagName("*"); // node list of every element under par (document, presumably the scedule page?) 
-	 for(var i=0,j=els.length; i<j; i++){ // while i is less than the number of elements under par 
-			if(re.test(els[i].className)){ // if an element includes "team_checkbox", push the element into a. 
+	 var re = new RegExp('\\b' + classname + '\\b');
+	 var els = par.getElementsByTagName("*"); // node list of every element under par (document, presumably the scedule page?)
+	 for(var i=0,j=els.length; i<j; i++){ // while i is less than the number of elements under par
+			if(re.test(els[i].className)){ // if an element includes "team_checkbox", push the element into a.
 				 a.push(els[i]);
 			}
 	 }
 	 return a;
-};
+}
 
-function isTeam(inteam) { // return 1 if inteam is a team name, 0 otherwise 
+function isTeam(inteam) { // return 1 if inteam is a team name, 0 otherwise
 	for (var x=0; x<teams.length; x++) {
 		if (teams[x] == inteam) {
 			return 1;
@@ -81,49 +87,68 @@ function getTeamIndex(inteam) {
 }
 
 function isAbbr(inabbr) {
-	for (var x=0; x<abbrs.length; x++) { 
-		if (abbrs[x] == inabbr) { 
-			return 1; 
+	for (var x=0; x<abbrs.length; x++) {
+		if (abbrs[x] == inabbr) {
+			return 1;
 		}
 	}
 	return 0;
 }
 
 function correctAbbr(inabbr, showOffense) {
-	var isGiven = isAbbr(inabbr); 
+	var isGiven = isAbbr(inabbr);
 	if (showOffense) {
-		return isGiven; 
+		return isGiven;
 	} else {
-		return !(isGiven); 
+		return !(isGiven);
 	}
 }
 
 function isID(inid) {
-	for (var x=0; x<teamID.length; x++) 
+	for (var x=0; x<teamID.length; x++)
 		if (teamID[x]==inid) return 1;
 	return 0;
-};
+}
 
 function getDistToGo(inTogo, inEndToGo) {
-	var distToGo=0; 
+	var distToGo=0;
 	if (inTogo=="inches") {
-		distToGo=0.1; 
+		distToGo=0.1;
 	} else if (inTogo=="Foot~") {
-		distToGo=0.17; 
+		distToGo=0.17;
 	} else if (inTogo=="< 1") {
-		distToGo=0.67; 
+		distToGo=0.67;
 	} else {
 		distToGo=parseInt(inTogo);
-		if (distToGo == NaN) {
-			return -1; 
+		if (isNaN(distToGo)) {
+			return -1;
 		}
 	}
 	if (inEndToGo=="+") {
-		distToGo+=0.25; 
+		distToGo+=0.25;
 	} else if (inEndToGo=="-") {
-		distToGo-=0.25; 
+		distToGo-=0.25;
 	}
 	return distToGo; 
+}
+
+function convertDownToInt(downString) {
+	var downInt = -1;
+	if (downString == "1st") {
+		downInt = 1;
+	}
+	else if (downString == "2nd") {
+		downInt = 2;
+	}
+	else if (downString == "3rd") {
+		downInt = 3;
+	}
+	else if (downString == "4th") {
+		downInt = 4;
+	}
+	//alert("downString = " + downString + ", downInt = " + downInt);
+
+	return downInt;
 }
 
 function getPkgid(inPkg) {
@@ -272,7 +297,7 @@ function checkWRList(id, name, position) {
         }
     }
     if (index == -1) {
-    	var stats = new Array(14) // player ID, name, 1st opt passes, targets, yards, successes, GCOVs, INTs, Drops, dump passes, dist downfield, position, catches, PDEF
+    	var stats = new Array(14); // player ID, name, 1st opt passes, targets, yards, successes, GCOVs, INTs, Drops, dump passes, dist downfield, position, catches, PDEF
         for (var i=0; i<14; i++) {
         	stats[i] = 0;
         }
@@ -295,7 +320,7 @@ function checkIDPList(id, name) {
         }
     }
     if (index == -1) {
-    	var stats = new Array(20) // player ID, name, 1st opt passes, targets, yards, successes, GCOVs, cv INTs, Drops, dump passes, dist downfield, position (MT), catches, cv PDEF, cv TKL, rm INT, rm PDEF, rm TKL, run TKL, run STOP
+    	var stats = new Array(20); // player ID, name, 1st opt passes, targets, yards, successes, GCOVs, cv INTs, Drops, dump passes, dist downfield, position (MT), catches, cv PDEF, cv TKL, rm INT, rm PDEF, rm TKL, run TKL, run STOP
         for (var i=0; i<20; i++) {
         	stats[i] = 0;
         }
@@ -504,7 +529,10 @@ function make_WR_target_table(FIRST_def, TGT_def, DMP_def, DIST_def) {
 	var stat_defs = "<td>" + FIRST_def + "</td> <td>" + TGT_def + "</td> <td>" + DIST_def + "</td> <td>" + DMP_def + "</td>"; 
 	var table = 
 		"<table border='2'> <tr>" + 
-		"<th rowspan='2'>Package</th> <th rowspan='2'>WR</th> <th colspan='4'>1st Down</th> <th colspan='4'>2nd and 0-"+shortSplit+"</th> <th colspan='4'>2nd and "+shortSplit+"-"+longSplit+"</th> <th colspan='4'>2nd and "+longSplit+"+</th> <th colspan='4'>3rd/4th and 0-"+shortSplit+"</th> <th colspan='4'>3rd/4th and "+shortSplit+"-"+longSplit+"</th> <th colspan='4'>3rd/4th and "+longSplit+"+</th>" + 
+		"<th rowspan='2'>Package</th> <th rowspan='2'>WR</th> <th colspan='4'>1st Down</th> <th colspan='4'>2nd and 0-"+shortSplit+
+		"</th> <th colspan='4'>2nd and "+shortSplit+"-"+longSplit+"</th> <th colspan='4'>2nd and "+longSplit+
+		"+</th> <th colspan='4'>3rd/4th and 0-"+shortSplit+"</th> <th colspan='4'>3rd/4th and "+shortSplit+"-"+longSplit+
+		"</th> <th colspan='4'>3rd/4th and "+longSplit+"+</th>" + 
 		"<tr>" + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + 
 		addWrTgtPkgTr("HFT12", "WR1", "WR2", "TE1", "HB", "FB") + 
 		addWrTgtPkgTr("HFTt1", "WR1", "TE1", "TE2", "HB", "FB") + 
@@ -521,15 +549,15 @@ function make_WR_target_table(FIRST_def, TGT_def, DMP_def, DIST_def) {
 function addWrTgtPkgTr(pkg, wr1, wr2, wr3, wr4, wr5) {
 	pkgid = getPkgid(pkg); 
 	var row = 
-		"<tr> <th rowspan='5'>" + pkg + "</th> <th>" + wr1 + "</th> <td>" 
-		+ getFirst(wr1, pkgid, 0) + "</td> <td>" + getTGTs(wr1, pkgid, 0) + "</td> <td>" + getAveDist(wr1, pkgid, 0) + "</td> <td>" + getDumpoffs(wr1, pkgid, 0) + "</td> <td>"
-		+ getFirst(wr1, pkgid, 1) + "</td> <td>" + getTGTs(wr1, pkgid, 1) + "</td> <td>" + getAveDist(wr1, pkgid, 1) + "</td> <td>" + getDumpoffs(wr1, pkgid, 1) + "</td> <td>" 
-		+ getFirst(wr1, pkgid, 2) + "</td> <td>" + getTGTs(wr1, pkgid, 2) + "</td> <td>" + getAveDist(wr1, pkgid, 2) + "</td> <td>" + getDumpoffs(wr1, pkgid, 2) + "</td> <td>" 
-		+ getFirst(wr1, pkgid, 3) + "</td> <td>" + getTGTs(wr1, pkgid, 3) + "</td> <td>" + getAveDist(wr1, pkgid, 3) + "</td> <td>" + getDumpoffs(wr1, pkgid, 3) + "</td> <td>" 
-		+ getFirst(wr1, pkgid, 4) + "</td> <td>" + getTGTs(wr1, pkgid, 4) + "</td> <td>" + getAveDist(wr1, pkgid, 4) + "</td> <td>" + getDumpoffs(wr1, pkgid, 4) + "</td> <td>" 
-		+ getFirst(wr1, pkgid, 5) + "</td> <td>" + getTGTs(wr1, pkgid, 5) + "</td> <td>" + getAveDist(wr1, pkgid, 5) + "</td> <td>" + getDumpoffs(wr1, pkgid, 5) + "</td> <td>" 
-		+ getFirst(wr1, pkgid, 6) + "</td> <td>" + getTGTs(wr1, pkgid, 6) + "</td> <td>" + getAveDist(wr1, pkgid, 6) + "</td> <td>" + getDumpoffs(wr1, pkgid, 6) + "</td>" 
-		+ addWrTgtTr(pkgid, wr2) + addWrTgtTr(pkgid, wr3) + addWrTgtTr(pkgid, wr4) + addWrTgtTr(pkgid, wr5); // */
+		"<tr> <th rowspan='5'>" + pkg + "</th> <th>" + wr1 + "</th> <td>" +
+		getFirst(wr1, pkgid, 0) + "</td> <td>" + getTGTs(wr1, pkgid, 0) + "</td> <td>" + getAveDist(wr1, pkgid, 0) + "</td> <td>" + getDumpoffs(wr1, pkgid, 0) + "</td> <td>" +
+		getFirst(wr1, pkgid, 1) + "</td> <td>" + getTGTs(wr1, pkgid, 1) + "</td> <td>" + getAveDist(wr1, pkgid, 1) + "</td> <td>" + getDumpoffs(wr1, pkgid, 1) + "</td> <td>" +
+		getFirst(wr1, pkgid, 2) + "</td> <td>" + getTGTs(wr1, pkgid, 2) + "</td> <td>" + getAveDist(wr1, pkgid, 2) + "</td> <td>" + getDumpoffs(wr1, pkgid, 2) + "</td> <td>" +
+		getFirst(wr1, pkgid, 3) + "</td> <td>" + getTGTs(wr1, pkgid, 3) + "</td> <td>" + getAveDist(wr1, pkgid, 3) + "</td> <td>" + getDumpoffs(wr1, pkgid, 3) + "</td> <td>" +
+		getFirst(wr1, pkgid, 4) + "</td> <td>" + getTGTs(wr1, pkgid, 4) + "</td> <td>" + getAveDist(wr1, pkgid, 4) + "</td> <td>" + getDumpoffs(wr1, pkgid, 4) + "</td> <td>" +
+		getFirst(wr1, pkgid, 5) + "</td> <td>" + getTGTs(wr1, pkgid, 5) + "</td> <td>" + getAveDist(wr1, pkgid, 5) + "</td> <td>" + getDumpoffs(wr1, pkgid, 5) + "</td> <td>" +
+		getFirst(wr1, pkgid, 6) + "</td> <td>" + getTGTs(wr1, pkgid, 6) + "</td> <td>" + getAveDist(wr1, pkgid, 6) + "</td> <td>" + getDumpoffs(wr1, pkgid, 6) + "</td>" +
+		addWrTgtTr(pkgid, wr2) + addWrTgtTr(pkgid, wr3) + addWrTgtTr(pkgid, wr4) + addWrTgtTr(pkgid, wr5); // */
 	return row; 
 }
 
@@ -548,7 +576,10 @@ function make_WR_production_table(GCOVpct_def, SR_def, YPT_def, INTpct_def) {
 	var stat_defs = "<td>" + GCOVpct_def + "</td> <td>" + SR_def + "</td> <td>" + YPT_def + "</td> <td>" + INTpct_def + "</td>"; 
 	var table = 
 		"<table border='2'> <tr>" + 
-		"<th rowspan='2'>Package</th> <th rowspan='2'>WR</th> <th colspan='4'>1st Down</th> <th colspan='4'>2nd and 0-"+shortSplit+"</th> <th colspan='4'>2nd and "+shortSplit+"-"+longSplit+"</th> <th colspan='4'>2nd and "+longSplit+"+</th> <th colspan='4'>3rd/4th and 0-"+shortSplit+"</th> <th colspan='4'>3rd/4th and "+shortSplit+"-"+longSplit+"</th> <th colspan='4'>3rd/4th and "+longSplit+"+</th>" + 
+		"<th rowspan='2'>Package</th> <th rowspan='2'>WR</th> <th colspan='4'>1st Down</th> <th colspan='4'>2nd and 0-"+shortSplit+
+		"</th> <th colspan='4'>2nd and "+shortSplit+"-"+longSplit+"</th> <th colspan='4'>2nd and "+longSplit+
+		"+</th> <th colspan='4'>3rd/4th and 0-"+shortSplit+"</th> <th colspan='4'>3rd/4th and "+shortSplit+"-"+longSplit+
+		"</th> <th colspan='4'>3rd/4th and "+longSplit+"+</th>" + 
 		"<tr>" + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + 
 		addWrProdPkgTr("HFT12", "WR1", "WR2", "TE1", "HB", "FB") + 
 		addWrProdPkgTr("HFTt1", "WR1", "TE1", "TE2", "HB", "FB") + 
@@ -565,15 +596,15 @@ function make_WR_production_table(GCOVpct_def, SR_def, YPT_def, INTpct_def) {
 function addWrProdPkgTr(pkg, wr1, wr2, wr3, wr4, wr5) {
 	pkgid = getPkgid(pkg); 
 	var row = 
-		"<tr> <th rowspan='5'>" + pkg + "</th> <th>" + wr1 + "</th> <td>" 
-		+ getGCOVpct(wr1, pkgid, 0) + "</td> <td>" + getWrSR(wr1, pkgid, 0) + "</td> <td>" + getYPT(wr1, pkgid, 0) + "</td> <td>" + getINTpct(wr1, pkgid, 0) + "</td> <td>"
-		+ getGCOVpct(wr1, pkgid, 1) + "</td> <td>" + getWrSR(wr1, pkgid, 1) + "</td> <td>" + getYPT(wr1, pkgid, 1) + "</td> <td>" + getINTpct(wr1, pkgid, 1) + "</td> <td>" 
-		+ getGCOVpct(wr1, pkgid, 2) + "</td> <td>" + getWrSR(wr1, pkgid, 2) + "</td> <td>" + getYPT(wr1, pkgid, 2) + "</td> <td>" + getINTpct(wr1, pkgid, 2) + "</td> <td>" 
-		+ getGCOVpct(wr1, pkgid, 3) + "</td> <td>" + getWrSR(wr1, pkgid, 3) + "</td> <td>" + getYPT(wr1, pkgid, 3) + "</td> <td>" + getINTpct(wr1, pkgid, 3) + "</td> <td>" 
-		+ getGCOVpct(wr1, pkgid, 4) + "</td> <td>" + getWrSR(wr1, pkgid, 4) + "</td> <td>" + getYPT(wr1, pkgid, 4) + "</td> <td>" + getINTpct(wr1, pkgid, 4) + "</td> <td>" 
-		+ getGCOVpct(wr1, pkgid, 5) + "</td> <td>" + getWrSR(wr1, pkgid, 5) + "</td> <td>" + getYPT(wr1, pkgid, 5) + "</td> <td>" + getINTpct(wr1, pkgid, 5) + "</td> <td>" 
-		+ getGCOVpct(wr1, pkgid, 6) + "</td> <td>" + getWrSR(wr1, pkgid, 6) + "</td> <td>" + getYPT(wr1, pkgid, 6) + "</td> <td>" + getINTpct(wr1, pkgid, 6) + "</td>"  
-		+ addWrProdTr(pkgid, wr2) + addWrProdTr(pkgid, wr3) + addWrProdTr(pkgid, wr4) + addWrProdTr(pkgid, wr5); // */
+		"<tr> <th rowspan='5'>" + pkg + "</th> <th>" + wr1 + "</th> <td>" +
+		getGCOVpct(wr1, pkgid, 0) + "</td> <td>" + getWrSR(wr1, pkgid, 0) + "</td> <td>" + getYPT(wr1, pkgid, 0) + "</td> <td>" + getINTpct(wr1, pkgid, 0) + "</td> <td>" +
+		getGCOVpct(wr1, pkgid, 1) + "</td> <td>" + getWrSR(wr1, pkgid, 1) + "</td> <td>" + getYPT(wr1, pkgid, 1) + "</td> <td>" + getINTpct(wr1, pkgid, 1) + "</td> <td>" +
+		getGCOVpct(wr1, pkgid, 2) + "</td> <td>" + getWrSR(wr1, pkgid, 2) + "</td> <td>" + getYPT(wr1, pkgid, 2) + "</td> <td>" + getINTpct(wr1, pkgid, 2) + "</td> <td>" +
+		getGCOVpct(wr1, pkgid, 3) + "</td> <td>" + getWrSR(wr1, pkgid, 3) + "</td> <td>" + getYPT(wr1, pkgid, 3) + "</td> <td>" + getINTpct(wr1, pkgid, 3) + "</td> <td>" +
+		getGCOVpct(wr1, pkgid, 4) + "</td> <td>" + getWrSR(wr1, pkgid, 4) + "</td> <td>" + getYPT(wr1, pkgid, 4) + "</td> <td>" + getINTpct(wr1, pkgid, 4) + "</td> <td>" +
+		getGCOVpct(wr1, pkgid, 5) + "</td> <td>" + getWrSR(wr1, pkgid, 5) + "</td> <td>" + getYPT(wr1, pkgid, 5) + "</td> <td>" + getINTpct(wr1, pkgid, 5) + "</td> <td>" +
+		getGCOVpct(wr1, pkgid, 6) + "</td> <td>" + getWrSR(wr1, pkgid, 6) + "</td> <td>" + getYPT(wr1, pkgid, 6) + "</td> <td>" + getINTpct(wr1, pkgid, 6) + "</td>" +
+		addWrProdTr(pkgid, wr2) + addWrProdTr(pkgid, wr3) + addWrProdTr(pkgid, wr4) + addWrProdTr(pkgid, wr5); // */
 	return row; 
 }
 
@@ -732,7 +763,7 @@ function makePassDistSplitTable() {
 
 function getPassDistRowHeader(i) {
 	var header = "";
-	if (i == 0) {
+	if (i === 0) {
     	header = "Dumpoff";
     }
     else if (i == 1) {
@@ -791,7 +822,7 @@ function getPassDistRowHeader(i) {
 
 function calculatePercent(numerator, denominator) {
 	var result = 0;
-    if (denominator != 0) {
+    if (denominator !== 0) {
     	result = numerator / denominator;
     }
     return (result*100).toFixed(1);
@@ -799,7 +830,7 @@ function calculatePercent(numerator, denominator) {
 
 function calculateAverage(numerator, denominator) {
 	var result = 0;
-    if (denominator != 0) {
+    if (denominator !== 0) {
     	result = numerator / denominator;
     }
     return result.toFixed(1);
@@ -824,7 +855,7 @@ function makeConversionTr(min, max, i) {
 
 function getConversionPct(i) {
     var pct;
-    if (conversionStats[i][0] == 0) {
+    if (conversionStats[i][0] === 0) {
         pct = "-"; 
     }
     else {
@@ -835,7 +866,7 @@ function getConversionPct(i) {
 
 function getYrdPerFD(i) {
     var YPF;
-    if (conversionStats[i][1] == 0) {
+    if (conversionStats[i][1] === 0) {
         YPF = "-";
     }
     else {
@@ -847,7 +878,7 @@ function getYrdPerFD(i) {
 function getYrdPerStp(i) {
     var YPS;
     var stops = conversionStats[i][0] - conversionStats[i][1];
-    if (stops == 0) {
+    if (stops === 0) {
         YPS = "-";
     }
     else {
@@ -878,7 +909,7 @@ function getAveDist(wr, pkgid, downDistID) {
 	wrid = getWRID(wr); 
 	var dist = WRSplitStats[pkgid][downDistID][wrid][4]; 
 	var atts = WRSplitStats[pkgid][downDistID][wrid][5] - (WRSplitStats[pkgid][downDistID][wrid][2] + WRSplitStats[pkgid][downDistID][wrid][3]);
-	if (dist==0) {
+	if (dist === 0) {
 		return 0; 
 	}
 	else {
@@ -889,7 +920,7 @@ function getAveDist(wr, pkgid, downDistID) {
 function getWrSR(wr, pkgid, downDistID) {
 	wrid = getWRID(wr); 
 	var SR; 
-	if (WRSplitStats[pkgid][downDistID][wrid][5] == 0) {
+	if (WRSplitStats[pkgid][downDistID][wrid][5] === 0) {
 		SR = 0; 
 	}
 	else {
@@ -901,7 +932,7 @@ function getWrSR(wr, pkgid, downDistID) {
 function getYPT(wr, pkgid, downDistID) {
 	wrid = getWRID(wr); 
 	var YPT; 
-	if (WRSplitStats[pkgid][downDistID][wrid][5] == 0) {
+	if (WRSplitStats[pkgid][downDistID][wrid][5] === 0) {
 		YPT = 0; 
 	}
 	else {
@@ -914,7 +945,7 @@ function getGCOVpct(wr, pkgid, downDistID) {
 	wrid = getWRID(wr); 
 	var firstOpt = WRSplitStats[pkgid][downDistID][wrid][0] + WRSplitStats[pkgid][downDistID][wrid][1]; 
 	var GCOVpct; 
-	if (firstOpt == 0) {
+	if (firstOpt === 0) {
 		GCOVpct = 0; 
 	}
 	else {
@@ -926,7 +957,7 @@ function getGCOVpct(wr, pkgid, downDistID) {
 function getINTpct(wr, pkgid, downDistID) {
 	wrid = getWRID(wr); 
 	var INTpct; 
-	if (WRSplitStats[pkgid][downDistID][wrid][5] == 0) {
+	if (WRSplitStats[pkgid][downDistID][wrid][5] === 0) {
 		INTpct = 0; 
 	}
 	else {
@@ -1040,7 +1071,7 @@ function parsePBP(intext) {
 	
     //alert("started to read the log");
     
-    if (preptr==0) {
+    if (preptr===0) {
 		ptr2=intext.indexOf("<center>", preptr);
 		if (ptr2!=-1) {
 			preptr = ptr2; 
@@ -1141,7 +1172,7 @@ function parsePBP(intext) {
             defpkgid=getDefPkgid(defpkg);
         }
 
-		if (startThis==0) {
+		if (startThis === 0) {
 			startThis=preptr; 
 		}
 		ptr4=intext.indexOf("2 Point Conversion.", preptr); 
@@ -1213,7 +1244,7 @@ function parsePBP(intext) {
 				ptr4=intext.indexOf("class='supz'>", ptr5);
 				ptr5=intext.indexOf("</span>", ptr4+13);
 				yard2=intext.substring(ptr4+13, ptr5); // get decimal yardage 
-				if (loss==0) { // combine into one value 
+				if (loss === 0) { // combine into one value 
 					yard=parseInt(yard) + parseInt(yard2)/100; 
 				} else if (loss==1) {
 					yard= -1 * (Math.abs(parseInt(yard)) + parseInt(yard2)/100); 
@@ -1566,7 +1597,7 @@ function parsePBP(intext) {
         	comp = 0;
         }
 
-		if (pass==0 && scramble==1) {
+		if (pass===0 && scramble==1) {
 			pass=1;
 		}
 		if (pass) {
@@ -1588,7 +1619,7 @@ function parsePBP(intext) {
 			sack=0; 
 		}
         
-        if (att == 0) {
+        if (att === 0) {
             WRID = -1;
             WRpID = -1;
             passDefenderpID = -1;
@@ -1641,9 +1672,11 @@ function parsePBP(intext) {
 		
 		distToGo=getDistToGo(togo, endToGo); 
 
+		downInt = convertDownToInt(down);
+
 		isSuccess=getSuccess(yard, distToGo, down, isTouchdown);     
 
-		if (correctAbbr(abbr, showOffense) && (run==1 || pass==1) && distToGo!=-1 && isSuccess!=-1 && pkgid>=0 && pkgid<=7 && (noPlay==0) || withPens) { 
+		if (correctAbbr(abbr, showOffense) && (run==1 || pass==1) && distToGo!=-1 && isSuccess!=-1 && pkgid>=0 && pkgid<=7 && (noPlay===0) || withPens) { 
 			if (down=="1st") {
 				downDistID=0; 
 				checkRunPass(run, pass, pkgid, downDistID, yard, isSuccess); 
@@ -1668,23 +1701,24 @@ function parsePBP(intext) {
 			} 
 		} // if isAbbr(abbr) ... 
         
-		if (correctAbbr(abbr, showOffense) && (WRTargetSplits || WRProductionSplits) && (noPlay==0 || withPens)) {
+		if (correctAbbr(abbr, showOffense) && (WRTargetSplits || WRProductionSplits) && (noPlay===0 || withPens) &&
+			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
 			if (att==1 && WRID!=-1) {
-				if (!(WRID > -1)) {
+				if (WRID <= -1) {
 					alert("Something broke. WRID = " + WRID + ", readcount = " + readcount + ", tmp = " + tmp); 
 				}
 				WRSplitStats[pkgid][downDistID][WRID][5]++; // increment targets 
 				WRSplitStats[pkgid][downDistID][WRID][6] += yard; // add to yards 
-				if (dumpoff==0 && GCOV==0) {
+				if (dumpoff===0 && GCOV===0) {
 					WRSplitStats[pkgid][downDistID][WRID][1]++; // increment first option passes 
 				} 
 				else if (dumpoff) {
 					WRSplitStats[pkgid][downDistID][WRID][2]++; // increment dumpoff passes 
 				} 
-				if (dumpoff==0 && attYard!="") {
+				if (dumpoff===0 && attYard!=="") {
 					WRSplitStats[pkgid][downDistID][WRID][4]+=attYard; // add to attempted yards 
 				} 
-				if (dumpoff==0 && attYard=="") {
+				if (dumpoff===0 && attYard==="") {
 					WRSplitStats[pkgid][downDistID][WRID][3]++; // increment drops on downfield passes and passes batted at the line 
 				}
 				if (isSuccess == 1) {
@@ -1704,7 +1738,8 @@ function parsePBP(intext) {
 			}
 		}
         
-        if (defPkgSplits && (showBothTeams || !correctAbbr(abbr, showOffense) || bothTeamsValid) && (noPlay == 0 || withPens)) {
+        if (defPkgSplits && (showBothTeams || !correctAbbr(abbr, showOffense) || bothTeamsValid) && (noPlay === 0 || withPens) &&
+        	(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
             defPkgSplitStats[defpkgid][0]++;
             if (run) {
                 defPkgSplitStats[defpkgid][1]++;
@@ -1717,7 +1752,7 @@ function parsePBP(intext) {
             } // */
         }
         
-        if (conversions && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay == 0 || withPens) && (down == "3rd" || down == "4th")) {
+        if (conversions && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens) && (down == "3rd" || down == "4th")) {
             var downDistID = get3rd4thDownDistID(distToGo);
             if (downDistID == -1) {
                 alert("downDistID == -1"); 
@@ -1734,7 +1769,8 @@ function parsePBP(intext) {
             }
         }
         
-        if (individualWRStats && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay == 0 || withPens)) {
+        if (individualWRStats && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay == 0 || withPens) 
+        	&& (downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
         	var index = -1;
             
             // player ID, name, 1st opt passes, targets, yards, successes, GCOVs, INTs, Drops, dump passes, dist downfield, position, catches
@@ -1779,7 +1815,8 @@ function parsePBP(intext) {
         	alert("!correctAbbr(" + abbr + ", " + showOffense + "), play number " + tmp);
         } // */
         
-        if (individualDefenderStats && (showBothTeams || !correctAbbr(abbr, showOffense) || bothTeamsValid) && (noPlay == 0 || withPens)) {
+        if (individualDefenderStats && (showBothTeams || !correctAbbr(abbr, showOffense) || bothTeamsValid) && (noPlay === 0 || withPens) &&
+        	(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
         	var index = -1;
             
             // player ID, name, 1st opt passes, targets, yards, successes, GCOVs, INTs, Drops, dump passes, dist downfield, catches
@@ -1852,7 +1889,8 @@ function parsePBP(intext) {
             }
         }
         
-        if (passDistSplits && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay == 0 || withPens) && (attYard != "" || dumpoff)) {
+        if (passDistSplits && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay == 0 || withPens) && (attYard != "" || dumpoff)
+        	&& (downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
        		var distID = -1;
             if (dumpoff) {
             	distID = 0;
@@ -1939,7 +1977,7 @@ function parsePBP(intext) {
 		var YPT_def="<span title='Yards per Target: The average number of yards gained on a pass to this reciever'>Y/T</span>"; 
 		var GCOVpct_def="<span title='Good Coverage Percentage: the percentage of first option looks to this reciever which result in a GCOV instead of a pass attempt'>GCOV%</span>"; 
 		var INTpct_def="<span title='Interception Rate: the percentage of passes to this reciever which result in an interception by the defense'>INT%</span>";
-		var SC_def="<span title='Success Count: the number of plays in which this player was targeted which were a net positive for the offense'>SR</span>"
+		var SC_def="<span title='Success Count: the number of plays in which this player was targeted which were a net positive for the offense'>SR</span>";
         
         var tables = "";
 
@@ -2000,7 +2038,7 @@ function parsePBP(intext) {
         
         newDiv.innerHTML = tables;
 	}
-};
+}
 
 function initializeArrays() {
 	detailedPackageStats=new Array(7); // initialize stat array (1st down, 2nd & short, 2nd & medium, 2nd & long, 3rd/4th & short, 3rd/4th & medium, 3rd/4th & long) 
@@ -2034,7 +2072,7 @@ function initializeArrays() {
         packageStats[a]=pkgs;  
     } 
     
-    packageYards=new Array(7)
+    packageYards=new Array(7);
     for (var x=0; x<7; x++) { 
         var pkgs=new Array(8);  
         for (y=0; y<8; y++) {
@@ -2375,27 +2413,7 @@ function getGameDropdown(season) {
     return gameDropdown;
 }
 
-function startFunc () 
-{
-	var input=document.body.innerHTML, ptr1, ptr2, ptr3, id, id2, name, endptr;
-	var withGameDropdown = 0; 
-    var selectedTable;
-
-	var target = document.getElementById('imonstatus');
-
-	var runPassDef = "<span title='displays total plays, yards per play, and success rate for both runs and passes'>Rushing and passing splits</span>"; 
-	var targetsDef = "<span title='displays 1st option looks, targets, average distance downfield, and dumpoffs to each possible reciever'>Reciever target splits</span>"; 
-	var productionDef = "<span title='displays GCOV%, yards per target, success rate, and interception rate for each possible reciever'>Reciever production splits</span>"; 
-    var defPkgSplitsDef = "<span title='displays number of snaps for each defensive package'>Defensive package splits</span>";
-    var thirdFourthDownsDef = "<span title='displays 3rd and 4th down conversion attempts and success rate for a wide variety of distances'>3rd/4th downs</span>";
-    var WRStatsDef = "<span title='displays 1st option checks, yards per target, success rate, and various other statistics for each individual reciever'>Individual reciever stats</span>";
-    var IDPStatsDef = "<span title='displays 1st option checks, yards per target, success rate, and various other statistics for the recievers matched up against each individual defensive player'>Individual defensive player stats</span>";
-    var passDistStatsDef = "<span title='displays completion percentage, interception rate, average YAC, and other statistics for passes of various distances'>Pass results by distance</span>";
-    
-	var withPensDef = "<span title='If this box is checked, statistics produced will include plays which were nullified by a penalty and not included in official statistics. " + 
-										"If the box is not checked, these plays will be left out'> Include nullified plays "; 
-    
-
+function makeButtontableTeamRows() {
 	var buttontable = document.createElement('table');
 	buttontable.setAttribute('cellspacing', '0');
 	buttontable.setAttribute('cellpadding', '0');
@@ -2429,16 +2447,54 @@ function startFunc ()
 		newtr2.appendChild(newtd3);
 	}
 
+	return buttontable;
+}
+
+function makeButtontableOptionRows(buttontable) {
+	// create new row and append to table
 	var newtr3=document.createElement('tr');
 	buttontable.appendChild(newtr3);
-	var newtd4 = document.createElement('td'); 
+
+	// create new division and append to row
+	var newtd4 = selectOffDefBoth();
+	newtr3.appendChild(newtd4); 
+
+	// create new division and append to row
+	var newtd5 = selectStatTables();
+	newtr3.appendChild(newtd5);
+    
+    // create new division and append to row
+    var newtd6 = selectPreRegPost();
+    newtr3.appendChild(newtd6);
+
+    // create new division and append to row
+	var newtd7 = selectWithPens();
+	newtr3.appendChild(newtd7);
+
+	return buttontable;
+}
+
+function selectOffDefBoth() {
+	var newtd4 = document.createElement('td');
 	newtd4.setAttribute('colspan', '4');
-	var newDiv4 = document.createElement('div'); 
+	var newDiv4 = document.createElement('div');
 	newDiv4.innerHTML = '<input type="radio" name="unit" id="offense" checked="checked">  For this team (team offense/team players) <br>' + 
     	'<input type="radio" name="unit" id="defense">  Against this team (team defense/opposing players) <br>' + 
-        '<input type="radio" name="unit" id="both"> Both teams'; 
-	newtd4.appendChild(newDiv4); 
-	newtr3.appendChild(newtd4); 
+        '<input type="radio" name="unit" id="both"> Both teams';
+	newtd4.appendChild(newDiv4);
+
+	return newtd4;
+}
+
+function selectStatTables() {
+	var runPassDef = "<span title='displays total plays, yards per play, and success rate for both runs and passes'>Rushing and passing splits</span>"; 
+	var targetsDef = "<span title='displays 1st option looks, targets, average distance downfield, and dumpoffs to each possible reciever'>Reciever target splits</span>"; 
+	var productionDef = "<span title='displays GCOV%, yards per target, success rate, and interception rate for each possible reciever'>Reciever production splits</span>"; 
+    var defPkgSplitsDef = "<span title='displays number of snaps for each defensive package'>Defensive package splits</span>";
+    var thirdFourthDownsDef = "<span title='displays 3rd and 4th down conversion attempts and success rate for a wide variety of distances'>3rd/4th downs</span>";
+    var WRStatsDef = "<span title='displays 1st option checks, yards per target, success rate, and various other statistics for each individual reciever'>Individual reciever stats</span>";
+    var IDPStatsDef = "<span title='displays 1st option checks, yards per target, success rate, and various other statistics for the recievers matched up against each individual defensive player'>Individual defensive player stats</span>";
+    var passDistStatsDef = "<span title='displays completion percentage, interception rate, average YAC, and other statistics for passes of various distances'>Pass results by distance</span>";
 
 	var newtd5 = document.createElement('td'); 
 	newtd5.setAttribute('colspan', '4');
@@ -2453,10 +2509,13 @@ function startFunc ()
         '<input type="checkbox" name="other" id="passDist"> ' + passDistStatsDef + ' <br>' + 
         //'<input type="checkbox" name="other" id="sacks"> Pass Rush <br>' + 
         '<input type="checkbox" name="other" id="defPkgSplits"> ' + defPkgSplitsDef;
-	newtd5.appendChild(newDiv5); 
-	newtr3.appendChild(newtd5); // */ 
-    
-    var newtd6 = document.createElement('td'); 
+	newtd5.appendChild(newDiv5);
+
+	return newtd5;
+}
+
+function selectPreRegPost() {
+	var newtd6 = document.createElement('td'); 
     newtd6.setAttribute('colspan', '3'); 
     var newDiv6 = document.createElement('div'); 
     newDiv6.innerHTML = 
@@ -2464,15 +2523,34 @@ function startFunc ()
         '<input type="checkbox" name="season" id="reg" checked="checked"> Regular season ' + getGameDropdown("reg") + ' <br> ' + 
         '<input type="checkbox" name="season" id="post" checked="checked"> Postseason ' + getGameDropdown("post"); // */
     newtd6.appendChild(newDiv6);
-    newtr3.appendChild(newtd6); // */
+
+    return newtd6;
+}
+
+function selectWithPens() {
+	var withPensDef = "<span title='If this box is checked, statistics produced will include plays which were nullified by a penalty and not included in official statistics. " + 
+										"If the box is not checked, these plays will be left out'> Include nullified plays "; 
 
 	var newtd7 = document.createElement('td'); 
 	newtd7.setAttribute('colspan', '1'); 
 	var newDiv7 = document.createElement('div'); 
 	newDiv7.innerHTML = 
 	'<input type="checkbox" name="pens" id="withPens">' + withPensDef; 
-	newtd7.appendChild(newDiv7); 
-	newtr3.appendChild(newtd7); 
+	newtd7.appendChild(newDiv7);
+
+	return newtd7;
+}
+
+function startFunc () 
+{
+	var input=document.body.innerHTML, ptr1, ptr2, ptr3, id, id2, name, endptr;
+	var withGameDropdown = 0; 
+    var selectedTable;
+
+	var target = document.getElementById('imonstatus');
+
+	var buttontable = makeButtontableTeamRows();
+	buttontable = makeButtontableOptionRows(buttontable);
 
 	var newtr=document.createElement('tr');
 	buttontable.appendChild(newtr);
@@ -2627,7 +2705,7 @@ function startFunc ()
 
 
 	if (target) target.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.insertBefore(buttontable, 
-																																target.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling);
+						target.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling);
     
     addButtons("pre");
     addButtons("reg");
@@ -2637,39 +2715,48 @@ function startFunc ()
 
 window.setTimeout( function() {
 
-	var input=document.body.innerHTML, ptr1, ptr2, ptr3, year, league;
+	var input=document.body.innerHTML;
+	var URI=document.body.baseURI;
+	var ptr1, ptr2, ptr3, year, league;
     
     fillDefPkgs();
     initializeArrays();
-    
-	ptr1=input.indexOf("imonyear", 0);
-	ptr2=input.indexOf("value=\"", ptr1);
-	ptr3=input.indexOf("\"", ptr2+7);
+
+    // check if this is the scrimmage page
+    ptr1=URI.indexOf("scrimmine", 0);
+    if (ptr1!=-1) {
+    	//alert("scrimage");
+    }
+    else {
+		ptr1=input.indexOf("imonyear", 0);
+		ptr2=input.indexOf("value=\"", ptr1);
+		ptr3=input.indexOf("\"", ptr2+7);
 		if (ptr1<0 || ptr2<0 || ptr3<0) { 
 			alert("Can't find year"); 
 			return; 
 		}
-	year=input.substring(ptr2+7, ptr3);
+		year=input.substring(ptr2+7, ptr3);
 
-	ptr1=input.indexOf("imonlg", 0);
-	ptr2=input.indexOf("value=\"", ptr1);
-	ptr3=input.indexOf("\"", ptr2+7);
-	if (ptr1<0 || ptr2<0 || ptr3<0) { 
-		alert("Can't find league number"); 
-		return; 
+		ptr1=input.indexOf("imonlg", 0);
+		ptr2=input.indexOf("value=\"", ptr1);
+		ptr3=input.indexOf("\"", ptr2+7);
+		if (ptr1<0 || ptr2<0 || ptr3<0) { 
+			alert("Can't find league number"); 
+			return; 
+		}
+		league=input.substring(ptr2+7, ptr3);
+
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: 'http://deeproute.com/?sel=lgleaderbyteam&year=' + year + '&myleagueno=' + league + '&typer=X',
+			headers: {
+				 'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+				 'Accept': 'application/atom+xml,application/xml,text/xml',
+			},
+			onload: function(detail) {
+					parseTeamStatsForAbbrs(detail.responseText);
+			},
+		});
 	}
-	league=input.substring(ptr2+7, ptr3);
-
-	GM_xmlhttpRequest({
-		method: 'GET',
-		url: 'http://deeproute.com/?sel=lgleaderbyteam&year=' + year + '&myleagueno=' + league + '&typer=X',
-		headers: {
-			 'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
-			 'Accept': 'application/atom+xml,application/xml,text/xml',
-		},
-		onload: function(detail) {
-				parseTeamStatsForAbbrs(detail.responseText);
-		},
-	});
 
 }, 100);
