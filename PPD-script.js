@@ -30,7 +30,7 @@ var sumPackageStats=[], sumDownStats=[], sumAllPackages =[];
 var WRSplitStats=[]; 
 var WRPlayerStats=[];
 var IDPStats=[];
-var PlayerRushStats=[];
+var RBPlayerStats=[];
 var rushGainSplits=[]; 
 var defPkgSplitStats =[];
 var defPkgs=[];
@@ -316,14 +316,14 @@ function checkWRList(id, name, position) {
 	return index;
 }
 
-function checkRunnerList(id, name, position) {
+function checkRBList(id, name, position) {
 	var index = -1;
 	var pos = position.substring(0, 2);
-	for (var x=0; x<PlayerRushStats.length; x++) {
-		if (PlayerRushStats[x][0] == id) {
+	for (var x=0; x<RBPlayerStats.length; x++) {
+		if (RBPlayerStats[x][0] == id) {
 			index = x;
-			if (PlayerRushStats[index][2].indexOf(pos) == -1) {
-				PlayerRushStats[index][2] = PlayerRushStats[index][2] + "/" + pos;
+			if (RBPlayerStats[index][2].indexOf(pos) == -1) {
+				RBPlayerStats[index][2] = RBPlayerStats[index][2] + "/" + pos;
 			}
 			//alert("found runner " + name + " on the runner list");
 		}
@@ -333,12 +333,12 @@ function checkRunnerList(id, name, position) {
 		for (var i=0; i<8; i++) {
 			stats[i] = 0;
 		}
-		index = PlayerRushStats.length;
-		PlayerRushStats[index] = stats;
-		PlayerRushStats[index][0] = id;
-		PlayerRushStats[index][1] = name;
-		PlayerRushStats[index][2] = pos;
-		//alert("adding " + name + " to the reciever list");
+		index = RBPlayerStats.length;
+		RBPlayerStats[index] = stats;
+		RBPlayerStats[index][0] = id;
+		RBPlayerStats[index][1] = name;
+		RBPlayerStats[index][2] = pos;
+		//alert("adding " + name + " to the runner list");
 	}
 	return index;
 }
@@ -375,28 +375,31 @@ function checkRunPass(run, pass, pkgid, downDistID, yards, isSuccess) {
 function getSuccess(yards, distToGo, down, isTouchdown) {
 	var isSuccess=-1; 
 	if (isTouchdown==1) {
-		return 1; 
+		isSuccess = 1; 
 	}
-	if (down=="1st") {
-		if (yards >= (distToGo*0.45)) {
-			return 1;  
-		} else {
-			return 0; 
-		}
-	} else if (down=="2nd") {
-		if (yards >= (distToGo*0.6)) {
-			return 1; 
-		} else {
-			return 0; 
-		}
-	} else if (down=="3rd" || down=="4th") {
-		if (yards >= distToGo) {
-			return 1; 
-		} else {
-			return 0; 
-		}
+	else if (yards >= getDistToSuccess(distToGo, down)) {
+		isSuccess = 1;
+	}
+	else {
+		isSuccess = 0;
 	}
 	return isSuccess; 
+}
+
+function getDistToSuccess(distToGo, down) {
+	var distToSuccess = -1;
+
+	if (down=="1st") {
+		distToSuccess = distToGo*0.45;
+	}
+	else if (down=="2nd") {
+		distToSuccess = distToGo*0.6;
+	}
+	else if (down=="3rd" || down=="4th") {
+		distToSuccess = distToGo;
+	}
+
+	return distToSuccess;
 }
 
 function getYRD(downDistID, pkgid, isPassPlay) {
@@ -770,8 +773,21 @@ function makeIDPStatTable() {
 	return table;
 }
 
+// player ID, name, position, ATT, Yards, successes, yards to 1st down, yards to success
 function makeIndividualRBStatTable() {
-	var table = "<table border='1'><th>Name</th><th>POS</th><th>ATT</th><th>YPC</th><th>SR</th><th>YT1D</th><th>YTS</th>";
+	var table = "<table border='1'><th>Name</th><th>POS</th><th>ATT</th><th>Yards</th><th>YPC</th><th>SC</th><th>SR</th><th>YT1D</th><th>YTS</th>";
+	for (var i=0; i<RBPlayerStats.length; i++) {
+		table = table.concat("<tr><td>" + RBPlayerStats[i][1] + 
+			"</td><td>" + RBPlayerStats[i][2] + 
+			"</td><td>" + RBPlayerStats[i][3] + 
+			"</td><td>" + RBPlayerStats[i][4].toFixed(1) + 
+			"</td><td>" + calculateAverage(RBPlayerStats[i][4], RBPlayerStats[i][3]) + 
+			"</td><td>" + RBPlayerStats[i][5] + 
+			"</td><td>" + calculatePercent(RBPlayerStats[i][5], RBPlayerStats[i][3]) + "%" + 
+			"</td><td>" + calculateAverage(RBPlayerStats[i][6], RBPlayerStats[i][3]) + 
+			"</td><td>" + calculateAverage(RBPlayerStats[i][7], RBPlayerStats[i][3]) + 
+			"</td>");
+	}
 	table = table.concat("</table>");
 	return table;
 }
@@ -1161,6 +1177,7 @@ function parsePBP(intext) {
 		tmp++; // increment 
 		ptr2=intext.indexOf("Offensive Package Was", ptr1); // find next "Offensive Package Was" after ptr1 
 		if (ptr2<0) {
+			//alert("finished reading the log");
 			break; // if no more offensive plays, leave 
 		}
 		endptr=ptr2; 
@@ -1226,6 +1243,8 @@ function parsePBP(intext) {
 		ptr4=intext.indexOf("<b>", ptr5+4); // find second bolding: quarter and time remaining 
 		ptr7=intext.indexOf("</b>", ptr4+3); 
 		gameTime=intext.substring(ptr4+3, ptr7); // store string with quarter and time remaining. 
+
+		//alert("tmp = " + tmp + ", gameTime = " + gameTime);
 
 		ptr4=intext.indexOf("<b>", ptr7+4); // third bolding: down and distance
 		//ptr7=intext.indexOf("</b>", ptr4+3); 
@@ -1640,7 +1659,8 @@ function parsePBP(intext) {
 			pass=1;
 		}
 		if (pass) {
-			att=1; 
+			att=1;
+			RBpID = -1;
 		}
 		else {
 			att=0;
@@ -1670,10 +1690,10 @@ function parsePBP(intext) {
 			run=1;
 			handoff=1;
 
-			RB = intext.substring(ptr5+12, ptr5+15); 
+			RB = intext.substring(ptr4+12, ptr4+15); 
 			
-			ptr6=intext.indexOf("&lookatplayer=", ptr5+27);
-			if (ptr6!=-1 && ptr6<ptr5+100) {
+			ptr6=intext.indexOf("&lookatplayer=", ptr4+27);
+			if (ptr6!=-1 && ptr6<ptr4+100) {
 				ptr7=intext.indexOf("&", ptr6+14);
 				if (ptr7!=-1 && ptr7<ptr6+30) {
 					RBpID = intext.substring(ptr6+14, ptr7);
@@ -1684,16 +1704,38 @@ function parsePBP(intext) {
 						ptr8=intext.indexOf("</b>", ptr9+3);
 						if (ptr8!=-1 && ptr8<ptr9+50) {
 							RBName = intext.substring(ptr9+3, ptr8);
+							//alert("Handoff! Pos = " + RB + ", pID = " + RBpID + ", Name = " + RBName);
 						}
 					}
 				}
 			}
+			//alert("Handoff! RB = " + RB + ", game time = " + gameTime);
 		}
 
 		ptr4=intext.indexOf(" keeps it and runs ", preptr);
 		if (ptr4!=-1 && ptr4<endptr) {
 			run=1;
 			sneak=1;
+
+			RB = intext.substring(ptr4+19, ptr4+22); 
+			
+			ptr6=intext.indexOf("&lookatplayer=", ptr4+27);
+			if (ptr6!=-1 && ptr6<ptr4+100) {
+				ptr7=intext.indexOf("&", ptr6+14);
+				if (ptr7!=-1 && ptr7<ptr6+30) {
+					RBpID = intext.substring(ptr6+14, ptr7);
+					RBpID = parseInt(RBpID);
+					
+					ptr9=intext.indexOf("<b>", ptr7+11);
+					if (ptr9!=-1 && ptr9<ptr7+17) {
+						ptr8=intext.indexOf("</b>", ptr9+3);
+						if (ptr8!=-1 && ptr8<ptr9+50) {
+							RBName = intext.substring(ptr9+3, ptr8);
+							//alert("Keeper! Pos = " + RB + ", pID = " + RBpID + ", Name = " + RBName);
+						}
+					}
+				}
+			}
 		}
 		if (run==1 && (scramble==1 || sack==1)) { 
 			run=0; 
@@ -1728,11 +1770,13 @@ function parsePBP(intext) {
 			alert("Play with yardage: offense moved " + yard.toFixed(2) + ". down/dist = " + down + " and " + togo + ", game time = " + gameTime + ".\nYards thus far = " + tempYardCounter.toFixed(2)); 
 		} // */
 		
-		distToGo=getDistToGo(togo, endToGo); 
+		distToGo = getDistToGo(togo, endToGo);
+
+		distToSuccess = getDistToSuccess(distToGo, down);
 
 		downInt = convertDownToInt(down);
 
-		isSuccess=getSuccess(yard, distToGo, down, isTouchdown);     
+		isSuccess = getSuccess(yard, distToGo, down, isTouchdown);  
 
 		if (correctAbbr(abbr, showOffense) && (run==1 || pass==1) && distToGo!=-1 && isSuccess!=-1 && pkgid>=0 && pkgid<=7 && (noPlay===0) || withPens) { 
 			if (down=="1st") {
@@ -1870,11 +1914,22 @@ function parsePBP(intext) {
 		}
 
 		if (individualRunnerStats && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens) &&
-			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
+			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo) && distToSuccess != -1) {
 			index = -1;
 
-			// player ID, name, position, ATT, Yards, successes, yards to 1st down, yards to success
-			
+			// player ID, name, position, Attempts, Yards, successes, yards to 1st down, yards to success
+			if (RBpID != -1) {
+				//alert("handoff to " + RB + " " + RBName + ", abbr = " + abbr + ", gameTime = " + gameTime);
+				index = checkRBList(RBpID, RBName, RB);
+
+				RBPlayerStats[index][3]++; // increment attempts
+				RBPlayerStats[index][4] += yard;
+				if (isSuccess) {
+					RBPlayerStats[index][5]++;
+				}
+				RBPlayerStats[index][6] += distToGo;
+				RBPlayerStats[index][7] += distToSuccess; // */
+			}
 		}
 
 		/*if (!correctAbbr(abbr, showOffense)) {
@@ -2019,6 +2074,7 @@ function parsePBP(intext) {
 		isSuccess=0;
 		ptr1=ptr2+21;
 		WRID=-1;
+		RBpID = -1;
 		defPlaymakerpID = -1;
 		attYard="";
 		startThis=startNext;
@@ -2100,7 +2156,7 @@ function parsePBP(intext) {
 			tables = tables.concat(makeTableLable("Individual Defensive Player Stats") + makeIDPStatTable());
 		}
 		if (individualRunnerStats) {
-			tables = tables.concat(makeTableLable("Indivitual Runner Stats") + makeIndividualRBStatTable());
+			tables = tables.concat(makeTableLable("Individual Runner Stats") + makeIndividualRBStatTable());
 		}
 		if (passDistSplits) {
 			tables = tables.concat(makeTableLable("Pass Results By Distance") + makePassDistSplitTable());
@@ -2653,6 +2709,7 @@ function startFunc ()
 		defPkgSplits = 0;
 		conversions = 0;
 		individualWRStats = 0;
+		individualRunnerStats = 0;
 		individualDefenderStats = 0;
 		passDistSplits = 0;
 		sacks = 0;
@@ -2766,7 +2823,7 @@ function startFunc ()
 			abbrList=[];
 			teamID=[];
 			WRPlayerStats=[];
-			playerRushStats=[];
+			RBPlayerStats=[];
 			IDPStats=[];
 			initializeArrays();
 			
