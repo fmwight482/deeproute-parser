@@ -8,7 +8,7 @@
 // @include     http://deeproute.com/?js=scrimmine
 // @grant		GM_xmlhttpRequest
 // @connect	    deeproute.com
-// @version     1.6.2
+// @version     1.6.3
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
