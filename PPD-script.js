@@ -8,7 +8,7 @@
 // @include     http://deeproute.com/?js=scrimmine
 // @grant		GM_xmlhttpRequest
 // @connect	    deeproute.com
-// @version     1.6.3
+// @version     1.6.4.2
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
@@ -1110,7 +1110,7 @@ function parsePBP(intext) {
 	var pkgid, defpkgid, formid, playid, downDistID, index, run, handoff, sneak, pass, att, tmparr, sack, GCOV;
 	var pressScram, coverScram, throwAway, pdef, tkl;
 	var WR, WRID, WRpID, WRName, GCOVd, GCOVdpID, GCOVdID, GCOVdName, GCOVer, GCOVerID, GCOVerName, passDefenderpID, passDefenderName;
-	var RB, RBpID, RBName;
+	var RB, RBpID=-1, RBName;
 	var defPlaymaker, defPlaymakerpID=-1, defPlaymakerName;
 	var startNext, startThis=0, attYard, attYard2, drop, hadYards, tempYardCounter=0;
 	var attempts=0, scrambles=0, sacks=0; 
@@ -1660,7 +1660,6 @@ function parsePBP(intext) {
 		}
 		if (pass) {
 			att=1;
-			RBpID = -1;
 		}
 		else {
 			att=0;
@@ -1670,9 +1669,9 @@ function parsePBP(intext) {
 		}
 		ptr4=intext.indexOf("SACKED", preptr); // test if play was a sack 
 		if (ptr4!=-1 && ptr4<endptr) { 
-			att=0; 
-			pass=1; 
-			sack=1; 
+			att=0;
+			pass=1;
+			sack=1;
 		} 
 		else { 
 			sack=0; 
@@ -1717,11 +1716,12 @@ function parsePBP(intext) {
 			run=1;
 			sneak=1;
 
-			RB = intext.substring(ptr4+19, ptr4+22); 
+			//alert("Keeper! RB = " + RB + ", gameTime = " + gameTime);
 			
-			ptr6=intext.indexOf("&lookatplayer=", ptr4+27);
-			if (ptr6!=-1 && ptr6<ptr4+100) {
+			ptr6=intext.indexOf("&lookatplayer=", ptr4-150);
+			if (ptr6!=-1 && ptr6<ptr4) {
 				ptr7=intext.indexOf("&", ptr6+14);
+				//alert("Keeper! RB = " + RB + ", gameTime = " + gameTime);
 				if (ptr7!=-1 && ptr7<ptr6+30) {
 					RBpID = intext.substring(ptr6+14, ptr7);
 					RBpID = parseInt(RBpID);
@@ -1731,10 +1731,15 @@ function parsePBP(intext) {
 						ptr8=intext.indexOf("</b>", ptr9+3);
 						if (ptr8!=-1 && ptr8<ptr9+50) {
 							RBName = intext.substring(ptr9+3, ptr8);
-							//alert("Keeper! Pos = " + RB + ", pID = " + RBpID + ", Name = " + RBName);
 						}
 					}
 				}
+
+				ptr5=intext.lastIndexOf("<a target", ptr6);
+				if (ptr5!=-1) {
+					RB = intext.substring(ptr5-3, ptr5);
+				}
+				//alert("Keeper! Pos = " + RB + ", pID = " + RBpID + ", Name = " + RBName);
 			}
 		}
 		if (run==1 && (scramble==1 || sack==1)) { 
