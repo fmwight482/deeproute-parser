@@ -2507,7 +2507,7 @@ function fillGames(season) {
 function addButtons(season) {
 	var className = season + "_checkbox";
 	var buttonDiv1 = document.createElement('div');
-	buttonDiv1.innerHTML = '<input type="button" style="font-size: 6pt; font-weight: bold; width: 100%; height: 10px" value="Clear All">';
+	buttonDiv1.innerHTML = '<input type="button" style="font-size: 6pt; font-weight: bold; width: 100%; height: 15px" value="Clear All">';
 	buttonDiv1.addEventListener('click', function() {
 		var checkbox = getElementsByClassName(className, document);  
 		for (var i=0; i < checkbox.length; i++) 
@@ -2515,7 +2515,7 @@ function addButtons(season) {
 	}, true); // */
 	
 	var buttonDiv2 = document.createElement('div');
-	buttonDiv2.innerHTML = '<input type="button" style="font-size: 6pt; font-weight: bold; width: 100%; height: 10px" value="Select All">';
+	buttonDiv2.innerHTML = '<input type="button" style="font-size: 6pt; font-weight: bold; width: 100%; height: 15px" value="Select All">';
 	buttonDiv2.addEventListener('click', function() {
 		var checkbox = getElementsByClassName(className, document);  
 		for (var i=0; i < checkbox.length; i++) 
