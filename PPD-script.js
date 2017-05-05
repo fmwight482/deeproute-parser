@@ -775,7 +775,13 @@ function makeIDPStatTable() {
 
 // player ID, name, position, ATT, Yards, successes, yards to 1st down, yards to success
 function makeIndividualRBStatTable() {
-	var table = "<table border='1'><th>Name</th><th>POS</th><th>ATT</th><th>Yards</th><th>YPC</th><th>SC</th><th>SR</th><th>YT1D</th><th>YTS</th>";
+	var ATT_def = "<span title='Rushing Attempts: the number of times this player ran the ball as part of a designed running play. This includes QB run plays, but not sacks or scrambles'>ATT</span>";
+	var SC_def = "<span title='Success Count: the number of plays in which this player ran the ball which are considered successful (meaning the offense is better off after them than they were before). A successful play is defined here as one which gains 45% of the required yardage on 1st down, 60% on 2nd down, and 100% on 3rd or 4th down. Definition paraphrased from footballoutsiders.com'>SC</span>";
+	var SR_def = "<span title='Success Rate: percentage of plays on which this player ran the ball which are considered successful'>SR</span>";
+	var YT1D_def = "<span title='Yards to 1st Down: the average number of yards required to pick up a first down on plays where this player ran the ball'>YT1D</span>";
+	var YTS_def = "<span title='Yards to Success: the average number of yards required for a successful play on plays where this player ran the ball'>YTS</span>";
+
+	var table = "<table border='1'><th>Name</th><th>POS</th><th>" + ATT_def + "</th><th>Yards</th><th>YPC</th><th>" + SC_def + "</th><th>" + SR_def + "</th><th>" + YT1D_def + "</th><th>" + YTS_def + "</th>";
 	for (var i=0; i<RBPlayerStats.length; i++) {
 		table = table.concat("<tr><td>" + RBPlayerStats[i][1] + 
 			"</td><td>" + RBPlayerStats[i][2] + 
