@@ -8,7 +8,7 @@
 // @include     http://deeproute.com/?js=scrimmine
 // @grant		GM_xmlhttpRequest
 // @connect	    deeproute.com
-// @version     1.6.4.2
+// @version     1.6.4.3
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
@@ -49,7 +49,7 @@ var individualRunnerStats = 0;
 var defPkgSplits = 0;
 var conversions = 0;
 var passDistSplits = 0;
-var sacks = 0;
+var showSacks = 0;
 
 var Preseason = 0; 
 var RegularSeason = 0; 
@@ -821,6 +821,15 @@ function makePassDistSplitTable() {
 	return table;
 }
 
+function makeSacksTable() {
+	// pass plays, passes, immediate sacks, cover sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
+	var table = "<table border='1'><th>Pass Plays</th><th>TGT</th><th>TGT%</th><th>Imediate Sacks</th><th>Cover Sacks</th>" + 
+		"<th>Pressure Scrambles</th><th>Coverage Scrambles</th><th>Scramble sacks</th><th>dumpoffs</th><th>throwaways</th>";
+	table = table.concat("<tr><td>" + sackStats[0] + "</td><td>" + (sackStats[1] - sackStats[8]) + "</td><td>" + calculatePercent(sackStats[1] - sackStats[8], sackStats[0]) + "%</td><td>" + sackStats[2] + "</td><td>" + sackStats[3] + "</td><td>" + sackStats[4] + "</td><td>" + sackStats[5] + "</td><td>" + sackStats[6] + "</td><td>" + sackStats[7] + "</td><td>" + sackStats[8] + "</td>");
+	table = table.concat("</table>");
+	return table;
+}
+
 function getPassDistRowHeader(i) {
 	var header = "";
 	if (i === 0) {
@@ -1323,20 +1332,20 @@ function parsePBP(intext) {
 			ptr4=intext.indexOf("enalty <b>declined</b>", startThis); 
 			if (ptr4!=-1 && ptr4<startNext) { 
 				//alert("penalty declined! game time = " + gameTime);
-				penalty=0; 
-				noPlay=0; 
+				penalty=0;
+				noPlay=0;
 			}
 			else {
 				penalty=1; 
-				ptr4=intext.indexOf(" assessed at the end of ", startThis); 
+				ptr4=intext.indexOf(" assessed at the end of ", startThis);
 				if (ptr4!=-1 && ptr4<startNext) {
-					noPlay = 0; 
+					noPlay = 0;
 				} 
 				else {
-					ptr4=intext.indexOf("enalty <b>accepted</b>", startThis); 
+					ptr4=intext.indexOf("enalty <b>accepted</b>", startThis);
 					if (ptr4!=-1 && ptr4<startNext) {
 						//alert("penalty accepted! game time = " + gameTime); 
-						noPlay = 1; 
+						noPlay = 1;
 					}
 					else {
 						ptr4=intext.indexOf(" yard penalty; Automatic First Down!", startThis);
@@ -1417,6 +1426,14 @@ function parsePBP(intext) {
 			dumpoff=0;
 		}
 
+		ptr4=intext.indexOf("threw the ball away", preptr); // check for throwaways
+		if (ptr4!=-1 && ptr4<endptr) {
+			throwAway = 1;
+		}
+		else {
+			throwAway = 0;
+		}
+
 		ptr4=intext.indexOf("scrambles..", preptr); 
 		if (ptr4!=-1 && ptr4<endptr) {
 			scramble=1; 
@@ -1424,11 +1441,26 @@ function parsePBP(intext) {
 			WRpID = -1;
 			passDefenderpID = -1;
 		}
-		else scramble=0;
+		else {
+			scramble=0;
+		}
 		
 		ptr4=intext.indexOf("t see anyone open ", preptr);
 		if (ptr4!=-1 && ptr4<endptr) {
+			coverScram = 1;
+			scramble = 1;
+		}
+		else {
 			coverScram = 0;
+		}
+
+		ptr4=intext.indexOf("under pressure and has decided to run", preptr);
+		if (ptr4!=-1 && ptr4<endptr) {
+			pressScram = 1;
+			scramble = 1;
+		}
+		else {
+			pressScram = 0;
 		}
 
 		ptr4=intext.indexOf("INTERCEPTED by", preptr); 
@@ -2055,29 +2087,34 @@ function parsePBP(intext) {
 			}
 		}
 		
-		if (sacks && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens)) {
-			// pass plays, passes, sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
+		if (showSacks && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens || throwAway)) {
+			// pass plays, passes, immediate sacks, cover sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
 			if (pass) {
-				sackStats[0]++; // increment passes
+				sackStats[0]++; // increment pass plays
 			}
 			if (att) {
-				sackStats[1]++; // increment attempts
+				sackStats[1]++; // increment pass attempts
 			}
 			if (sack) {
-				sackStats[2]++; // increment sacks
 				if (scramble) {
-					sackStats[5]++; // increment scramble sacks
+					sackStats[6]++; // increment scramble sacks
+				}
+				else if (GCOV) {
+					sackStats[2]++; // increment cover sacks
+				}
+				else {
+					sackStats[3]++; // increment immediate sacks
 				}
 			}
 			// no pressure scrambles
 			if (coverScram) {
-				sackStats[4]++; // increment cover scrambles
+				sackStats[5]++; // increment cover scrambles
 			}
 			if (dumpoff) {
-				sackStats[6]++; // increment dumpoffs
+				sackStats[7]++; // increment dumpoffs
 			}
 			if (throwAway) {
-				sackStats[7]++; // increment throw aways
+				sackStats[8]++; // increment throw aways
 			}
 		}
 
@@ -2171,7 +2208,10 @@ function parsePBP(intext) {
 		}
 		if (passDistSplits) {
 			tables = tables.concat(makeTableLable("Pass Results By Distance") + makePassDistSplitTable());
-		} // */
+		}
+		if (showSacks) {
+			tables = tables.concat(makeTableLable("Sack Stats") + makeSacksTable());
+		}
 		
 		newDiv.innerHTML = tables;
 	}
@@ -2302,8 +2342,8 @@ function initializeArrays() {
 		passDistSplitStats[a] = stats;
 	} // */
 	
-	sackStats = new Array(8); // pass plays, passes, sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
-	for (a=0; a<8; a++) {
+	sackStats = new Array(9); // pass plays, passes, immediate sacks, cover sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
+	for (a=0; a<9; a++) {
 		sackStats[a] = 0;
 	}
 }
@@ -2633,9 +2673,10 @@ function selectStatTables() {
 	var defPkgSplitsDef = "<span title='displays number of snaps for each defensive package'>Defensive package splits</span>";
 	var thirdFourthDownsDef = "<span title='displays 3rd and 4th down conversion attempts and success rate for a wide variety of distances'>3rd/4th downs</span>";
 	var WRStatsDef = "<span title='displays 1st option checks, yards per target, success rate, and various other statistics for each individual reciever'>Individual reciever stats</span>";
-	var RBStatsDef = "<span title='display running stats ELABORATE LATER'>Individual rushing stats</span>";
+	var RBStatsDef = "<span title='displas YPC, success rate, and and other rushing statistics'>Individual rushing stats</span>";
 	var IDPStatsDef = "<span title='displays 1st option checks, yards per target, success rate, and various other statistics for the recievers matched up against each individual defensive player'>Individual defensive player stats</span>";
 	var passDistStatsDef = "<span title='displays completion percentage, interception rate, average YAC, and other statistics for passes of various distances'>Pass results by distance</span>";
+	var passRushStatsDef = "<span title='displays sacks, throwaways, scrambles, and other plays which help guage how much pressure is applied to the quarterback'>Pressure stats</span>";
 
 	var newtd5 = document.createElement('td');
 	newtd5.setAttribute('colspan', '4');
@@ -2649,7 +2690,7 @@ function selectStatTables() {
 		'<input type="checkbox" name="other" id="runners"> ' + RBStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="defenders"> ' + IDPStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="passDist"> ' + passDistStatsDef + ' <br>' + 
-		//'<input type="checkbox" name="other" id="sacks"> Pass Rush <br>' + 
+		'<input type="checkbox" name="other" id="sacks"> ' + passRushStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="defPkgSplits"> ' + defPkgSplitsDef;
 	newtd5.appendChild(newDiv5);
 
@@ -2723,7 +2764,7 @@ function startFunc ()
 		individualRunnerStats = 0;
 		individualDefenderStats = 0;
 		passDistSplits = 0;
-		sacks = 0;
+		showSacks = 0;
 		
 		selectedTable = 0;
 		
@@ -2759,8 +2800,8 @@ function startFunc ()
 			individualDefenderStats = 1;
 			selectedTable = 1;
 		}
-		/*if (document.getElementById("sacks").checked) {
-			sacks = 1;
+		if (document.getElementById("sacks").checked) {
+			showSacks = 1;
 			selectedTable = 1;
 		} // */
 		if (document.getElementById("passDist").checked) {
