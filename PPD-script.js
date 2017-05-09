@@ -37,6 +37,7 @@ var defPkgs=[];
 var conversionsStats=[];
 var passDistSplitStats=[];
 var sackStats=[];
+var kickoffStats=[];
 
 var showOffense = 1;
 var showBothTeams = 0;
