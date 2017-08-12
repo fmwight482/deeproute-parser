@@ -824,9 +824,8 @@ function makePassDistSplitTable() {
 
 function makeSacksTable() {
 	// pass plays, passes, immediate sacks, cover sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
-	var table = "<table border='1'><th>Pass Plays</th><th>TGT</th><th>TGT%</th><th>Imediate Sacks</th><th>Cover Sacks</th>" + 
-		"<th>Pressure Scrambles</th><th>Coverage Scrambles</th><th>Scramble sacks</th><th>dumpoffs</th><th>throwaways</th>";
-	table = table.concat("<tr><td>" + sackStats[0] + "</td><td>" + (sackStats[1] - sackStats[8]) + "</td><td>" + calculatePercent(sackStats[1] - sackStats[8], sackStats[0]) + "%</td><td>" + sackStats[2] + "</td><td>" + sackStats[3] + "</td><td>" + sackStats[4] + "</td><td>" + sackStats[5] + "</td><td>" + sackStats[6] + "</td><td>" + sackStats[7] + "</td><td>" + sackStats[8] + "</td>");
+	var table = "<table border='1'><th>Pass Plays</th><th>TGT</th><th>TGT%</th><th>Imediate Sacks</th><th>ImdSk%</th><th>Cover Sacks</th><th>CovSk%</th><th>Pressure Scrambles</th><th>Coverage Scrambles</th><th>CovScram%</th><th>Scramble sacks</th><th>Sk/Scram%</th><th>dumpoffs</th><th>Dump%</th><th>throwaways</th><th>TA%</th>";
+	table = table.concat("<tr><td>" + sackStats[0] + "</td><td>" + (sackStats[1] - sackStats[8]) + "</td><td>" + calculatePercent(sackStats[1] - sackStats[8], sackStats[0]) + "%</td><td>" + sackStats[2] + "</td><td>" + calculatePercent(sackStats[2], sackStats[0]) + "%</td><td>" + sackStats[3] + "</td><td>" + calculatePercent(sackStats[3], sackStats[0]) + "%</td><td>" + sackStats[4] + "</td><td>" + sackStats[5] + "</td><td>" + calculatePercent(sackStats[5], sackStats[0]) + "%</td><td>" + sackStats[6] + "</td><td>" + calculatePercent(sackStats[6], sackStats[4] + sackStats[5]) + "%</td><td>" + sackStats[7] + "</td><td>" + calculatePercent(sackStats[7], sackStats[0]) + "%</td><td>" + sackStats[8] + "</td><td>" + calculatePercent(sackStats[8], sackStats[0]) + "%</td>");
 	table = table.concat("</table>");
 	return table;
 }
