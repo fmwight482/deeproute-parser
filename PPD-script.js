@@ -2587,8 +2587,8 @@ function addButtons(season) {
 function getGameDropdown(season) {
 	var gameDropdown = 
 		"<a id=\x22" + season + "_show_id\x22 onclick=\x22document.getElementById('" + season + "_spoiler_id').style.display=''; document.getElementById('" + season + "_spoiler_span').style.display=''; document.getElementById('" + season + "_show_id').style.display='none';\x22 class=\x22link\x22>" + 
-		" >></a> <a id=\x22" + season + "_spoiler_id\x22 style=\x22display: none\x22 onclick=\x22document.getElementById('" + season + "_spoiler_id').style.display='none'; document.getElementById('" + season + "_spoiler_span').style.display='none'; document.getElementById('" + season + "_show_id').style.display='';\x22 class=\x22link\x22>" + 
-		" << </a> <span id=\x22" + season + "_spoiler_span\x22 style=\x22display: none\x22>" + fillGames(season) + " </span>"; // */
+		" vv</a> <a id=\x22" + season + "_spoiler_id\x22 style=\x22display: none\x22 onclick=\x22document.getElementById('" + season + "_spoiler_id').style.display='none'; document.getElementById('" + season + "_spoiler_span').style.display='none'; document.getElementById('" + season + "_show_id').style.display='';\x22 class=\x22link\x22>" + 
+		" ^^ </a> <span id=\x22" + season + "_spoiler_span\x22 style=\x22display: none\x22>" + fillGames(season) + " </span>"; // */
 	return gameDropdown;
 }
 
