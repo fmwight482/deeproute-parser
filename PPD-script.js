@@ -2866,7 +2866,7 @@ function startFunc ()
 	newtd2.setAttribute('colspan', '2');
 	var newDiv3 = document.createElement('div');
 	newDiv3.align = 'center';
-	newDiv3.innerHTML = '<input type="button" style="font-size: 10pt; font-weight: bold; width: 100%; height: 30px" value="Select all">'; 
+	newDiv3.innerHTML = '<input type="button" style="font-size: 10pt; font-weight: bold; width: 100%; height: 30px" value="Select all teams">'; 
 	newDiv3.addEventListener('click', function() {
 			var checkbox = getElementsByClassName('team_checkbox', document);  
 			for (var i=0; i < checkbox.length; i++) checkbox[i].checked=true;   
@@ -2878,7 +2878,7 @@ function startFunc ()
 	newtd3.setAttribute('colspan', '2');
 	var newDivA = document.createElement('div');
 	newDivA.align = 'center';
-	newDivA.innerHTML = '<input type="button" style="font-size: 10pt; font-weight: bold; width: 100%; height: 30px" value="Clear all">'; 
+	newDivA.innerHTML = '<input type="button" style="font-size: 10pt; font-weight: bold; width: 100%; height: 30px" value="Clear selected teams">'; 
 	newDivA.addEventListener('click', function() {
 		var checkbox = getElementsByClassName('team_checkbox', document);  
 		for (var i=0; i < checkbox.length; i++) 
