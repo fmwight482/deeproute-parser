@@ -37,7 +37,7 @@ var defPkgs=[];
 var conversionsStats=[];
 var passDistSplitStats=[];
 var sackStats=[];
-var kickoffStats=[];
+var kickoffStats_array=[];
 
 var showOffense = 1;
 var showBothTeams = 0;
@@ -51,6 +51,7 @@ var defPkgSplits = 0;
 var conversions = 0;
 var passDistSplits = 0;
 var showSacks = 0;
+var kickoffStats_bol = 0;
 
 var Preseason = 0; 
 var RegularSeason = 0; 
@@ -655,6 +656,10 @@ function addWrProdTr(pkgid, wr) {
 	return row; 
 }
 
+/*******************************************/
+/* * * * SINGLE-FUNCTION STAT TABLES * * * */
+/*******************************************/
+
 function makeDefPkgSplitsTable() {
 	var table = "<table border='1'><th>Package</th><th>Total Plays</th><th>Run Plays</th><th>Pass Plays</th>";
 	var sumTot = 0;
@@ -1119,7 +1124,8 @@ function makeTableLable(name) {
 }
 
 function parsePBP(intext) {
-	var ptr1=0, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9;
+	var startPtr=0, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9;
+	var kickoffPtr, onsidesPtr, fieldGoalPtr, puntPtr, endSprecialTeamsPtr;
 	var pkg, defpkg, form, play, abbr, yard, yard2, comp, scramble, INT, incomplete, loss, isTouchdown, isSuccess; 
 	var down, togo, distToGo=0, endToGo, gameTime, penalty, noPlay, tmp=0, endptr, dumpoff, first_read, preptr=0; 
 	var pkgid, defpkgid, formid, playid, downDistID, index, run, handoff, sneak, pass, att, tmparr, sack, GCOV;
@@ -1131,12 +1137,13 @@ function parsePBP(intext) {
 	var attempts=0, scrambles=0, sacks=0; 
 	var name1, name2, abbr1, abbr2, defAbbr, name1Index, name2Index;
 	var bothTeamsValid;
+	var kickoff=0, onsides=0, fieldGoal=0, punt=0;
 
 	readcount++;
 	newDiv = document.getElementById('scout_count');
 	newDiv.innerHTML= '<span style="background-color:white">' + readcount.toString() + ' of ' + readtarget + ' games</span>';
 
-	// plan: scan for two team names at the top of the log, get team abbrs for each and set them as abbr1, abbr2. 
+	// scan for two team names at the top of the log, get team abbrs for each and set them as abbr1, abbr2. 
 	// on each play, check abbr against one of them, if abbr1 isEqual set defAbbr to abbr2, vice versa. 
 	
 	//alert("started to read the log");
@@ -1190,13 +1197,20 @@ function parsePBP(intext) {
 
 	while (1) {
 		tmp++; // increment 
-		ptr2=intext.indexOf("Offensive Package Was", ptr1); // find next "Offensive Package Was" after ptr1 
-		if (ptr2<0) {
+
+		kickoffPtr=intext.indexOf("Kickoff by", startPtr);
+		onsidesPtr=intext.indexOf("is lining up to try an onside kick.", startPtr);
+		fieldGoalPtr=intext.indexOf(" is coming on for a ", startPtr);
+		puntPtr=intext.indexOf("is lined up to punt", startPtr);
+		endSprecialTeamsPtr= intext.indexOf("The play required ", startPtr);
+
+		playPtr=intext.indexOf("Offensive Package Was", startPtr); // find next "Offensive Package Was" after startPtr 
+		if (playPtr<0) {
 			//alert("finished reading the log");
 			break; // if no more offensive plays, leave 
 		}
-		endptr=ptr2; 
-		ptr3=intext.lastIndexOf("<span style='font-size:13;'>", ptr2); // find start of the final PBP line from this play 
+		endptr=playPtr; 
+		ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr); // find start of the final PBP line from this play 
 
 		ptr7=intext.indexOf("Two Minute Warning", ptr3); // if imediately before the two minute warning, look for the line before it
 		if (ptr7!=-1 && ptr7 < endptr) {
@@ -1205,25 +1219,25 @@ function parsePBP(intext) {
 		}
 
 		ptr4=intext.indexOf("ouchdown", ptr3); // find next touchdown after start of the final PBP line 
-		if (ptr4>ptr3 && ptr4 < ptr2) { // if the touchdown is after the start of the final PBP line and before the package info
+		if (ptr4>ptr3 && ptr4 < endptr) { // if the touchdown is after the start of the final PBP line and before the package info
 			isTouchdown=1; 
 			ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr-5); // sets ptr3 to the final PBP line  
 		} // if ptr4>ptr3 ...
-		ptr6=intext.lastIndexOf("was the man covering on the play"); 
-		if (ptr6!=-1 && ptr6 < endptr) {
+		coveragePtr=intext.lastIndexOf("was the man covering on the play"); 
+		if (coveragePtr!=-1 && coveragePtr < endptr) {
 			ptr3=intext.lastIndexOf("<span style='font-size:13;'>", ptr3-5);
 		}
 		
-		ptr6=intext.indexOf("was the man covering on the play", preptr);
-		if (ptr6!=-1 && ptr6 < endptr) {
-			ptr7=intext.lastIndexOf("&lookatplayer=", ptr6);
-			if (ptr7!=-1 && ptr7<ptr6) {
+		coveragePtr=intext.indexOf("was the man covering on the play", preptr);
+		if (coveragePtr!=-1 && coveragePtr < endptr) {
+			ptr7=intext.lastIndexOf("&lookatplayer=", coveragePtr);
+			if (ptr7!=-1 && ptr7<coveragePtr) {
 				ptr8=intext.indexOf("&", ptr7+14);
-				if (ptr8!=-1 && ptr8<ptr6) {
+				if (ptr8!=-1 && ptr8<coveragePtr) {
 					passDefenderpID = parseInt(intext.substring(ptr7+14, ptr8));
 					ptr9=intext.indexOf("<b>", ptr8);
-					if (ptr9!=-1 && ptr9<ptr6) {
-						passDefenderName = intext.substring(ptr9+3, ptr6-9);
+					if (ptr9!=-1 && ptr9<coveragePtr) {
+						passDefenderName = intext.substring(ptr9+3, coveragePtr-9);
 					}
 				}
 			}
@@ -1232,12 +1246,12 @@ function parsePBP(intext) {
 			passDefenderpID = -1;
 		}
 		
-		startNext=intext.indexOf("<span style='font-size:13;'>", ptr2); // find the first PBP line on the next play (to find penalties)
+		startNext=intext.indexOf("<span style='font-size:13;'>", endptr); // find the first PBP line on the next play (to find penalties)
 		
-		pkg=intext.substring(ptr2+29, ptr2+38); // get the offensive personel package 
+		pkg=intext.substring(endptr+29, endptr+38); // get the offensive personel package 
 		pkgid=getPkgid(pkg);
 		
-		ptr4=intext.indexOf("Defensive Package Was", ptr2);
+		ptr4=intext.indexOf("Defensive Package Was", endptr);
 		if (ptr4!=-1 && ptr4 < startNext) {
 			defpkg=intext.substring(ptr4+29, ptr4+34);
 			defpkgid=getDefPkgid(defpkg);
@@ -1388,19 +1402,19 @@ function parsePBP(intext) {
 				}
 			}
 			
-			ptr6=intext.indexOf(" Good coverage by ", ptr4);
-			if (ptr6!=-1 && ptr6<endptr) {
-				GCOVer = intext.substring(ptr6+18, ptr6+22);
+			coveragePtr=intext.indexOf(" Good coverage by ", ptr4);
+			if (coveragePtr!=-1 && coveragePtr<endptr) {
+				GCOVer = intext.substring(coveragePtr+18, coveragePtr+22);
 			}
 			
 			// get name and ID for the defender
-			ptr5=intext.indexOf("</a> on the play.", ptr6);
+			ptr5=intext.indexOf("</a> on the play.", coveragePtr);
 			if (ptr5!=-1 && ptr5<endptr) {
 				ptr4=intext.lastIndexOf("&lookatplayer=", ptr5);
 				if (ptr4!=-1 && ptr4<ptr5) {
-					ptr6=intext.indexOf("&", ptr4+14);
-					if (ptr6!=-1 && ptr6<ptr5) {
-						GCOVerID = parseInt(intext.substring(ptr4+14, ptr6));
+					coveragePtr=intext.indexOf("&", ptr4+14);
+					if (coveragePtr!=-1 && coveragePtr<ptr5) {
+						GCOVerID = parseInt(intext.substring(ptr4+14, coveragePtr));
 						ptr7=intext.indexOf("<b>", ptr4+14);
 						if (ptr7!=-1 && ptr7<ptr5) {
 							GCOVerName = intext.substring(ptr7+3, ptr5-4);
@@ -2120,7 +2134,7 @@ function parsePBP(intext) {
 
 		isTouchdown=0;
 		isSuccess=0;
-		ptr1=ptr2+21;
+		startPtr=endptr+21;
 		WRID=-1;
 		RBpID = -1;
 		defPlaymakerpID = -1;
@@ -2345,6 +2359,11 @@ function initializeArrays() {
 	sackStats = new Array(9); // pass plays, passes, immediate sacks, cover sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
 	for (a=0; a<9; a++) {
 		sackStats[a] = 0;
+	}
+
+	kickoffStats_array = new Array(5); // kickoffs, touchbacks, returned kicks, net start position of returned kicks, kick return yards
+	for (a=0; a<7; a++) {
+		kickoffStats_array[a] = 0;
 	}
 }
 
@@ -2677,6 +2696,7 @@ function selectStatTables() {
 	var IDPStatsDef = "<span title='displays 1st option checks, yards per target, success rate, and various other statistics for the recievers matched up against each individual defensive player'>Individual defensive player stats</span>";
 	var passDistStatsDef = "<span title='displays completion percentage, interception rate, average YAC, and other statistics for passes of various distances'>Pass results by distance</span>";
 	var passRushStatsDef = "<span title='displays sacks, throwaways, scrambles, and other plays which help guage how much pressure is applied to the quarterback'>Pressure stats</span>";
+	var kickoffStatsDef = "<span title='displays stats for kickoffs'>Kickoff stats</span>";
 
 	var newtd5 = document.createElement('td');
 	newtd5.setAttribute('colspan', '4');
@@ -2691,6 +2711,7 @@ function selectStatTables() {
 		'<input type="checkbox" name="other" id="defenders"> ' + IDPStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="passDist"> ' + passDistStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="sacks"> ' + passRushStatsDef + ' <br>' + 
+		'<input type="checkbox" name="other" id="kickoffs"> ' + kickoffStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="defPkgSplits"> ' + defPkgSplitsDef;
 	newtd5.appendChild(newDiv5);
 
@@ -2765,6 +2786,7 @@ function startFunc ()
 		individualDefenderStats = 0;
 		passDistSplits = 0;
 		showSacks = 0;
+		kickoffStats_bol = 0;
 		
 		selectedTable = 0;
 		
@@ -2803,11 +2825,15 @@ function startFunc ()
 		if (document.getElementById("sacks").checked) {
 			showSacks = 1;
 			selectedTable = 1;
-		} // */
+		}
 		if (document.getElementById("passDist").checked) {
 			passDistSplits = 1;
 			selectedTable = 1;
-		} // */
+		}
+		if (document.getElementById("kickoffs").checked) {
+			kickoffStats_bol = 1;
+			selectedTable = 1;
+		}
 		
 		if (document.getElementById("pre").checked) {
 			Preseason = 1; 
