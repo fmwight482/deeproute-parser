@@ -1202,347 +1202,345 @@ function parsePBP(intext) {
 		onsidesPtr=intext.indexOf("is lining up to try an onside kick.", startPtr);
 		fieldGoalPtr=intext.indexOf(" is coming on for a ", startPtr);
 		puntPtr=intext.indexOf("is lined up to punt", startPtr);
-		endSprecialTeamsPtr= intext.indexOf("The play required ", startPtr);
+		endSprecialTeamsPtr=intext.indexOf("The play required ", startPtr);
 
 		playPtr=intext.indexOf("Offensive Package Was", startPtr); // find next "Offensive Package Was" after startPtr 
-		if (playPtr<0) {
+
+		if (kickoffPtr >= 0 && (kickoffPtr < playPtr || playPtr < 0)) {
+			kickoff = 1;
+		}
+		else if (onsidesPtr >= 0 && (onsidesPtr < playPtr || playPtr < 0)) {
+			onsides = 1;
+		}
+		else if (fieldGoalPtr >= 0 && (fieldGoalPtr < playPtr || playPtr < 0)) {
+			fieldGoal = 1;
+		}
+		else if (puntPtr >= 0 && (puntPtr < playPtr || playPtr < 0)) {
+			punt = 1;
+		}
+
+		if (!(kickoff || onsides || fieldGoal || punt) && playPtr < 0) {
 			//alert("finished reading the log");
 			break; // if no more offensive plays, leave 
 		}
-		endptr=playPtr; 
-		ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr); // find start of the final PBP line from this play 
+		else if (playPtr >= 0) { // if not a special teams play
+			endptr=playPtr;
 
-		ptr7=intext.indexOf("Two Minute Warning", ptr3); // if imediately before the two minute warning, look for the line before it
-		if (ptr7!=-1 && ptr7 < endptr) {
-			ptr4=ptr3-28;
-			ptr3=intext.lastIndexOf("<span style='font-size:13;'>", ptr4);
-		}
+			ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr); // find start of the final PBP line from this play 
 
-		ptr4=intext.indexOf("ouchdown", ptr3); // find next touchdown after start of the final PBP line 
-		if (ptr4>ptr3 && ptr4 < endptr) { // if the touchdown is after the start of the final PBP line and before the package info
-			isTouchdown=1; 
-			ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr-5); // sets ptr3 to the final PBP line  
-		} // if ptr4>ptr3 ...
-		coveragePtr=intext.lastIndexOf("was the man covering on the play"); 
-		if (coveragePtr!=-1 && coveragePtr < endptr) {
-			ptr3=intext.lastIndexOf("<span style='font-size:13;'>", ptr3-5);
-		}
-		
-		coveragePtr=intext.indexOf("was the man covering on the play", preptr);
-		if (coveragePtr!=-1 && coveragePtr < endptr) {
-			ptr7=intext.lastIndexOf("&lookatplayer=", coveragePtr);
-			if (ptr7!=-1 && ptr7<coveragePtr) {
-				ptr8=intext.indexOf("&", ptr7+14);
-				if (ptr8!=-1 && ptr8<coveragePtr) {
-					passDefenderpID = parseInt(intext.substring(ptr7+14, ptr8));
-					ptr9=intext.indexOf("<b>", ptr8);
-					if (ptr9!=-1 && ptr9<coveragePtr) {
-						passDefenderName = intext.substring(ptr9+3, coveragePtr-9);
+			ptr7=intext.indexOf("Two Minute Warning", ptr3); // if imediately before the two minute warning, look for the line before it
+			if (ptr7!=-1 && ptr7 < endptr) {
+				ptr4=ptr3-28;
+				ptr3=intext.lastIndexOf("<span style='font-size:13;'>", ptr4);
+			}
+
+			ptr4=intext.indexOf("ouchdown", ptr3); // find next touchdown after start of the final PBP line 
+			if (ptr4>ptr3 && ptr4 < endptr) { // if the touchdown is after the start of the final PBP line and before the package info
+				isTouchdown=1; 
+				ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr-5); // sets ptr3 to the final PBP line  
+			} // if ptr4>ptr3 ...
+			coveragePtr=intext.lastIndexOf("was the man covering on the play"); 
+			if (coveragePtr!=-1 && coveragePtr < endptr) {
+				ptr3=intext.lastIndexOf("<span style='font-size:13;'>", ptr3-5);
+			}
+			
+			coveragePtr=intext.indexOf("was the man covering on the play", preptr);
+			if (coveragePtr!=-1 && coveragePtr < endptr) {
+				ptr7=intext.lastIndexOf("&lookatplayer=", coveragePtr);
+				if (ptr7!=-1 && ptr7<coveragePtr) {
+					ptr8=intext.indexOf("&", ptr7+14);
+					if (ptr8!=-1 && ptr8<coveragePtr) {
+						passDefenderpID = parseInt(intext.substring(ptr7+14, ptr8));
+						ptr9=intext.indexOf("<b>", ptr8);
+						if (ptr9!=-1 && ptr9<coveragePtr) {
+							passDefenderName = intext.substring(ptr9+3, coveragePtr-9);
+						}
 					}
 				}
-			}
-		}
-		else {
-			passDefenderpID = -1;
-		}
-		
-		startNext=intext.indexOf("<span style='font-size:13;'>", endptr); // find the first PBP line on the next play (to find penalties)
-		
-		pkg=intext.substring(endptr+29, endptr+38); // get the offensive personel package 
-		pkgid=getPkgid(pkg);
-		
-		ptr4=intext.indexOf("Defensive Package Was", endptr);
-		if (ptr4!=-1 && ptr4 < startNext) {
-			defpkg=intext.substring(ptr4+29, ptr4+34);
-			defpkgid=getDefPkgid(defpkg);
-		}
-
-		if (startThis === 0) {
-			startThis=preptr; 
-		}
-		ptr4=intext.indexOf("2 Point Conversion.", preptr); 
-		if (ptr4!=-1 && ptr4<endptr) {
-			preptr=ptr4; 
-		}
-
-		ptr4=intext.indexOf("<b>", ptr3); // find location of first bolding on last line 
-		ptr5=intext.indexOf("</b>", ptr4+3); // find location of close of first bolding 
-		abbr=intext.substring(ptr4+3, ptr5); // get bolded text (offensive team abbr) 
-
-		ptr4=intext.indexOf("<b>", ptr5+4); // find second bolding: quarter and time remaining 
-		ptr7=intext.indexOf("</b>", ptr4+3); 
-		gameTime=intext.substring(ptr4+3, ptr7); // store string with quarter and time remaining. 
-
-		//alert("tmp = " + tmp + ", gameTime = " + gameTime);
-
-		ptr4=intext.indexOf("<b>", ptr7+4); // third bolding: down and distance
-		//ptr7=intext.indexOf("</b>", ptr4+3); 
-		down=intext.substring(ptr4+4, ptr4+7); // store down ("1st", "2nd", etc)
-		ptr7=intext.indexOf(";", ptr4); // find end of distance ("Foot~", "13+", etc)
-		togo=intext.substring(ptr4+12, ptr7); // store distance 
-		endToGo=intext.substring(ptr7-1, ptr7); // get the final char before the ";", which may or not be a "+" or "-" 
-
-		ptr4=intext.indexOf("a gain of", preptr); // find next "a gain of", if it exists and is before the end move it to ptr5
-		loss=0; 
-		hadYards=1; 
-		if (ptr4!=-1 && ptr4<endptr) {
-			ptr5=ptr4;
-		}
-		else {
-			ptr4=intext.indexOf("a LOSS of", preptr); // do previous for "a loss of" 
-			if (ptr4!=-1 && ptr4<endptr) { 
-				ptr5=ptr4; loss=1; 
 			}
 			else {
-				ptr4=intext.indexOf(" gains ", preptr); // do previous for "gains" 
-				if (ptr4!=-1 && ptr4<endptr) {
-					ptr5=ptr4;
+				passDefenderpID = -1;
+			}
+			
+			startNext=intext.indexOf("<span style='font-size:13;'>", endptr); // find the first PBP line on the next play (to find penalties)
+			
+			pkg=intext.substring(endptr+29, endptr+38); // get the offensive personel package 
+			pkgid=getPkgid(pkg);
+			
+			ptr4=intext.indexOf("Defensive Package Was", endptr);
+			if (ptr4!=-1 && ptr4 < startNext) {
+				defpkg=intext.substring(ptr4+29, ptr4+34);
+				defpkgid=getDefPkgid(defpkg);
+			}
+
+			if (startThis === 0) {
+				startThis=preptr; 
+			}
+			ptr4=intext.indexOf("2 Point Conversion.", preptr); 
+			if (ptr4!=-1 && ptr4<endptr) {
+				preptr=ptr4; 
+			}
+
+			ptr4=intext.indexOf("<b>", ptr3); // find location of first bolding on last line 
+			ptr5=intext.indexOf("</b>", ptr4+3); // find location of close of first bolding 
+			abbr=intext.substring(ptr4+3, ptr5); // get bolded text (offensive team abbr) 
+
+			ptr4=intext.indexOf("<b>", ptr5+4); // find second bolding: quarter and time remaining 
+			ptr7=intext.indexOf("</b>", ptr4+3); 
+			gameTime=intext.substring(ptr4+3, ptr7); // store string with quarter and time remaining. 
+
+			//alert("tmp = " + tmp + ", gameTime = " + gameTime);
+
+			ptr4=intext.indexOf("<b>", ptr7+4); // third bolding: down and distance
+			//ptr7=intext.indexOf("</b>", ptr4+3); 
+			down=intext.substring(ptr4+4, ptr4+7); // store down ("1st", "2nd", etc)
+			ptr7=intext.indexOf(";", ptr4); // find end of distance ("Foot~", "13+", etc)
+			togo=intext.substring(ptr4+12, ptr7); // store distance 
+			endToGo=intext.substring(ptr7-1, ptr7); // get the final char before the ";", which may or not be a "+" or "-" 
+
+			ptr4=intext.indexOf("a gain of", preptr); // find next "a gain of", if it exists and is before the end move it to ptr5
+			loss=0; 
+			hadYards=1; 
+			if (ptr4!=-1 && ptr4<endptr) {
+				ptr5=ptr4;
+			}
+			else {
+				ptr4=intext.indexOf("a LOSS of", preptr); // do previous for "a loss of" 
+				if (ptr4!=-1 && ptr4<endptr) { 
+					ptr5=ptr4; loss=1; 
 				}
 				else {
-					ptr4=intext.indexOf(" loses ", preptr); // do previous for "loses" 
-					if (ptr4!=-1 && ptr4<endptr) { 
-						ptr5=ptr4; loss=1; 
+					ptr4=intext.indexOf(" gains ", preptr); // do previous for "gains" 
+					if (ptr4!=-1 && ptr4<endptr) {
+						ptr5=ptr4;
 					}
 					else {
-						ptr4=intext.indexOf(" keeps it and runs ", preptr); 
-						if (ptr4!=-1 && ptr4<endptr) {
-							ptr5=ptr4; 
+						ptr4=intext.indexOf(" loses ", preptr); // do previous for "loses" 
+						if (ptr4!=-1 && ptr4<endptr) { 
+							ptr5=ptr4; loss=1; 
 						}
 						else {
-							ptr4=intext.indexOf("SACKED", preptr); 
+							ptr4=intext.indexOf(" keeps it and runs ", preptr); 
 							if (ptr4!=-1 && ptr4<endptr) {
 								ptr5=ptr4; 
-								loss=1; 
 							}
 							else {
-								ptr5=-1; // set ptr to -1 (no loss or gain on the play) 
-								hadYards=0; 
+								ptr4=intext.indexOf("SACKED", preptr); 
+								if (ptr4!=-1 && ptr4<endptr) {
+									ptr5=ptr4; 
+									loss=1; 
+								}
+								else {
+									ptr5=-1; // set ptr to -1 (no loss or gain on the play) 
+									hadYards=0; 
+								} // else 
 							} // else 
 						} // else 
 					} // else 
 				} // else 
-			} // else 
-		} // else  
-		if (ptr5!=-1) { // if a play happened 
-			ptr4=intext.indexOf("class='supza'>", ptr5); // find tag for yardage 
-			if (ptr4!=-1 && ptr4<endptr) { // if yardage happened 
-				ptr5=intext.indexOf("</span>", ptr4+14); // find end of yardage tag
-				yard=intext.substring(ptr4+14, ptr5); // get full yardage 
-				ptr4=intext.indexOf("class='supz'>", ptr5);
-				ptr5=intext.indexOf("</span>", ptr4+13);
-				yard2=intext.substring(ptr4+13, ptr5); // get decimal yardage 
-				if (loss === 0) { // combine into one value 
-					yard=parseInt(yard) + parseInt(yard2)/100; 
-				} else if (loss==1) {
-					yard= -1 * (Math.abs(parseInt(yard)) + parseInt(yard2)/100); 
-				} // */
-			} // if ptr4!=-1 ... 
+			} // else  
+			if (ptr5!=-1) { // if a play happened 
+				ptr4=intext.indexOf("class='supza'>", ptr5); // find tag for yardage 
+				if (ptr4!=-1 && ptr4<endptr) { // if yardage happened 
+					ptr5=intext.indexOf("</span>", ptr4+14); // find end of yardage tag
+					yard=intext.substring(ptr4+14, ptr5); // get full yardage 
+					ptr4=intext.indexOf("class='supz'>", ptr5);
+					ptr5=intext.indexOf("</span>", ptr4+13);
+					yard2=intext.substring(ptr4+13, ptr5); // get decimal yardage 
+					if (loss === 0) { // combine into one value 
+						yard=parseInt(yard) + parseInt(yard2)/100; 
+					} else if (loss==1) {
+						yard= -1 * (Math.abs(parseInt(yard)) + parseInt(yard2)/100); 
+					} // */
+				} // if ptr4!=-1 ... 
+				else yard=0;
+			} // if ptr5!=-1 
 			else yard=0;
-		} // if ptr5!=-1 
-		else yard=0;
 
-		ptr4=intext.indexOf("penalty", startThis); // test if play was a penalty 
-		if (ptr4!=-1 && ptr4<startNext) {
-			ptr4=intext.indexOf("enalty <b>declined</b>", startThis); 
-			if (ptr4!=-1 && ptr4<startNext) { 
-				//alert("penalty declined! game time = " + gameTime);
-				penalty=0;
-				noPlay=0;
-			}
-			else {
-				penalty=1; 
-				ptr4=intext.indexOf(" assessed at the end of ", startThis);
-				if (ptr4!=-1 && ptr4<startNext) {
-					noPlay = 0;
-				} 
+			ptr4=intext.indexOf("penalty", startThis); // test if play was a penalty 
+			if (ptr4!=-1 && ptr4<startNext) {
+				ptr4=intext.indexOf("enalty <b>declined</b>", startThis); 
+				if (ptr4!=-1 && ptr4<startNext) { 
+					//alert("penalty declined! game time = " + gameTime);
+					penalty=0;
+					noPlay=0;
+				}
 				else {
-					ptr4=intext.indexOf("enalty <b>accepted</b>", startThis);
+					penalty=1; 
+					ptr4=intext.indexOf(" assessed at the end of ", startThis);
 					if (ptr4!=-1 && ptr4<startNext) {
-						//alert("penalty accepted! game time = " + gameTime); 
-						noPlay = 1;
-					}
+						noPlay = 0;
+					} 
 					else {
-						ptr4=intext.indexOf(" yard penalty; Automatic First Down!", startThis);
+						ptr4=intext.indexOf("enalty <b>accepted</b>", startThis);
 						if (ptr4!=-1 && ptr4<startNext) {
+							//alert("penalty accepted! game time = " + gameTime); 
 							noPlay = 1;
 						}
 						else {
-							noPlay = 0;
+							ptr4=intext.indexOf(" yard penalty; Automatic First Down!", startThis);
+							if (ptr4!=-1 && ptr4<startNext) {
+								noPlay = 1;
+							}
+							else {
+								noPlay = 0;
+							}
 						}
 					}
 				}
 			}
-		}
-		else {
-			penalty=0; 
-			noPlay=0; 
-		}
+			else {
+				penalty=0; 
+				noPlay=0; 
+			}
 
-		ptr4=intext.indexOf(" primary option was ", preptr); // test for GCOVs 
-		if (ptr4!=-1 && ptr4<endptr) {
-			GCOV=1; 
-			GCOVd = intext.substring(ptr4+20, ptr4+23); 
-			GCOVdID = getWRID(GCOVd);
+			ptr4=intext.indexOf(" primary option was ", preptr); // test for GCOVs 
+			if (ptr4!=-1 && ptr4<endptr) {
+				GCOV=1; 
+				GCOVd = intext.substring(ptr4+20, ptr4+23); 
+				GCOVdID = getWRID(GCOVd);
+				
+				// get name and ID for the reciever
+				ptr5=intext.indexOf("&lookatplayer=", ptr4);
+				if (ptr5!=-1 && ptr5<ptr4+100) {
+					ptr4=intext.indexOf("&", ptr5+14);
+					if (ptr4!=-1 && ptr4<ptr5+30) { // if a player with an id longer than 16 digits exists, this will break
+						GCOVdpID = intext.substring(ptr5+14, ptr4);
+						GCOVdpID = parseInt(GCOVdpID);
+						
+						ptr5=intext.indexOf("<b>", ptr4+11);
+						if (ptr5!=-1 && ptr5<ptr4+17) {
+							ptr4=intext.indexOf("</b>", ptr5+3);
+							if (ptr4!=-1 && ptr4<ptr5+50) {
+								GCOVdName = intext.substring(ptr5+3, ptr4);
+							}
+						}
+					}
+				}
+				
+				coveragePtr=intext.indexOf(" Good coverage by ", ptr4);
+				if (coveragePtr!=-1 && coveragePtr<endptr) {
+					GCOVer = intext.substring(coveragePtr+18, coveragePtr+22);
+				}
+				
+				// get name and ID for the defender
+				ptr5=intext.indexOf("</a> on the play.", coveragePtr);
+				if (ptr5!=-1 && ptr5<endptr) {
+					ptr4=intext.lastIndexOf("&lookatplayer=", ptr5);
+					if (ptr4!=-1 && ptr4<ptr5) {
+						coveragePtr=intext.indexOf("&", ptr4+14);
+						if (coveragePtr!=-1 && coveragePtr<ptr5) {
+							GCOVerID = parseInt(intext.substring(ptr4+14, coveragePtr));
+							ptr7=intext.indexOf("<b>", ptr4+14);
+							if (ptr7!=-1 && ptr7<ptr5) {
+								GCOVerName = intext.substring(ptr7+3, ptr5-4);
+							}
+						}
+					}
+				}
+				//alert("GCOV by the " + GCOVer + ". Name = " + GCOVerName + ", pID = " + GCOVerID);
+			} 
+			else {
+				GCOV=0; 
+				GCOVd=-1; 
+				GCOVdID=-1; 
+				GCOVdpID=-1;
+				GCOVerID=-1;
+			}
+
+			ptr4=intext.indexOf("dump it off", preptr); // test if play was a dumpoff 
+			if (ptr4!=-1 && ptr4<endptr) {
+				dumpoff=1;
+			}
+			else {
+				dumpoff=0;
+			}
+
+			ptr4=intext.indexOf("threw the ball away", preptr); // check for throwaways
+			if (ptr4!=-1 && ptr4<endptr) {
+				throwAway = 1;
+			}
+			else {
+				throwAway = 0;
+			}
+
+			ptr4=intext.indexOf("scrambles..", preptr); 
+			if (ptr4!=-1 && ptr4<endptr) {
+				scramble=1; 
+				WRID = -1;
+				WRpID = -1;
+				passDefenderpID = -1;
+			}
+			else {
+				scramble=0;
+			}
 			
-			// get name and ID for the reciever
-			ptr5=intext.indexOf("&lookatplayer=", ptr4);
-			if (ptr5!=-1 && ptr5<ptr4+100) {
-				ptr4=intext.indexOf("&", ptr5+14);
-				if (ptr4!=-1 && ptr4<ptr5+30) { // if a player with an id longer than 16 digits exists, this will break
-					GCOVdpID = intext.substring(ptr5+14, ptr4);
-					GCOVdpID = parseInt(GCOVdpID);
-					
-					ptr5=intext.indexOf("<b>", ptr4+11);
-					if (ptr5!=-1 && ptr5<ptr4+17) {
-						ptr4=intext.indexOf("</b>", ptr5+3);
-						if (ptr4!=-1 && ptr4<ptr5+50) {
-							GCOVdName = intext.substring(ptr5+3, ptr4);
+			ptr4=intext.indexOf("t see anyone open ", preptr);
+			if (ptr4!=-1 && ptr4<endptr) {
+				coverScram = 1;
+				scramble = 1;
+			}
+			else {
+				coverScram = 0;
+			}
+
+			ptr4=intext.indexOf("under pressure and has decided to run", preptr);
+			if (ptr4!=-1 && ptr4<endptr) {
+				pressScram = 1;
+				scramble = 1;
+			}
+			else {
+				pressScram = 0;
+			}
+
+			ptr4=intext.indexOf("INTERCEPTED by", preptr); 
+			if (ptr4!=-1 && ptr4<endptr) {
+				INT = 1;
+				//pdef = 1;
+				comp = 0;
+				defPlaymaker = intext.substring(ptr4+15, ptr4+19);
+				ptr5 = intext.indexOf("&lookatplayer=", ptr4);
+				if (ptr5!=-1 && ptr5<endptr) {
+					ptr6 = intext.indexOf("&", ptr5+14);
+					if (ptr6!=-1 && ptr6<endptr) {
+						defPlaymakerpID = parseInt(intext.substring(ptr5+14, ptr6));
+						ptr7 = intext.indexOf("<b>", ptr6);
+						if (ptr7!=-1 && ptr7<endptr) {
+							ptr8 = intext.indexOf("</b>", ptr7+3);
+							defPlaymakerName = intext.substring(ptr7+3, ptr8);
+						}
+					}
+				}
+			} 
+			else {
+				INT = 0;
+			}
+
+			ptr4=intext.indexOf(".. credit ", preptr); // pass deflections 
+			if (ptr4!=-1 && ptr4<endptr) {
+				pdef = 1;
+				comp = 0;
+				defPlaymaker = intext.substring(ptr4+15, ptr4+19);
+				ptr5 = intext.indexOf("&lookatplayer=", ptr4);
+				if (ptr5!=-1 && ptr5<endptr) {
+					ptr6 = intext.indexOf("&", ptr5+14);
+					if (ptr6!=-1 && ptr6<endptr) {
+						defPlaymakerpID = parseInt(intext.substring(ptr5+14, ptr6));
+						ptr7 = intext.indexOf("<b>", ptr6);
+						if (ptr7!=-1 && ptr7<endptr) {
+							ptr8 = intext.indexOf("</b>", ptr7+3);
+							defPlaymakerName = intext.substring(ptr7+3, ptr8);
 						}
 					}
 				}
 			}
-			
-			coveragePtr=intext.indexOf(" Good coverage by ", ptr4);
-			if (coveragePtr!=-1 && coveragePtr<endptr) {
-				GCOVer = intext.substring(coveragePtr+18, coveragePtr+22);
+			else {
+				//if (INT == 0) {
+				pdef = 0;
+				//}
 			}
-			
-			// get name and ID for the defender
-			ptr5=intext.indexOf("</a> on the play.", coveragePtr);
-			if (ptr5!=-1 && ptr5<endptr) {
-				ptr4=intext.lastIndexOf("&lookatplayer=", ptr5);
-				if (ptr4!=-1 && ptr4<ptr5) {
-					coveragePtr=intext.indexOf("&", ptr4+14);
-					if (coveragePtr!=-1 && coveragePtr<ptr5) {
-						GCOVerID = parseInt(intext.substring(ptr4+14, coveragePtr));
-						ptr7=intext.indexOf("<b>", ptr4+14);
-						if (ptr7!=-1 && ptr7<ptr5) {
-							GCOVerName = intext.substring(ptr7+3, ptr5-4);
-						}
-					}
-				}
-			}
-			//alert("GCOV by the " + GCOVer + ". Name = " + GCOVerName + ", pID = " + GCOVerID);
-		} 
-		else {
-			GCOV=0; 
-			GCOVd=-1; 
-			GCOVdID=-1; 
-			GCOVdpID=-1;
-			GCOVerID=-1;
-		}
 
-		ptr4=intext.indexOf("dump it off", preptr); // test if play was a dumpoff 
-		if (ptr4!=-1 && ptr4<endptr) {
-			dumpoff=1;
-		}
-		else {
-			dumpoff=0;
-		}
-
-		ptr4=intext.indexOf("threw the ball away", preptr); // check for throwaways
-		if (ptr4!=-1 && ptr4<endptr) {
-			throwAway = 1;
-		}
-		else {
-			throwAway = 0;
-		}
-
-		ptr4=intext.indexOf("scrambles..", preptr); 
-		if (ptr4!=-1 && ptr4<endptr) {
-			scramble=1; 
-			WRID = -1;
-			WRpID = -1;
-			passDefenderpID = -1;
-		}
-		else {
-			scramble=0;
-		}
-		
-		ptr4=intext.indexOf("t see anyone open ", preptr);
-		if (ptr4!=-1 && ptr4<endptr) {
-			coverScram = 1;
-			scramble = 1;
-		}
-		else {
-			coverScram = 0;
-		}
-
-		ptr4=intext.indexOf("under pressure and has decided to run", preptr);
-		if (ptr4!=-1 && ptr4<endptr) {
-			pressScram = 1;
-			scramble = 1;
-		}
-		else {
-			pressScram = 0;
-		}
-
-		ptr4=intext.indexOf("INTERCEPTED by", preptr); 
-		if (ptr4!=-1 && ptr4<endptr) {
-			INT = 1;
-			//pdef = 1;
-			comp = 0;
-			defPlaymaker = intext.substring(ptr4+15, ptr4+19);
-			ptr5 = intext.indexOf("&lookatplayer=", ptr4);
-			if (ptr5!=-1 && ptr5<endptr) {
-				ptr6 = intext.indexOf("&", ptr5+14);
-				if (ptr6!=-1 && ptr6<endptr) {
-					defPlaymakerpID = parseInt(intext.substring(ptr5+14, ptr6));
-					ptr7 = intext.indexOf("<b>", ptr6);
-					if (ptr7!=-1 && ptr7<endptr) {
-						ptr8 = intext.indexOf("</b>", ptr7+3);
-						defPlaymakerName = intext.substring(ptr7+3, ptr8);
-					}
-				}
-			}
-		} 
-		else {
-			INT = 0;
-		}
-
-		ptr4=intext.indexOf(".. credit ", preptr); // pass deflections 
-		if (ptr4!=-1 && ptr4<endptr) {
-			pdef = 1;
-			comp = 0;
-			defPlaymaker = intext.substring(ptr4+15, ptr4+19);
-			ptr5 = intext.indexOf("&lookatplayer=", ptr4);
-			if (ptr5!=-1 && ptr5<endptr) {
-				ptr6 = intext.indexOf("&", ptr5+14);
-				if (ptr6!=-1 && ptr6<endptr) {
-					defPlaymakerpID = parseInt(intext.substring(ptr5+14, ptr6));
-					ptr7 = intext.indexOf("<b>", ptr6);
-					if (ptr7!=-1 && ptr7<endptr) {
-						ptr8 = intext.indexOf("</b>", ptr7+3);
-						defPlaymakerName = intext.substring(ptr7+3, ptr8);
-					}
-				}
-			}
-		}
-		else {
-			//if (INT == 0) {
-			pdef = 0;
-			//}
-		}
-
-		ptr4=intext.indexOf("tackled by ", preptr); // tackles
-		if (ptr4!=-1 && ptr4<endptr) {
-			tkl = 1;
-			defPlaymaker = intext.substring(ptr4+15, ptr4+19);
-			ptr5 = intext.indexOf("&lookatplayer=", ptr4);
-			if (ptr5!=-1 && ptr5<endptr) {
-				ptr6 = intext.indexOf("&", ptr5+14);
-				if (ptr6!=-1 && ptr6<endptr) {
-					defPlaymakerpID = parseInt(intext.substring(ptr5+14, ptr6));
-					ptr7 = intext.indexOf("<b>", ptr6);
-					if (ptr7!=-1 && ptr7<endptr) {
-						ptr8 = intext.indexOf("</b>", ptr7+3);
-						defPlaymakerName = intext.substring(ptr7+3, ptr8);
-					}
-				}
-			}
-		}
-		else {
-			ptr4=intext.indexOf("ridden out of bounds by ", preptr);
+			ptr4=intext.indexOf("tackled by ", preptr); // tackles
 			if (ptr4!=-1 && ptr4<endptr) {
 				tkl = 1;
 				defPlaymaker = intext.substring(ptr4+15, ptr4+19);
@@ -1560,112 +1558,83 @@ function parsePBP(intext) {
 				}
 			}
 			else {
-				tkl = 0;
-			}
-		} // */
-
-		pass=0; // test if pass play 
-		ptr4=intext.indexOf(" pass ", preptr);
-		if (ptr4!=-1 && ptr4<endptr) {
-			pass=1; 
-			ptr5=intext.indexOf("<b>AMAZING</b> catch by ", preptr); 
-			if (ptr5!=-1 && ptr5<endptr) {
-				comp = 1;
-				WR = intext.substring(ptr5+24, ptr5+27);
-				WRID = getWRID(WR);
-				
-				ptr6=intext.indexOf("&lookatplayer=", ptr5+27);
-				if (ptr6!=-1 && ptr6<ptr5+100) {
-					ptr7=intext.indexOf("&", ptr6+14);
-					if (ptr7!=-1 && ptr7<ptr6+30) {
-						WRpID = intext.substring(ptr6+14, ptr7);
-						WRpID = parseInt(WRpID);
-						
-						ptr5=intext.indexOf("<b>", ptr7+11);
-						if (ptr5!=-1 && ptr5<ptr7+17) {
-							ptr6=intext.indexOf("</b>", ptr5+3);
-							if (ptr6!=-1 && ptr6<ptr5+50) {
-								WRName = intext.substring(ptr5+3, ptr6);
+				ptr4=intext.indexOf("ridden out of bounds by ", preptr);
+				if (ptr4!=-1 && ptr4<endptr) {
+					tkl = 1;
+					defPlaymaker = intext.substring(ptr4+15, ptr4+19);
+					ptr5 = intext.indexOf("&lookatplayer=", ptr4);
+					if (ptr5!=-1 && ptr5<endptr) {
+						ptr6 = intext.indexOf("&", ptr5+14);
+						if (ptr6!=-1 && ptr6<endptr) {
+							defPlaymakerpID = parseInt(intext.substring(ptr5+14, ptr6));
+							ptr7 = intext.indexOf("<b>", ptr6);
+							if (ptr7!=-1 && ptr7<endptr) {
+								ptr8 = intext.indexOf("</b>", ptr7+3);
+								defPlaymakerName = intext.substring(ptr7+3, ptr8);
 							}
 						}
 					}
 				}
-				//alert("Amazing catch by " + WR + ". Name = " + WRName + ", pID = " + WRpID);
-			}
-			else {
-				WRID = -1;
-				WRpID = -1;
-			}
-		}
-
-		ptr4=intext.indexOf(" throwing ", preptr);
-		if (ptr4!=-1 && ptr4<endptr) {
-			pass=1; 
-		}
-
-		ptr4=intext.indexOf("threw the ball away", preptr);
-		if (ptr4!=-1 && ptr4<endptr) { 
-			pass=1;
-			comp=0;
-			WRID=-1;
-			WRpID=-1;
-			passDefenderpID=-1;
-		}
-
-		ptr4=intext.indexOf(" Pass by", preptr);
-		if (ptr4!=-1 && ptr4<endptr) {
-			pass=1;
-			ptr5=intext.indexOf(" to ", ptr4);
-			ptr6=intext.indexOf(",to ", ptr4);
-			if (ptr5!=-1 && ptr5<endptr && intext.substring(ptr5+4, ptr5+7)!="exe") {
-				WR = intext.substring(ptr5+4, ptr5+7);
-				
-				ptr8=intext.indexOf("&lookatplayer=", ptr5+27);
-				if (ptr8!=-1 && ptr8<ptr5+100) {
-					ptr7=intext.indexOf("&", ptr8+14);
-					if (ptr7!=-1 && ptr7<ptr8+30) {
-						WRpID = intext.substring(ptr8+14, ptr7);
-						WRpID = parseInt(WRpID);
-						
-						ptr9=intext.indexOf("<b>", ptr7+11);
-						if (ptr9!=-1 && ptr9<ptr7+17) {
-							ptr8=intext.indexOf("</b>", ptr9+3);
-							if (ptr8!=-1 && ptr8<ptr9+50) {
-								WRName = intext.substring(ptr9+3, ptr8);
-							}
-						}
-					}
+				else {
+					tkl = 0;
 				}
-				//alert("Pass thrown to " + WR + ". Name = " + WRName + ", pID = " + WRpID);
-			}
-			else if (ptr6!=-1 && ptr6<endptr) {
-				WR = intext.substring(ptr6+4, ptr6+7);
-				
-				ptr8=intext.indexOf("&lookatplayer=", ptr6+27);
-				if (ptr8!=-1 && ptr8<ptr6+100) {
-					ptr7=intext.indexOf("&", ptr8+14);
-					if (ptr7!=-1 && ptr7<ptr8+30) {
-						WRpID = intext.substring(ptr8+14, ptr7);
-						WRpID = parseInt(WRpID);
-						
-						ptr9=intext.indexOf("<b>", ptr7+11);
-						if (ptr9!=-1 && ptr9<ptr7+17) {
-							ptr8=intext.indexOf("</b>", ptr9+3);
-							if (ptr8!=-1 && ptr8<ptr9+50) {
-								WRName = intext.substring(ptr9+3, ptr8);
-							}
-						}
-					}
-				}
-				//alert("Pass thrown to " + WR + ". Name = " + WRName + ", pID = " + WRpID);
-			}
-			else {
-				ptr5=intext.indexOf("DROPPED by ", preptr); 
+			} // */
+
+			pass=0; // test if pass play 
+			ptr4=intext.indexOf(" pass ", preptr);
+			if (ptr4!=-1 && ptr4<endptr) {
+				pass=1; 
+				ptr5=intext.indexOf("<b>AMAZING</b> catch by ", preptr); 
 				if (ptr5!=-1 && ptr5<endptr) {
-					WR = intext.substring(ptr5+11, ptr5+14); 
-					//alert("drop by " + WR + ", readcount = " + readcount + ", tmp = " + tmp + ", abbr = " + abbr); 
-					drop = 1;
-					comp = 0;
+					comp = 1;
+					WR = intext.substring(ptr5+24, ptr5+27);
+					WRID = getWRID(WR);
+					
+					ptr6=intext.indexOf("&lookatplayer=", ptr5+27);
+					if (ptr6!=-1 && ptr6<ptr5+100) {
+						ptr7=intext.indexOf("&", ptr6+14);
+						if (ptr7!=-1 && ptr7<ptr6+30) {
+							WRpID = intext.substring(ptr6+14, ptr7);
+							WRpID = parseInt(WRpID);
+							
+							ptr5=intext.indexOf("<b>", ptr7+11);
+							if (ptr5!=-1 && ptr5<ptr7+17) {
+								ptr6=intext.indexOf("</b>", ptr5+3);
+								if (ptr6!=-1 && ptr6<ptr5+50) {
+									WRName = intext.substring(ptr5+3, ptr6);
+								}
+							}
+						}
+					}
+					//alert("Amazing catch by " + WR + ". Name = " + WRName + ", pID = " + WRpID);
+				}
+				else {
+					WRID = -1;
+					WRpID = -1;
+				}
+			}
+
+			ptr4=intext.indexOf(" throwing ", preptr);
+			if (ptr4!=-1 && ptr4<endptr) {
+				pass=1; 
+			}
+
+			ptr4=intext.indexOf("threw the ball away", preptr);
+			if (ptr4!=-1 && ptr4<endptr) { 
+				pass=1;
+				comp=0;
+				WRID=-1;
+				WRpID=-1;
+				passDefenderpID=-1;
+			}
+
+			ptr4=intext.indexOf(" Pass by", preptr);
+			if (ptr4!=-1 && ptr4<endptr) {
+				pass=1;
+				ptr5=intext.indexOf(" to ", ptr4);
+				ptr6=intext.indexOf(",to ", ptr4);
+				if (ptr5!=-1 && ptr5<endptr && intext.substring(ptr5+4, ptr5+7)!="exe") {
+					WR = intext.substring(ptr5+4, ptr5+7);
 					
 					ptr8=intext.indexOf("&lookatplayer=", ptr5+27);
 					if (ptr8!=-1 && ptr8<ptr5+100) {
@@ -1683,149 +1652,200 @@ function parsePBP(intext) {
 							}
 						}
 					}
-					//alert("Pass dropped by " + WR + ". Name = " + WRName + ", pID = " + WRpID);
+					//alert("Pass thrown to " + WR + ". Name = " + WRName + ", pID = " + WRpID);
+				}
+				else if (ptr6!=-1 && ptr6<endptr) {
+					WR = intext.substring(ptr6+4, ptr6+7);
+					
+					ptr8=intext.indexOf("&lookatplayer=", ptr6+27);
+					if (ptr8!=-1 && ptr8<ptr6+100) {
+						ptr7=intext.indexOf("&", ptr8+14);
+						if (ptr7!=-1 && ptr7<ptr8+30) {
+							WRpID = intext.substring(ptr8+14, ptr7);
+							WRpID = parseInt(WRpID);
+							
+							ptr9=intext.indexOf("<b>", ptr7+11);
+							if (ptr9!=-1 && ptr9<ptr7+17) {
+								ptr8=intext.indexOf("</b>", ptr9+3);
+								if (ptr8!=-1 && ptr8<ptr9+50) {
+									WRName = intext.substring(ptr9+3, ptr8);
+								}
+							}
+						}
+					}
+					//alert("Pass thrown to " + WR + ". Name = " + WRName + ", pID = " + WRpID);
 				}
 				else {
-					WRID = -1; 
-					WRpID = -1;
-					drop = 0; 
-				}
-			}
-			if (WR != "exe") {
-				WRID = getWRID(WR); 
-			} 
-			else {
-				WRID = -1;
-				WRpID = -1;
-			} // */
-		}
-		ptr4=intext.indexOf(" <b>COMPLETE</b> ", preptr);
-		if (ptr4!=-1 && ptr4<endptr) {
-			comp = 1;
-		}
-		else {
-			comp = 0;
-		}
-
-		if (pass===0 && scramble==1) {
-			pass=1;
-		}
-		if (pass) {
-			att=1;
-		}
-		else {
-			att=0;
-		}
-		if (scramble) {
-			att=0;
-		}
-		ptr4=intext.indexOf("SACKED", preptr); // test if play was a sack 
-		if (ptr4!=-1 && ptr4<endptr) { 
-			att=0;
-			pass=1;
-			sack=1;
-		} 
-		else { 
-			sack=0; 
-		}
-		
-		if (att === 0) {
-			WRID = -1;
-			WRpID = -1;
-			passDefenderpID = -1;
-		}
-
-		run=0; 
-		ptr4=intext.indexOf(" Handoff to ", preptr); 
-		if (ptr4!=-1 && ptr4<endptr) {
-			run=1;
-			handoff=1;
-
-			RB = intext.substring(ptr4+12, ptr4+15); 
-			
-			ptr6=intext.indexOf("&lookatplayer=", ptr4+27);
-			if (ptr6!=-1 && ptr6<ptr4+100) {
-				ptr7=intext.indexOf("&", ptr6+14);
-				if (ptr7!=-1 && ptr7<ptr6+30) {
-					RBpID = intext.substring(ptr6+14, ptr7);
-					RBpID = parseInt(RBpID);
-					
-					ptr9=intext.indexOf("<b>", ptr7+11);
-					if (ptr9!=-1 && ptr9<ptr7+17) {
-						ptr8=intext.indexOf("</b>", ptr9+3);
-						if (ptr8!=-1 && ptr8<ptr9+50) {
-							RBName = intext.substring(ptr9+3, ptr8);
-							//alert("Handoff! Pos = " + RB + ", pID = " + RBpID + ", Name = " + RBName);
+					ptr5=intext.indexOf("DROPPED by ", preptr); 
+					if (ptr5!=-1 && ptr5<endptr) {
+						WR = intext.substring(ptr5+11, ptr5+14); 
+						//alert("drop by " + WR + ", readcount = " + readcount + ", tmp = " + tmp + ", abbr = " + abbr); 
+						drop = 1;
+						comp = 0;
+						
+						ptr8=intext.indexOf("&lookatplayer=", ptr5+27);
+						if (ptr8!=-1 && ptr8<ptr5+100) {
+							ptr7=intext.indexOf("&", ptr8+14);
+							if (ptr7!=-1 && ptr7<ptr8+30) {
+								WRpID = intext.substring(ptr8+14, ptr7);
+								WRpID = parseInt(WRpID);
+								
+								ptr9=intext.indexOf("<b>", ptr7+11);
+								if (ptr9!=-1 && ptr9<ptr7+17) {
+									ptr8=intext.indexOf("</b>", ptr9+3);
+									if (ptr8!=-1 && ptr8<ptr9+50) {
+										WRName = intext.substring(ptr9+3, ptr8);
+									}
+								}
+							}
 						}
-					}
-				}
-			}
-			//alert("Handoff! RB = " + RB + ", game time = " + gameTime);
-		}
-
-		ptr4=intext.indexOf(" keeps it and runs ", preptr);
-		if (ptr4!=-1 && ptr4<endptr) {
-			run=1;
-			sneak=1;
-
-			//alert("Keeper! RB = " + RB + ", gameTime = " + gameTime);
-			
-			ptr6=intext.indexOf("&lookatplayer=", ptr4-150);
-			if (ptr6!=-1 && ptr6<ptr4) {
-				ptr7=intext.indexOf("&", ptr6+14);
-				//alert("Keeper! RB = " + RB + ", gameTime = " + gameTime);
-				if (ptr7!=-1 && ptr7<ptr6+30) {
-					RBpID = intext.substring(ptr6+14, ptr7);
-					RBpID = parseInt(RBpID);
-					
-					ptr9=intext.indexOf("<b>", ptr7+11);
-					if (ptr9!=-1 && ptr9<ptr7+17) {
-						ptr8=intext.indexOf("</b>", ptr9+3);
-						if (ptr8!=-1 && ptr8<ptr9+50) {
-							RBName = intext.substring(ptr9+3, ptr8);
-						}
-					}
-				}
-
-				ptr5=intext.lastIndexOf("<a target", ptr6);
-				if (ptr5!=-1) {
-					RB = intext.substring(ptr5-3, ptr5);
-				}
-				//alert("Keeper! Pos = " + RB + ", pID = " + RBpID + ", Name = " + RBName);
-			}
-		}
-		if (run==1 && (scramble==1 || sack==1)) { 
-			run=0; 
-		} // */
-
-		if (att == 1) {
-			ptr4=intext.indexOf(" yard(s) downfield, ", preptr); 
-			if (ptr4!=-1 && ptr4<endptr) {
-				ptr5=intext.indexOf("class='supza'>", ptr4-70); 
-				if (ptr5!=-1 && ptr5<endptr) {
-					ptr4=intext.indexOf("</span>", ptr5+14);
-					var sign = intext.substring(ptr5+14, ptr5+15);
-					attYard=intext.substring(ptr5+14, ptr4);
-					ptr5=intext.indexOf("class='supz'>", ptr4); 
-					ptr4=intext.indexOf("</span>", ptr5+13); 
-					attYard2=intext.substring(ptr5+13, ptr4);
-					if (sign == "-") {
-						attYard = -1 * (Math.abs(parseInt(attYard)) + parseInt(attYard2)/100);
+						//alert("Pass dropped by " + WR + ". Name = " + WRName + ", pID = " + WRpID);
 					}
 					else {
-						attYard = parseInt(attYard) + parseInt(attYard2)/100;
+						WRID = -1; 
+						WRpID = -1;
+						drop = 0; 
+					}
+				}
+				if (WR != "exe") {
+					WRID = getWRID(WR); 
+				} 
+				else {
+					WRID = -1;
+					WRpID = -1;
+				} // */
+			}
+			ptr4=intext.indexOf(" <b>COMPLETE</b> ", preptr);
+			if (ptr4!=-1 && ptr4<endptr) {
+				comp = 1;
+			}
+			else {
+				comp = 0;
+			}
+
+			if (pass===0 && scramble==1) {
+				pass=1;
+			}
+			if (pass) {
+				att=1;
+			}
+			else {
+				att=0;
+			}
+			if (scramble) {
+				att=0;
+			}
+			ptr4=intext.indexOf("SACKED", preptr); // test if play was a sack 
+			if (ptr4!=-1 && ptr4<endptr) { 
+				att=0;
+				pass=1;
+				sack=1;
+			} 
+			else { 
+				sack=0; 
+			}
+			
+			if (att === 0) {
+				WRID = -1;
+				WRpID = -1;
+				passDefenderpID = -1;
+			}
+
+			run=0; 
+			ptr4=intext.indexOf(" Handoff to ", preptr); 
+			if (ptr4!=-1 && ptr4<endptr) {
+				run=1;
+				handoff=1;
+
+				RB = intext.substring(ptr4+12, ptr4+15); 
+				
+				ptr6=intext.indexOf("&lookatplayer=", ptr4+27);
+				if (ptr6!=-1 && ptr6<ptr4+100) {
+					ptr7=intext.indexOf("&", ptr6+14);
+					if (ptr7!=-1 && ptr7<ptr6+30) {
+						RBpID = intext.substring(ptr6+14, ptr7);
+						RBpID = parseInt(RBpID);
+						
+						ptr9=intext.indexOf("<b>", ptr7+11);
+						if (ptr9!=-1 && ptr9<ptr7+17) {
+							ptr8=intext.indexOf("</b>", ptr9+3);
+							if (ptr8!=-1 && ptr8<ptr9+50) {
+								RBName = intext.substring(ptr9+3, ptr8);
+								//alert("Handoff! Pos = " + RB + ", pID = " + RBpID + ", Name = " + RBName);
+							}
+						}
+					}
+				}
+				//alert("Handoff! RB = " + RB + ", game time = " + gameTime);
+			}
+
+			ptr4=intext.indexOf(" keeps it and runs ", preptr);
+			if (ptr4!=-1 && ptr4<endptr) {
+				run=1;
+				sneak=1;
+
+				//alert("Keeper! RB = " + RB + ", gameTime = " + gameTime);
+				
+				ptr6=intext.indexOf("&lookatplayer=", ptr4-150);
+				if (ptr6!=-1 && ptr6<ptr4) {
+					ptr7=intext.indexOf("&", ptr6+14);
+					//alert("Keeper! RB = " + RB + ", gameTime = " + gameTime);
+					if (ptr7!=-1 && ptr7<ptr6+30) {
+						RBpID = intext.substring(ptr6+14, ptr7);
+						RBpID = parseInt(RBpID);
+						
+						ptr9=intext.indexOf("<b>", ptr7+11);
+						if (ptr9!=-1 && ptr9<ptr7+17) {
+							ptr8=intext.indexOf("</b>", ptr9+3);
+							if (ptr8!=-1 && ptr8<ptr9+50) {
+								RBName = intext.substring(ptr9+3, ptr8);
+							}
+						}
+					}
+
+					ptr5=intext.lastIndexOf("<a target", ptr6);
+					if (ptr5!=-1) {
+						RB = intext.substring(ptr5-3, ptr5);
+					}
+					//alert("Keeper! Pos = " + RB + ", pID = " + RBpID + ", Name = " + RBName);
+				}
+			}
+			if (run==1 && (scramble==1 || sack==1)) { 
+				run=0; 
+			} // */
+
+			if (att == 1) {
+				ptr4=intext.indexOf(" yard(s) downfield, ", preptr); 
+				if (ptr4!=-1 && ptr4<endptr) {
+					ptr5=intext.indexOf("class='supza'>", ptr4-70); 
+					if (ptr5!=-1 && ptr5<endptr) {
+						ptr4=intext.indexOf("</span>", ptr5+14);
+						var sign = intext.substring(ptr5+14, ptr5+15);
+						attYard=intext.substring(ptr5+14, ptr4);
+						ptr5=intext.indexOf("class='supz'>", ptr4); 
+						ptr4=intext.indexOf("</span>", ptr5+13); 
+						attYard2=intext.substring(ptr5+13, ptr4);
+						if (sign == "-") {
+							attYard = -1 * (Math.abs(parseInt(attYard)) + parseInt(attYard2)/100);
+						}
+						else {
+							attYard = parseInt(attYard) + parseInt(attYard2)/100;
+						}
 					}
 				}
 			}
-		}
-		else {
-			attYard = "";
-		}
+			else {
+				attYard = "";
+			}
 
-		/*if (correctAbbr(abbr, showOffense) && hadYards && (noPlay == 0)) {
-			tempYardCounter+=yard; 
-			alert("Play with yardage: offense moved " + yard.toFixed(2) + ". down/dist = " + down + " and " + togo + ", game time = " + gameTime + ".\nYards thus far = " + tempYardCounter.toFixed(2)); 
-		} // */
+			/*if (correctAbbr(abbr, showOffense) && hadYards && (noPlay == 0)) {
+				tempYardCounter+=yard; 
+				alert("Play with yardage: offense moved " + yard.toFixed(2) + ". down/dist = " + down + " and " + togo + ", game time = " + gameTime + ".\nYards thus far = " + tempYardCounter.toFixed(2)); 
+			} // */
+		}
+		else { // special teams play
+			endPtr = endSprecialTeamsPtr;
+		}
 		
 		distToGo = getDistToGo(togo, endToGo);
 
@@ -2132,8 +2152,12 @@ function parsePBP(intext) {
 			}
 		}
 
-		isTouchdown=0;
-		isSuccess=0;
+		isTouchdown = 0;
+		isSuccess = 0;
+		kickoff = 0;
+		onsides = 0;
+		fieldGoal = 0;
+		punt = 0;
 		startPtr=endptr+21;
 		WRID=-1;
 		RBpID = -1;
