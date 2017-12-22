@@ -1124,13 +1124,14 @@ function makeTableLable(name) {
 }
 
 function parsePBP(intext) {
-	var startPtr=0, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9;
-	var kickoffPtr, onsidesPtr, fieldGoalPtr, puntPtr, endSprecialTeamsPtr;
+	var startPtr=0, playPtr, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9;
+	var kickoffPtr, onsidesPtr, fieldGoalPtr, puntPtr, endSpecialTeamsPtr;
 	var pkg, defpkg, form, play, abbr, yard, yard2, comp, scramble, INT, incomplete, loss, isTouchdown, isSuccess; 
 	var down, togo, distToGo=0, endToGo, gameTime, penalty, noPlay, tmp=0, endptr, dumpoff, first_read, preptr=0; 
 	var pkgid, defpkgid, formid, playid, downDistID, index, run, handoff, sneak, pass, att, tmparr, sack, GCOV;
 	var pressScram, coverScram, throwAway, pdef, tkl;
 	var WR, WRID, WRpID, WRName, GCOVd, GCOVdpID, GCOVdID, GCOVdName, GCOVer, GCOVerID, GCOVerName, passDefenderpID, passDefenderName;
+	var kickerName, kickerTeamName, kickerTeamAbbr;
 	var RB, RBpID=-1, RBName;
 	var defPlaymaker, defPlaymakerpID=-1, defPlaymakerName;
 	var startNext, startThis=0, attYard, attYard2, drop, hadYards, tempYardCounter=0;
@@ -1138,6 +1139,7 @@ function parsePBP(intext) {
 	var name1, name2, abbr1, abbr2, defAbbr, name1Index, name2Index;
 	var bothTeamsValid;
 	var kickoff=0, onsides=0, fieldGoal=0, punt=0;
+	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot;
 
 	readcount++;
 	newDiv = document.getElementById('scout_count');
@@ -1198,32 +1200,35 @@ function parsePBP(intext) {
 	while (1) {
 		tmp++; // increment 
 
-		kickoffPtr=intext.indexOf("Kickoff by", startPtr);
-		onsidesPtr=intext.indexOf("is lining up to try an onside kick.", startPtr);
-		fieldGoalPtr=intext.indexOf(" is coming on for a ", startPtr);
-		puntPtr=intext.indexOf("is lined up to punt", startPtr);
-		endSprecialTeamsPtr=intext.indexOf("The play required ", startPtr);
+		kickoffPtr=intext.indexOf("Kickoff by", preptr);
+		onsidesPtr=intext.indexOf("is lining up to try an onside kick.", preptr);
+		fieldGoalPtr=intext.indexOf(" is coming on for a ", preptr);
+		puntPtr=intext.indexOf("is lined up to punt", preptr);
+		endSpecialTeamsPtr=intext.indexOf("The play required ", preptr);
 
-		playPtr=intext.indexOf("Offensive Package Was", startPtr); // find next "Offensive Package Was" after startPtr 
+		playPtr=intext.indexOf("Offensive Package Was", preptr); // find next "Offensive Package Was" after preptr 
 
-		if (kickoffPtr >= 0 && (kickoffPtr < playPtr || playPtr < 0)) {
+		if (kickoffPtr >= 0 && kickoffPtr < endSpecialTeamsPtr && (kickoffPtr < playPtr || playPtr < 0)) {
 			kickoff = 1;
+			//alert("Found kickoff: " + tmp);
 		}
-		else if (onsidesPtr >= 0 && (onsidesPtr < playPtr || playPtr < 0)) {
+		else if (onsidesPtr >= 0 && onsidesPtr < endSpecialTeamsPtr && (onsidesPtr < playPtr || playPtr < 0)) {
 			onsides = 1;
+			//alert("Found onsides kick: " + tmp);
 		}
-		else if (fieldGoalPtr >= 0 && (fieldGoalPtr < playPtr || playPtr < 0)) {
+		else if (fieldGoalPtr >= 0 && fieldGoalPtr < endSpecialTeamsPtr && (fieldGoalPtr < playPtr || playPtr < 0)) {
 			fieldGoal = 1;
 		}
-		else if (puntPtr >= 0 && (puntPtr < playPtr || playPtr < 0)) {
+		else if (puntPtr >= 0 && puntPtr < endSpecialTeamsPtr && (puntPtr < playPtr || playPtr < 0)) {
 			punt = 1;
 		}
 
 		if (!(kickoff || onsides || fieldGoal || punt) && playPtr < 0) {
 			//alert("finished reading the log");
+			alert("found " + tmp + " plays");
 			break; // if no more offensive plays, leave 
 		}
-		else if (playPtr >= 0) { // if not a special teams play
+		else if (!(kickoff || onsides || fieldGoal || punt) && playPtr >= 0) { // if not a special teams play
 			endptr=playPtr;
 
 			ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr); // find start of the final PBP line from this play 
@@ -2158,13 +2163,13 @@ function parsePBP(intext) {
 		onsides = 0;
 		fieldGoal = 0;
 		punt = 0;
-		startPtr=endptr+21;
+		//startPtr=endptr+21;
 		WRID=-1;
 		RBpID = -1;
 		defPlaymakerpID = -1;
 		attYard="";
 		startThis=startNext;
-		preptr=endptr;
+		preptr=endptr+21;
 
 	} // while(1) 
 
