@@ -1225,7 +1225,7 @@ function parsePBP(intext) {
 
 		if (!(kickoff || onsides || fieldGoal || punt) && playPtr < 0) {
 			//alert("finished reading the log");
-			alert("found " + tmp + " plays");
+			//alert("found " + tmp + " plays");
 			break; // if no more offensive plays, leave 
 		}
 		else if (!(kickoff || onsides || fieldGoal || punt) && playPtr >= 0) { // if not a special teams play
@@ -1849,8 +1849,72 @@ function parsePBP(intext) {
 			} // */
 		}
 		else { // special teams play
-			endPtr = endSprecialTeamsPtr;
+			//alert("SPECIAL TEAMS! kickoff = " + kickoff + ", onsides = " + onsides + ", fieldGoal = " + fieldGoal + ", punt = " + punt + ", tmp = " + tmp);
+			var kickerPtr1, kickerPtr2, kickerTeamPtr1, kickerTeamPtr2, kickDistPtr1, kickDistPtr2;
+			var gotKickerInfo = 0;
+			var kickDistStr;
+
+			endptr = endSpecialTeamsPtr;
+
+			if (kickoff) {
+				//alert("it's a kickoff! kickoffPtr = " + kickoffPtr);
+				//alert("surroundings: '" + intext.substring(kickoffPtr-200, kickoffPtr+200) + "'");
+				kickerPtr1 = intext.indexOf("<b>", kickoffPtr); // find the name of the kicker
+				if (kickerPtr1 != -1 && kickerPtr1 < endptr) {
+					kickerPtr2 = intext.indexOf("</b>", kickerPtr1+3);
+					if (kickerPtr2 != -1 && kickerPtr2 < endptr) {
+						kickerName = intext.substring(kickerPtr1+3, kickerPtr2);
+						kickerTeamPtr1 = intext.indexOf("<b>", kickerPtr2+4); // find the name of the kicking team
+						if (kickerTeamPtr1 != -1 && kickerTeamPtr1 < endptr) {
+							kickerTeamPtr2 = intext.indexOf("</b>", kickerTeamPtr1+3);
+							if (kickerTeamPtr2 != -1 && kickerTeamPtr2 < endptr) {
+								kickerTeamName = intext.substring(kickerTeamPtr1+3, kickerTeamPtr2);
+								var nameIndex = getTeamIndex(kickerTeamName);
+								kickerTeamAbbr = abbrs[nameIndex];
+								gotKickerInfo = 1;
+								//alert("Kicker name = " + kickerName + ", kicking team name = " + kickerTeamName + ", abbr = " + kickerTeamAbbr);
+							}
+						}
+					}
+				}
+				else {
+					alert("Couldn't find kicker. kickerPtr1 = " + kickerPtr1 + ". Surroundings: '" + intext.substring(kickoffPtr-200, kickoffPtr) + "' SPLIT HERE '" + intext.substring(kickoffPtr, kickoffPtr+200) + "'");
+					//alert("endptr = '" + intext.substring(endptr, endptr+50) + "'");
+				}
+				if (gotKickerInfo) {
+					//alert("kickerTeamPtr2 surroundings: '" + intext.substring(kickerTeamPtr2-50, kickerTeamPtr2) + "[BREAK HERE]" + intext.substring(kickerTeamPtr2, kickerTeamPtr2+50) + "'");
+					kickDistPtr1 = intext.indexOf("Ball travels to their ", kickerTeamPtr2);
+					if (kickDistPtr1 != -1 && kickerTeamPtr1 < endptr) {
+						//alert("Got distPtr1");
+						kickDistPtr2 = intext.indexOf(" yardline", kickDistPtr1+22);
+						if (kickDistPtr2 != -1 && kickDistPtr2 < endptr) {
+							kickDistStr = intext.substring(kickDistPtr1+22, kickDistPtr2);
+							//alert("kick travels to the '" + kickDistStr + "'");
+							touchback = 0;
+							kickoffLandingSpot = parseInt(intext.substring(kickDistPtr1+25, kickDistPtr2));
+							//alert("kickoffLandingSpot = " + kickoffLandingSpot);
+						}
+					}
+					else {
+						kickDistPtr1 = intext.indexOf(" Ball travels into the endzone.", kickerTeamPtr2);
+						if (kickDistPtr1 != -1) {
+							touchback = 1;
+							endPtr = kickDistPtr1;
+							//alert("Touchback! Surroundings: '" + intext.substring(kickerTeamPtr2-100, kickerTeamPtr2) + "' SPLIT HERE '" + intext.substring(kickerTeamPtr2, kickerTeamPtr2+200) + "'");
+							//alert("endptr = '" + intext.substring(endptr, endptr+50) + "'");
+						}
+					}
+				}
+			}
 		}
+
+
+		/*********************************************************/
+		/*********************************************************/
+		/* * * * * * * * * START RECORDING STATS * * * * * * * * */
+		/*********************************************************/
+		/*********************************************************/
+
 		
 		distToGo = getDistToGo(togo, endToGo);
 
