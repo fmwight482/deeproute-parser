@@ -2221,6 +2221,20 @@ function parsePBP(intext) {
 			}
 		}
 
+		if (kickoffStats_bol && (showBothTeams || correctAbbr(kickerTeamAbbr, showOffense)) && (noPlay === 0 || withPens || throwAway)) {
+			// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks
+			if (kickoff) {
+				kickoffStats_array[0]++; // increment kickoffs
+				if (touchback) {
+					kickoffStats_array[1]++; // increment touchbacks
+				}
+				else {
+					kickoffStats_array[2]++; // increment kick returns
+					kickoffStats_array[3]+=kickoffLandingSpot;
+				}
+			}
+		}
+
 		isTouchdown = 0;
 		isSuccess = 0;
 		kickoff = 0;
@@ -2454,7 +2468,7 @@ function initializeArrays() {
 		sackStats[a] = 0;
 	}
 
-	kickoffStats_array = new Array(5); // kickoffs, touchbacks, returned kicks, net start position of returned kicks, kick return yards
+	kickoffStats_array = new Array(5); // kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks
 	for (a=0; a<7; a++) {
 		kickoffStats_array[a] = 0;
 	}
