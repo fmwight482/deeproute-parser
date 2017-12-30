@@ -835,6 +835,14 @@ function makeSacksTable() {
 	return table;
 }
 
+function makeKickoffsTable() {
+	// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks
+	var table = "<table border='1'><th>Kickoffs</th><th>Touchbacks</th><th>TB%</th><th>Avg kick return from</th>";
+	table = table.concat("<tr><td>" + kickoffStats_array[0] + "</td><td>" + kickoffStats_array[1] + "</td><td>" + calculatePercent(kickoffStats_array[1], kickoffStats_array[0]) + "%</td><td>" + calculateAverage(kickoffStats_array[3], kickoffStats_array[2])) + "</td>";
+	table = table.concat("</table>");
+	return table;
+}
+
 function getPassDistRowHeader(i) {
 	var header = "";
 	if (i === 0) {
@@ -1127,7 +1135,7 @@ function parsePBP(intext) {
 	var startPtr=0, playPtr, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9;
 	var kickoffPtr, onsidesPtr, fieldGoalPtr, puntPtr, endSpecialTeamsPtr;
 	var pkg, defpkg, form, play, abbr, yard, yard2, comp, scramble, INT, incomplete, loss, isTouchdown, isSuccess; 
-	var down, togo, distToGo=0, endToGo, gameTime, penalty, noPlay, tmp=0, endptr, dumpoff, first_read, preptr=0; 
+	var down, togo, distToGo=0, endToGo, gameTime, penalty, noPlay=0, tmp=0, endptr, dumpoff, first_read, preptr=0; 
 	var pkgid, defpkgid, formid, playid, downDistID, index, run, handoff, sneak, pass, att, tmparr, sack, GCOV;
 	var pressScram, coverScram, throwAway, pdef, tkl;
 	var WR, WRID, WRpID, WRName, GCOVd, GCOVdpID, GCOVdID, GCOVdName, GCOVer, GCOVerID, GCOVerName, passDefenderpID, passDefenderName;
@@ -1858,7 +1866,7 @@ function parsePBP(intext) {
 
 			if (kickoff) {
 				//alert("it's a kickoff! kickoffPtr = " + kickoffPtr);
-				//alert("surroundings: '" + intext.substring(kickoffPtr-200, kickoffPtr+200) + "'");
+				//alert("kickoff surroundings: '" + intext.substring(kickoffPtr-200, kickoffPtr+200) + "'");
 				kickerPtr1 = intext.indexOf("<b>", kickoffPtr); // find the name of the kicker
 				if (kickerPtr1 != -1 && kickerPtr1 < endptr) {
 					kickerPtr2 = intext.indexOf("</b>", kickerPtr1+3);
@@ -1884,7 +1892,7 @@ function parsePBP(intext) {
 				if (gotKickerInfo) {
 					//alert("kickerTeamPtr2 surroundings: '" + intext.substring(kickerTeamPtr2-50, kickerTeamPtr2) + "[BREAK HERE]" + intext.substring(kickerTeamPtr2, kickerTeamPtr2+50) + "'");
 					kickDistPtr1 = intext.indexOf("Ball travels to their ", kickerTeamPtr2);
-					if (kickDistPtr1 != -1 && kickerTeamPtr1 < endptr) {
+					if (kickDistPtr1 != -1 && kickDistPtr1 < endptr) {
 						//alert("Got distPtr1");
 						kickDistPtr2 = intext.indexOf(" yardline", kickDistPtr1+22);
 						if (kickDistPtr2 != -1 && kickDistPtr2 < endptr) {
@@ -1899,12 +1907,15 @@ function parsePBP(intext) {
 						kickDistPtr1 = intext.indexOf(" Ball travels into the endzone.", kickerTeamPtr2);
 						if (kickDistPtr1 != -1) {
 							touchback = 1;
-							endPtr = kickDistPtr1;
+							endptr = kickDistPtr1;
 							//alert("Touchback! Surroundings: '" + intext.substring(kickerTeamPtr2-100, kickerTeamPtr2) + "' SPLIT HERE '" + intext.substring(kickerTeamPtr2, kickerTeamPtr2+200) + "'");
 							//alert("endptr = '" + intext.substring(endptr, endptr+50) + "'");
 						}
 					}
 				}
+
+				// kickoffStats_bol && (showBothTeams || correctAbbr(kickerTeamAbbr, showOffense)) && (noPlay === 0 || withPens)
+				//alert("kickoffStats_bol = " + kickoffStats_bol + ", kickoff = " + kickoff + ", correctAbbr = " + correctAbbr(kickerTeamAbbr, showOffense) + ", noPlay = " + noPlay);
 			}
 		}
 
@@ -2221,16 +2232,18 @@ function parsePBP(intext) {
 			}
 		}
 
-		if (kickoffStats_bol && (showBothTeams || correctAbbr(kickerTeamAbbr, showOffense)) && (noPlay === 0 || withPens || throwAway)) {
+		if (kickoffStats_bol && (showBothTeams || correctAbbr(kickerTeamAbbr, showOffense)) && (noPlay === 0 || withPens)) {
 			// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks
 			if (kickoff) {
 				kickoffStats_array[0]++; // increment kickoffs
 				if (touchback) {
 					kickoffStats_array[1]++; // increment touchbacks
+					//alert("Recorded a touchback!");
 				}
 				else {
 					kickoffStats_array[2]++; // increment kick returns
 					kickoffStats_array[3]+=kickoffLandingSpot;
+					//alert("Recorded a return!");
 				}
 			}
 		}
@@ -2332,6 +2345,9 @@ function parsePBP(intext) {
 		}
 		if (showSacks) {
 			tables = tables.concat(makeTableLable("Sack Stats") + makeSacksTable());
+		}
+		if (kickoffStats_bol) {
+			tables = tables.concat(makeTableLable("Kickoff Stats") + makeKickoffsTable());
 		}
 		
 		newDiv.innerHTML = tables;
