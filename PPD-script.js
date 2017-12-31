@@ -8,7 +8,7 @@
 // @include     http://deeproute.com/?js=scrimmine
 // @grant		GM_xmlhttpRequest
 // @connect	    deeproute.com
-// @version     1.6.5
+// @version     1.6.5.1
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
@@ -1916,11 +1916,18 @@ function parsePBP(intext) {
 								returnDistPtr2 = intext.indexOf(".", returnDistPtr1);
 								if (returnDistPtr2 != -1 && returnDistPtr2 < endptr) {
 									returnDistStr = intext.substring(returnDistPtr1, returnDistPtr2);
-									returnFieldSide = returnDistStr.substring(0, 3);
-									returnYardLine = returnDistStr.substring(4, returnDistStr.length);
-									kickoffReturnSpot = parseInt(returnYardLine);
-									if (returnFieldSide == "Opp") {
-										kickoffReturnSpot = 100 - kickoffReturnSpot;
+									if (returnDistStr.includes("Midfield")) {
+										kickoffReturnSpot = 50;
+										returnYardLine = "50";
+										returnFieldSide = "midfield";
+									}
+									else {
+										returnFieldSide = returnDistStr.substring(0, 3);
+										returnYardLine = returnDistStr.substring(4, returnDistStr.length);
+										kickoffReturnSpot = parseInt(returnYardLine);
+										if (returnFieldSide == "Opp") {
+											kickoffReturnSpot = 100 - kickoffReturnSpot;
+										}
 									}
 									if (kickoffReturnSpot < 25) {
 										kickReturnInside25 = 1;
@@ -1943,9 +1950,6 @@ function parsePBP(intext) {
 						}
 					}
 				}
-
-				// kickoffStats_bol && (showBothTeams || correctAbbr(kickerTeamAbbr, showOffense)) && (noPlay === 0 || withPens)
-				//alert("kickoffStats_bol = " + kickoffStats_bol + ", kickoff = " + kickoff + ", correctAbbr = " + correctAbbr(kickerTeamAbbr, showOffense) + ", noPlay = " + noPlay);
 			}
 		}
 
