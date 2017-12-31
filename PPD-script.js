@@ -8,7 +8,7 @@
 // @include     http://deeproute.com/?js=scrimmine
 // @grant		GM_xmlhttpRequest
 // @connect	    deeproute.com
-// @version     1.6.4.3
+// @version     1.6.5
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
@@ -836,9 +836,9 @@ function makeSacksTable() {
 }
 
 function makeKickoffsTable() {
-	// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks
-	var table = "<table border='1'><th>Kickoffs</th><th>Touchbacks</th><th>TB%</th><th>Avg kick return from</th>";
-	table = table.concat("<tr><td>" + kickoffStats_array[0] + "</td><td>" + kickoffStats_array[1] + "</td><td>" + calculatePercent(kickoffStats_array[1], kickoffStats_array[0]) + "%</td><td>" + calculateAverage(kickoffStats_array[3], kickoffStats_array[2])) + "</td>";
+	// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
+	var table = "<table border='1'><th>Kickoffs</th><th>Touchbacks</th><th>TB%</th><th>Avg kick returned from</th><th>Avg field position on returns</th><th>KR <25yd line</th><th>\<25%</th><th>Avg field position</th>";
+	table = table.concat("<tr><td>" + kickoffStats_array[0] + "</td><td>" + kickoffStats_array[1] + "</td><td>" + calculatePercent(kickoffStats_array[1], kickoffStats_array[0]) + "%</td><td>" + calculateAverage(kickoffStats_array[3], kickoffStats_array[2])) + "</td><td>" + calculateAverage(kickoffStats_array[4], kickoffStats_array[2]) + "</td><td>" + kickoffStats_array[5] + "</td><td>" + calculatePercent(kickoffStats_array[5], kickoffStats_array[2]) + "%</td><td>" + calculateAverage((kickoffStats_array[1] * 25) + kickoffStats_array[4], kickoffStats_array[0]) + "</td>";
 	table = table.concat("</table>");
 	return table;
 }
@@ -1139,7 +1139,7 @@ function parsePBP(intext) {
 	var pkgid, defpkgid, formid, playid, downDistID, index, run, handoff, sneak, pass, att, tmparr, sack, GCOV;
 	var pressScram, coverScram, throwAway, pdef, tkl;
 	var WR, WRID, WRpID, WRName, GCOVd, GCOVdpID, GCOVdID, GCOVdName, GCOVer, GCOVerID, GCOVerName, passDefenderpID, passDefenderName;
-	var kickerName, kickerTeamName, kickerTeamAbbr;
+	var kickerName, kickerTeamName, kickerTeamAbbr, returnTeamAbbr;
 	var RB, RBpID=-1, RBName;
 	var defPlaymaker, defPlaymakerpID=-1, defPlaymakerName;
 	var startNext, startThis=0, attYard, attYard2, drop, hadYards, tempYardCounter=0;
@@ -1147,7 +1147,7 @@ function parsePBP(intext) {
 	var name1, name2, abbr1, abbr2, defAbbr, name1Index, name2Index;
 	var bothTeamsValid;
 	var kickoff=0, onsides=0, fieldGoal=0, punt=0;
-	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot;
+	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot, kickReturnInside25;
 
 	readcount++;
 	newDiv = document.getElementById('scout_count');
@@ -1858,9 +1858,10 @@ function parsePBP(intext) {
 		}
 		else { // special teams play
 			//alert("SPECIAL TEAMS! kickoff = " + kickoff + ", onsides = " + onsides + ", fieldGoal = " + fieldGoal + ", punt = " + punt + ", tmp = " + tmp);
-			var kickerPtr1, kickerPtr2, kickerTeamPtr1, kickerTeamPtr2, kickDistPtr1, kickDistPtr2;
+			var kickerPtr1, kickerPtr2, kickerTeamPtr1, kickerTeamPtr2, kickDistPtr1, kickDistPtr2, returnDistPtr1, returnDistPtr2;
+			var returnerPtr1, returnerPtr2;
 			var gotKickerInfo = 0;
-			var kickDistStr;
+			var kickDistStr, returnDistStr, returnYardLine, returnFieldSide;
 
 			endptr = endSpecialTeamsPtr;
 
@@ -1879,6 +1880,7 @@ function parsePBP(intext) {
 								kickerTeamName = intext.substring(kickerTeamPtr1+3, kickerTeamPtr2);
 								var nameIndex = getTeamIndex(kickerTeamName);
 								kickerTeamAbbr = abbrs[nameIndex];
+
 								gotKickerInfo = 1;
 								//alert("Kicker name = " + kickerName + ", kicking team name = " + kickerTeamName + ", abbr = " + kickerTeamAbbr);
 							}
@@ -1901,6 +1903,34 @@ function parsePBP(intext) {
 							touchback = 0;
 							kickoffLandingSpot = parseInt(intext.substring(kickDistPtr1+25, kickDistPtr2));
 							//alert("kickoffLandingSpot = " + kickoffLandingSpot);
+							returnerPtr1 = intext.indexOf("<b>", kickDistPtr2);
+							if (returnerPtr1 != -1 && returnerPtr1 < endptr) {
+								returnerPtr2 = intext.indexOf("</b>", returnerPtr1+3);
+								if (returnerPtr2 != -1 && returnerPtr2 < endptr) {
+									// extract returner name here
+								}
+							}
+							returnDistPtr1 = intext.indexOf(" yards to the ", kickDistPtr2);
+							if (returnDistPtr1 != -1 && returnDistPtr1 < endptr) {
+								returnDistPtr1 += 14;
+								returnDistPtr2 = intext.indexOf(".", returnDistPtr1);
+								if (returnDistPtr2 != -1 && returnDistPtr2 < endptr) {
+									returnDistStr = intext.substring(returnDistPtr1, returnDistPtr2);
+									returnFieldSide = returnDistStr.substring(0, 3);
+									returnYardLine = returnDistStr.substring(4, returnDistStr.length);
+									kickoffReturnSpot = parseInt(returnYardLine);
+									if (returnFieldSide == "Opp") {
+										kickoffReturnSpot = 100 - kickoffReturnSpot;
+									}
+									if (kickoffReturnSpot < 25) {
+										kickReturnInside25 = 1;
+									}
+									else {
+										kickReturnInside25 = 0;
+									}
+									//alert("kickoff returned to the '" + returnFieldSide + "' '" + returnYardLine + "', '" + kickoffReturnSpot + "' yards from the goal line");
+								}
+							}
 						}
 					}
 					else {
@@ -2233,17 +2263,19 @@ function parsePBP(intext) {
 		}
 
 		if (kickoffStats_bol && (showBothTeams || correctAbbr(kickerTeamAbbr, showOffense)) && (noPlay === 0 || withPens)) {
-			// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks
+			// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
 			if (kickoff) {
 				kickoffStats_array[0]++; // increment kickoffs
 				if (touchback) {
 					kickoffStats_array[1]++; // increment touchbacks
-					//alert("Recorded a touchback!");
 				}
 				else {
 					kickoffStats_array[2]++; // increment kick returns
 					kickoffStats_array[3]+=kickoffLandingSpot;
-					//alert("Recorded a return!");
+					kickoffStats_array[4]+=kickoffReturnSpot;
+					if (kickReturnInside25) {
+						kickoffStats_array[5]++; // increment kicks returned short of the 25
+					}
 				}
 			}
 		}
@@ -2484,8 +2516,8 @@ function initializeArrays() {
 		sackStats[a] = 0;
 	}
 
-	kickoffStats_array = new Array(5); // kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks
-	for (a=0; a<7; a++) {
+	kickoffStats_array = new Array(6); // kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
+	for (a=0; a<6; a++) {
 		kickoffStats_array[a] = 0;
 	}
 }
