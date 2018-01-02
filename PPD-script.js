@@ -93,6 +93,15 @@ function getTeamIndex(inteam) {
 	return -1;
 }
 
+function getAllTeamsIndex(inteam) {
+	for (var x=0; x<teamlist.length; x++) {
+		if (teamlist[x] == inteam) {
+			return x;
+		}
+	}
+	return -1;
+}
+
 function isAbbr(inabbr) {
 	for (var x=0; x<abbrs.length; x++) {
 		if (abbrs[x] == inabbr) {
@@ -837,8 +846,8 @@ function makeSacksTable() {
 
 function makeKickoffsTable() {
 	// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
-	var table = "<table border='1'><th>Kickoffs</th><th>Touchbacks</th><th>TB%</th><th>Avg kick returned from</th><th>Avg field position on returns</th><th>KR <25yd line</th><th>\<25%</th><th>Avg field position</th>";
-	table = table.concat("<tr><td>" + kickoffStats_array[0] + "</td><td>" + kickoffStats_array[1] + "</td><td>" + calculatePercent(kickoffStats_array[1], kickoffStats_array[0]) + "%</td><td>" + calculateAverage(kickoffStats_array[3], kickoffStats_array[2])) + "</td><td>" + calculateAverage(kickoffStats_array[4], kickoffStats_array[2]) + "</td><td>" + kickoffStats_array[5] + "</td><td>" + calculatePercent(kickoffStats_array[5], kickoffStats_array[2]) + "%</td><td>" + calculateAverage((kickoffStats_array[1] * 25) + kickoffStats_array[4], kickoffStats_array[0]) + "</td>";
+	var table = "<table border='1'><th>Kickoffs</th><th>Touchbacks</th><th>TB%</th><th>Avg kick returned from</th><th>Avg field position on returns</th><th>Yards Per Kick Return</th><th>KR <25yd line</th><th>\<25%</th><th>Avg field position</th>";
+	table = table.concat("<tr><td>" + kickoffStats_array[0] + "</td><td>" + kickoffStats_array[1] + "</td><td>" + calculatePercent(kickoffStats_array[1], kickoffStats_array[0]) + "%</td><td>" + calculateAverage(kickoffStats_array[3], kickoffStats_array[2])) + "</td><td>" + calculateAverage(kickoffStats_array[4], kickoffStats_array[2]) + "</td><td>" + calculateAverage(kickoffStats_array[4]-kickoffStats_array[3], kickoffStats_array[2]) + "</td><td>" + kickoffStats_array[5] + "</td><td>" + calculatePercent(kickoffStats_array[5], kickoffStats_array[2]) + "%</td><td>" + calculateAverage((kickoffStats_array[1] * 25) + kickoffStats_array[4], kickoffStats_array[0]) + "</td>";
 	table = table.concat("</table>");
 	return table;
 }
@@ -1144,7 +1153,7 @@ function parsePBP(intext) {
 	var defPlaymaker, defPlaymakerpID=-1, defPlaymakerName;
 	var startNext, startThis=0, attYard, attYard2, drop, hadYards, tempYardCounter=0;
 	var attempts=0, scrambles=0, sacks=0; 
-	var name1, name2, abbr1, abbr2, defAbbr, name1Index, name2Index;
+	var name1, name2, abbr1, abbr2, defAbbr, name1Index, name2Index, name1AllTeamsIndex, name2AllTeamsIndex;
 	var bothTeamsValid;
 	var kickoff=0, onsides=0, fieldGoal=0, punt=0;
 	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot, kickReturnInside25;
@@ -1155,6 +1164,7 @@ function parsePBP(intext) {
 
 	// scan for two team names at the top of the log, get team abbrs for each and set them as abbr1, abbr2. 
 	// on each play, check abbr against one of them, if abbr1 isEqual set defAbbr to abbr2, vice versa. 
+	// (not yet implemented)
 	
 	//alert("started to read the log");
 	
@@ -1165,45 +1175,57 @@ function parsePBP(intext) {
 		}
 	}
 
-	if (abbrs.length > 1) {
-		ptr2=intext.indexOf(" wins the flip and will receive.", preptr);
-		if (ptr2!=-1) {
-			// get recieving team name (team1)
-			ptr3=intext.lastIndexOf("<b>", ptr2);
-			if (ptr3!=-1) {
-				ptr4=intext.indexOf("</b>", ptr3+3);
-				if (ptr4!=-1) {
-					name1 = intext.substring(ptr3+3, ptr4);
-				}
+	//if (abbrs.length > 1) {
+	ptr2=intext.indexOf(" wins the flip and will receive.", preptr);
+	if (ptr2!=-1) {
+		// get recieving team name (team1)
+		ptr3=intext.lastIndexOf("<b>", ptr2);
+		if (ptr3!=-1) {
+			ptr4=intext.indexOf("</b>", ptr3+3);
+			if (ptr4!=-1) {
+				name1 = intext.substring(ptr3+3, ptr4);
 			}
-			// get kicking team name (team2)
-			ptr3=intext.indexOf("<b>", ptr2);
-			if (ptr3!=-1) {
-				ptr4=intext.indexOf("</b>", ptr3+3);
-				if (ptr4!=-1) {
-					name2 = intext.substring(ptr3+3, ptr4);
-				}
+		}
+		// get kicking team name (team2)
+		ptr3=intext.indexOf("<b>", ptr2);
+		if (ptr3!=-1) {
+			ptr4=intext.indexOf("</b>", ptr3+3);
+			if (ptr4!=-1) {
+				name2 = intext.substring(ptr3+3, ptr4);
 			}
+		}
 
-			name1Index = getTeamIndex(name1);
-			name2Index = getTeamIndex(name2);
+		name1AllTeamsIndex = getAllTeamsIndex(name1);
+		name2AllTeamsIndex = getAllTeamsIndex(name2);
 
-			if (name1Index != -1 && name2Index != -1) {
-				bothTeamsValid = 1;
-				abbr1 = abbrs[name1Index];
-				abbr2 = abbrs[name2Index];
-				//alert(name1 + " at " + name1Index + ", " + name2 + " at " + name2Index);
-			}
-			else {
-				bothTeamsValid = 0; 
-				//alert("invalid names: " + name1 + " at " + name1Index + ", " + name2 + " at " + name2Index);
-			}
+		name1Index = getTeamIndex(name1);
+		name2Index = getTeamIndex(name2);
+
+		if (name1Index != -1 && name2Index != -1) {
+			bothTeamsValid = 1;
+			abbr1 = abbrs[name1Index];
+			abbr2 = abbrs[name2Index];
+			//alert(name1 + " with abbr " + abbr1 + " at " + name1Index + ", " + name2 + " with abbr " + abbr2 + " at " + name2Index);
 		}
 		else {
-			alert("could not find coin flip");
+			bothTeamsValid = 0;
+
+			if (name1AllTeamsIndex != -1 && name2AllTeamsIndex != -1) {
+				abbr1 = abbrlist[name1AllTeamsIndex];
+				abbr2 = abbrlist[name2AllTeamsIndex];
+
+				//alert("Recording one team. " + name1 + " with abbr " + abbr1 + " at " + name1Index + ", " + name2 + " with abbr " + abbr2 + " at " + name2Index);
+			}
+			else {
+				alert("invalid names: " + name1 + " at " + name1Index + ", " + name2 + " at " + name2Index);
+			}
 		}
-		//alert("defPlaymakerpID = " + defPlaymakerpID);
 	}
+	else {
+		alert("could not find coin flip");
+	}
+	//alert("defPlaymakerpID = " + defPlaymakerpID);
+	//}
 
 	while (1) {
 		tmp++; // increment 
@@ -1878,8 +1900,18 @@ function parsePBP(intext) {
 							kickerTeamPtr2 = intext.indexOf("</b>", kickerTeamPtr1+3);
 							if (kickerTeamPtr2 != -1 && kickerTeamPtr2 < endptr) {
 								kickerTeamName = intext.substring(kickerTeamPtr1+3, kickerTeamPtr2);
-								var nameIndex = getTeamIndex(kickerTeamName);
-								kickerTeamAbbr = abbrs[nameIndex];
+								var nameIndex = getAllTeamsIndex(kickerTeamName);
+								kickerTeamAbbr = abbrlist[nameIndex];
+								//alert("found a kickoff");
+								if (kickerTeamAbbr == abbr1) {
+									returnTeamAbbr = abbr2;
+								}
+								else if (kickerTeamAbbr == abbr2) {
+									returnTeamAbbr = abbr1;
+								}
+								else {
+									alert("kickerTeamAbbr '" + kickerTeamAbbr + "' does not match '" + abbr1 + "' or '" + abbr2 + "'");
+								}
 
 								gotKickerInfo = 1;
 								//alert("Kicker name = " + kickerName + ", kicking team name = " + kickerTeamName + ", abbr = " + kickerTeamAbbr);
@@ -2266,7 +2298,7 @@ function parsePBP(intext) {
 			}
 		}
 
-		if (kickoffStats_bol && (showBothTeams || correctAbbr(kickerTeamAbbr, showOffense)) && (noPlay === 0 || withPens)) {
+		if (kickoffStats_bol && (showBothTeams || correctAbbr(returnTeamAbbr, showOffense)) && (noPlay === 0 || withPens)) {
 			// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
 			if (kickoff) {
 				kickoffStats_array[0]++; // increment kickoffs
