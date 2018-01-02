@@ -2861,17 +2861,21 @@ function selectStatTables() {
 	newtd5.setAttribute('colspan', '4');
 	var newDiv5 = document.createElement('div');
 	newDiv5.innerHTML = 
+		'<span class="teamSplitHeader"><b>Team Level Situational Splits</b></span><br>' + 
 		'<input type="checkbox" name="other" id="runPass">  ' + runPassDef + ' <br> ' + 
 		'<input type="checkbox" name="other" id="targets">  ' + targetsDef + ' <br> ' + 
-		'<input type="checkbox" name="other" id="production"> ' + productionDef + ' <br> ' + // */
+		'<input type="checkbox" name="other" id="production"> ' + productionDef + ' <br> ' + 
 		'<input type="checkbox" name="other" id="conversions"> ' + thirdFourthDownsDef + ' <br>' + 
+		'<input type="checkbox" name="other" id="passDist"> ' + passDistStatsDef + ' <br>' + 
+		'<input type="checkbox" name="other" id="defPkgSplits"> ' + defPkgSplitsDef + ' <br>' + 
+		'<span class="teamStatHeader"><b>Team Level Statistics</b></span><br>' + 
+		'<input type="checkbox" name="other" id="sacks"> ' + passRushStatsDef + ' <br>' + 
+		'<input type="checkbox" name="other" id="kickoffs"> ' + kickoffStatsDef + ' <br>' + 
+		'<span class="playerStatHeader"><b>Individual Player Statistics</b></span><br>' + 
 		'<input type="checkbox" name="other" id="recievers"> ' + WRStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="runners"> ' + RBStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="defenders"> ' + IDPStatsDef + ' <br>' + 
-		'<input type="checkbox" name="other" id="passDist"> ' + passDistStatsDef + ' <br>' + 
-		'<input type="checkbox" name="other" id="sacks"> ' + passRushStatsDef + ' <br>' + 
-		'<input type="checkbox" name="other" id="kickoffs"> ' + kickoffStatsDef + ' <br>' + 
-		'<input type="checkbox" name="other" id="defPkgSplits"> ' + defPkgSplitsDef;
+		''; // Hanging end of string to make new additions more convenient
 	newtd5.appendChild(newDiv5);
 
 	return newtd5;
