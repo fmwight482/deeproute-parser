@@ -3056,8 +3056,10 @@ function startFunc ()
 			readcount = 0; 
 			readtarget = 1;
 			links=[];
-			teamList=[];
-			abbrList=[];
+			// 1/2/2018: old bug hidden by a typo. Commented to be safe. Correct names are teamlist and abbrlist. 
+			// should these two be teams=[] and abbrs=[]?
+			//teamList=[]; 
+			//abbrList=[];
 			teamID=[];
 			WRPlayerStats=[];
 			RBPlayerStats=[];
