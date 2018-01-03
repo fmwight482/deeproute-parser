@@ -102,6 +102,15 @@ function getAllTeamsIndex(inteam) {
 	return -1;
 }
 
+function getTeamIndexFromAbbr(inabbr) {
+	for (var x=0; x<abbrs.length; x++) {
+		if (abbrs[x] == inabbr) {
+			return x;
+		}
+	}
+	return -1;
+}
+
 function isAbbr(inabbr) {
 	for (var x=0; x<abbrs.length; x++) {
 		if (abbrs[x] == inabbr) {
@@ -838,19 +847,68 @@ function makePassDistSplitTable() {
 
 function makeSacksTable() {
 	// pass plays, passes, immediate sacks, cover sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
-	var table = "<table border='1'><th>Pass Plays</th><th>TGT</th><th>TGT%</th><th>Imediate Sacks</th><th>ImdSk%</th><th>Cover Sacks</th><th>CovSk%</th><th>Pressure Scrambles</th><th>Coverage Scrambles</th><th>CovScram%</th><th>Scramble sacks</th><th>Sk/Scram%</th><th>dumpoffs</th><th>Dump%</th><th>throwaways</th><th>TA%</th>";
-	table = table.concat("<tr><td>" + sackStats[0] + "</td><td>" + (sackStats[1] - sackStats[8]) + "</td><td>" + calculatePercent(sackStats[1] - sackStats[8], sackStats[0]) + "%</td><td>" + sackStats[2] + "</td><td>" + calculatePercent(sackStats[2], sackStats[0]) + "%</td><td>" + sackStats[3] + "</td><td>" + calculatePercent(sackStats[3], sackStats[0]) + "%</td><td>" + sackStats[4] + "</td><td>" + sackStats[5] + "</td><td>" + calculatePercent(sackStats[5], sackStats[0]) + "%</td><td>" + sackStats[6] + "</td><td>" + calculatePercent(sackStats[6], sackStats[4] + sackStats[5]) + "%</td><td>" + sackStats[7] + "</td><td>" + calculatePercent(sackStats[7], sackStats[0]) + "%</td><td>" + sackStats[8] + "</td><td>" + calculatePercent(sackStats[8], sackStats[0]) + "%</td>");
+
+	var teamType = "Pass Rush";
+	if (showOffense) {
+		teamType = "Pass Blocking";
+	}
+
+	// create new array for the combined stats from all teams
+	sackStatsTotals = new Array(9);
+	for (var i=0; i<9; i++) {
+		sackStatsTotals[i] = 0;
+	}
+
+	var table = "<table border='1'><th>" + teamType + "</th><th>Pass Plays</th><th>TGT</th><th>TGT%</th><th>Imediate Sacks</th><th>ImdSk%</th><th>Cover Sacks</th><th>CovSk%</th><th>Pressure Scrambles</th><th>Coverage Scrambles</th><th>CovScram%</th><th>Scramble sacks</th><th>Sk/Scram%</th><th>dumpoffs</th><th>Dump%</th><th>throwaways</th><th>TA%</th>";
+
+	for (var j=0; j<abbrs.length; j++) {
+		table = table.concat("<tr><th>" + abbrs[j] + "</th><td>" + sackStats[j][0] + "</td><td>" + (sackStats[j][1] - sackStats[j][8]) + "</td><td>" + calculatePercent(sackStats[j][1] - sackStats[j][8], sackStats[j][0]) + "%</td><td>" + sackStats[j][2] + "</td><td>" + calculatePercent(sackStats[j][2], sackStats[j][0]) + "%</td><td>" + sackStats[j][3] + "</td><td>" + calculatePercent(sackStats[j][3], sackStats[j][0]) + "%</td><td>" + sackStats[j][4] + "</td><td>" + sackStats[j][5] + "</td><td>" + calculatePercent(sackStats[j][5], sackStats[j][0]) + "%</td><td>" + sackStats[j][6] + "</td><td>" + calculatePercent(sackStats[j][6], sackStats[j][4] + sackStats[j][5]) + "%</td><td>" + sackStats[j][7] + "</td><td>" + calculatePercent(sackStats[j][7], sackStats[j][0]) + "%</td><td>" + sackStats[j][8] + "</td><td>" + calculatePercent(sackStats[j][8], sackStats[j][0]) + "%</td>");
+
+		for (var k=0; k<9; k++) {
+			sackStatsTotals[k] += sackStats[j][k];
+		}
+	}
+
+	table = table.concat("<tr><td>Total</td><td>" + sackStatsTotals[0] + "</td><td>" + (sackStatsTotals[1] - sackStatsTotals[8]) + "</td><td>" + calculatePercent(sackStatsTotals[1] - sackStatsTotals[8], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[2] + "</td><td>" + calculatePercent(sackStatsTotals[2], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[3] + "</td><td>" + calculatePercent(sackStatsTotals[3], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[4] + "</td><td>" + sackStatsTotals[5] + "</td><td>" + calculatePercent(sackStatsTotals[5], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[6] + "</td><td>" + calculatePercent(sackStatsTotals[6], sackStatsTotals[4] + sackStatsTotals[5]) + "%</td><td>" + sackStatsTotals[7] + "</td><td>" + calculatePercent(sackStatsTotals[7], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[8] + "</td><td>" + calculatePercent(sackStatsTotals[8], sackStatsTotals[0]) + "%</td>");
+
 	table = table.concat("</table>");
 	return table;
 }
 
-function makeKickoffsTable() {
+function makeKickoffsTable(showOffense) {
 	// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
-	var table = "<table border='1'><th>Kickoffs</th><th>Touchbacks</th><th>TB%</th><th>Avg kick returned from</th><th>Avg field position on returns</th><th>Yards Per Kick Return</th><th>KR <25yd line</th><th>\<25%</th><th>Avg field position</th>";
-	table = table.concat("<tr><td>" + kickoffStats_array[0] + "</td><td>" + kickoffStats_array[1] + "</td><td>" + calculatePercent(kickoffStats_array[1], kickoffStats_array[0]) + "%</td><td>" + calculateAverage(kickoffStats_array[3], kickoffStats_array[2])) + "</td><td>" + calculateAverage(kickoffStats_array[4], kickoffStats_array[2]) + "</td><td>" + calculateAverage(kickoffStats_array[4]-kickoffStats_array[3], kickoffStats_array[2]) + "</td><td>" + kickoffStats_array[5] + "</td><td>" + calculatePercent(kickoffStats_array[5], kickoffStats_array[2]) + "%</td><td>" + calculateAverage((kickoffStats_array[1] * 25) + kickoffStats_array[4], kickoffStats_array[0]) + "</td>";
+
+	var teamType = "Kicking Team";
+	if (showOffense) {
+		teamType = "Recieving Team";
+	}
+
+	// create new array for the combined stats from all teams
+	kickoffStatTotals = new Array(6);
+	for (var k=0; k<6; k++) {
+		kickoffStatTotals[k] = 0;
+	}
+
+	var table = "<table border='1'><th>" + teamType + "</th><th>Kickoffs</th><th>Touchbacks</th><th>TB%</th><th>Avg kick returned from</th><th>Avg field position on returns</th><th>Yards Per Kick Return</th><th>KR <25yd line</th><th>\<25%</th><th>Avg field position</th>";
+
+	for (var i=0; i<abbrs.length; i++) {
+		table = table.concat("<tr><th>" + abbrs[i] + "</th><td>" + kickoffStats_array[i][0] + "</td><td>" + kickoffStats_array[i][1] + "</td><td>" + calculatePercent(kickoffStats_array[i][1], kickoffStats_array[i][0]) + "%</td><td>" + calculateAverage(kickoffStats_array[i][3], kickoffStats_array[i][2]) + "</td><td>" + calculateAverage(kickoffStats_array[i][4], kickoffStats_array[i][2]) + "</td><td>" + calculateAverage(kickoffStats_array[i][4]-kickoffStats_array[i][3], kickoffStats_array[i][2]) + "</td><td>" + kickoffStats_array[i][5] + "</td><td>" + calculatePercent(kickoffStats_array[i][5], kickoffStats_array[i][2]) + "%</td><td>" + calculateAverage((kickoffStats_array[i][1] * 25) + kickoffStats_array[i][4], kickoffStats_array[i][0]) + "</td>");
+
+		for (var j=0; j<6; j++) {
+			kickoffStatTotals[j] += kickoffStats_array[i][j];
+		}
+	}
+
+	table = table.concat("<tr><td>Total</td><td>" + kickoffStatTotals[0] + "</td><td>" + kickoffStatTotals[1] + "</td><td>" + calculatePercent(kickoffStatTotals[1], kickoffStatTotals[0]) + "%</td><td>" + calculateAverage(kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4]-kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + kickoffStatTotals[5] + "</td><td>" + calculatePercent(kickoffStatTotals[5], kickoffStatTotals[2]) + "%</td><td>" + calculateAverage((kickoffStatTotals[1] * 25) + kickoffStatTotals[4], kickoffStatTotals[0]) + "</td>");
+
 	table = table.concat("</table>");
 	return table;
 }
+
+/*function makeKickoffsTableRow(statArray) {
+	var row = "<tr><td>" + statArray[0] + "</td><td>" + statArray[1] + "</td><td>" + calculatePercent(statArray[1], statArray[0]) + "%</td><td>" + calculateAverage(statArray[3], statArray[2]) + "</td><td>" + calculateAverage(statArray[4], statArray[2]) + "</td><td>" + calculateAverage(statArray[4]-statArray[3], statArray[2]) + "</td><td>" + statArray[5] + "</td><td>" + calculatePercent(statArray[5], statArray[2]) + "%</td><td>" + calculateAverage((statArray[1] * 25) + statArray[4], statArray[0]) + "</td>";
+	return row;
+} // */
 
 function getPassDistRowHeader(i) {
 	var header = "";
@@ -1148,7 +1206,7 @@ function parsePBP(intext) {
 	var pkgid, defpkgid, formid, playid, downDistID, index, run, handoff, sneak, pass, att, tmparr, sack, GCOV;
 	var pressScram, coverScram, throwAway, pdef, tkl;
 	var WR, WRID, WRpID, WRName, GCOVd, GCOVdpID, GCOVdID, GCOVdName, GCOVer, GCOVerID, GCOVerName, passDefenderpID, passDefenderName;
-	var kickerName, kickerTeamName, kickerTeamAbbr, returnTeamAbbr;
+	var kickerName, kickerTeamName, returnTeamName, kickerTeamAbbr, returnTeamAbbr;
 	var RB, RBpID=-1, RBName;
 	var defPlaymaker, defPlaymakerpID=-1, defPlaymakerName;
 	var startNext, startThis=0, attYard, attYard2, drop, hadYards, tempYardCounter=0;
@@ -1905,9 +1963,11 @@ function parsePBP(intext) {
 								//alert("found a kickoff");
 								if (kickerTeamAbbr == abbr1) {
 									returnTeamAbbr = abbr2;
+									returnTeamName = name2;
 								}
 								else if (kickerTeamAbbr == abbr2) {
 									returnTeamAbbr = abbr1;
+									returnTeamName = name1;
 								}
 								else {
 									alert("kickerTeamAbbr '" + kickerTeamAbbr + "' does not match '" + abbr1 + "' or '" + abbr2 + "'");
@@ -2268,50 +2328,70 @@ function parsePBP(intext) {
 		}
 		
 		if (showSacks && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens || throwAway)) {
+			var teamIndex;
+			if (showOffense) {
+				teamIndex = getTeamIndexFromAbbr(abbr);
+			}
+			else if (abbr == abbr1) {
+				teamIndex = getTeamIndexFromAbbr(abbr2);
+			}
+			else {
+				teamIndex = getTeamIndexFromAbbr(abbr1);
+			}
+
 			// pass plays, passes, immediate sacks, cover sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
 			if (pass) {
-				sackStats[0]++; // increment pass plays
+				sackStats[teamIndex][0]++; // increment pass plays
 			}
 			if (att) {
-				sackStats[1]++; // increment pass attempts
+				sackStats[teamIndex][1]++; // increment pass attempts
 			}
 			if (sack) {
 				if (scramble) {
-					sackStats[6]++; // increment scramble sacks
+					sackStats[teamIndex][6]++; // increment scramble sacks
+					//alert("found scrample sack at play " + tmp + "! Total: " + sackStats[teamIndex][6]);
 				}
 				else if (GCOV) {
-					sackStats[2]++; // increment cover sacks
+					sackStats[teamIndex][2]++; // increment cover sacks
 				}
 				else {
-					sackStats[3]++; // increment immediate sacks
+					sackStats[teamIndex][3]++; // increment immediate sacks
 				}
 			}
 			// no pressure scrambles
 			if (coverScram) {
-				sackStats[5]++; // increment cover scrambles
+				sackStats[teamIndex][5]++; // increment cover scrambles
 			}
 			if (dumpoff) {
-				sackStats[7]++; // increment dumpoffs
+				sackStats[teamIndex][7]++; // increment dumpoffs
 			}
 			if (throwAway) {
-				sackStats[8]++; // increment throw aways
+				sackStats[teamIndex][8]++; // increment throw aways
 			}
 		}
 
-		if (kickoffStats_bol && (showBothTeams || correctAbbr(returnTeamAbbr, showOffense)) && (noPlay === 0 || withPens)) {
+		// Only works with individual teams
+		if (kickoffStats_bol && correctAbbr(returnTeamAbbr, showOffense) && (noPlay === 0 || withPens) && kickoff) {
 			// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
-			if (kickoff) {
-				kickoffStats_array[0]++; // increment kickoffs
-				if (touchback) {
-					kickoffStats_array[1]++; // increment touchbacks
-				}
-				else {
-					kickoffStats_array[2]++; // increment kick returns
-					kickoffStats_array[3]+=kickoffLandingSpot;
-					kickoffStats_array[4]+=kickoffReturnSpot;
-					if (kickReturnInside25) {
-						kickoffStats_array[5]++; // increment kicks returned short of the 25
-					}
+
+			// set the correct abbreviation
+			// TODO: find a more efficient way to do this across all tables
+			var teamIndex = getTeamIndex(kickerTeamName);
+			if (showOffense) {
+				teamIndex = getTeamIndex(returnTeamName);
+			}
+			//alert("kicking team is '" + kickerTeamName + "', return team is '" + returnTeamName + "', team index is " + teamIndex);
+
+			kickoffStats_array[teamIndex][0]++; // increment kickoffs
+			if (touchback) {
+				kickoffStats_array[teamIndex][1]++; // increment touchbacks
+			}
+			else {
+				kickoffStats_array[teamIndex][2]++; // increment kick returns
+				kickoffStats_array[teamIndex][3]+=kickoffLandingSpot;
+				kickoffStats_array[teamIndex][4]+=kickoffReturnSpot;
+				if (kickReturnInside25) {
+					kickoffStats_array[teamIndex][5]++; // increment kicks returned short of the 25
 				}
 			}
 		}
@@ -2415,7 +2495,7 @@ function parsePBP(intext) {
 			tables = tables.concat(makeTableLable("Sack Stats") + makeSacksTable());
 		}
 		if (kickoffStats_bol) {
-			tables = tables.concat(makeTableLable("Kickoff Stats") + makeKickoffsTable());
+			tables = tables.concat(makeTableLable("Kickoff Stats") + makeKickoffsTable(showOffense));
 		}
 		
 		newDiv.innerHTML = tables;
@@ -2546,15 +2626,26 @@ function initializeArrays() {
 		}
 		passDistSplitStats[a] = stats;
 	} // */
-	
-	sackStats = new Array(9); // pass plays, passes, immediate sacks, cover sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
-	for (a=0; a<9; a++) {
-		sackStats[a] = 0;
+}
+
+// initialize arrays for tables with a separate row for each team
+function initializeMultiTeamArrays() {
+	var a, b;
+
+	sackStats = new Array(abbrs.length);
+	for (a=0; a<abbrs.length; a++) {
+		sackStats[a] = new Array(9); // pass plays, passes, immediate sacks, cover sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
+		for (b=0; b<9; b++) {
+			sackStats[a][b] = 0;
+		}
 	}
 
-	kickoffStats_array = new Array(6); // kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
-	for (a=0; a<6; a++) {
-		kickoffStats_array[a] = 0;
+	kickoffStats_array = new Array(abbrs.length);
+	for (a=0; a<abbrs.length; a++) {
+		kickoffStats_array[a] = new Array(6); // kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
+		for (b=0; b<6; b++) {
+			kickoffStats_array[a][b] = 0;
+		}
 	}
 }
 
@@ -3051,6 +3142,7 @@ function startFunc ()
 		}
 		else {
 			buildGameList(input);
+			initializeMultiTeamArrays();
 			startReadLog();
 		}
 	}, true);                // "Start" button, runs script 
