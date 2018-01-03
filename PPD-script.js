@@ -113,10 +113,10 @@ function isAbbr(inabbr) {
 
 function correctAbbr(inabbr, showOffense) {
 	var isGiven = isAbbr(inabbr);
-	if (showOffense) {
-		return isGiven;
+	if (isGiven) {
+		return 1;
 	} else {
-		return !(isGiven);
+		return !showOffense;
 	}
 }
 
