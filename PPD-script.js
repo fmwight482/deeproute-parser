@@ -8,7 +8,7 @@
 // @include     http://deeproute.com/?js=scrimmine
 // @grant		GM_xmlhttpRequest
 // @connect	    deeproute.com
-// @version     1.6.5.1
+// @version     1.6.6
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
@@ -126,6 +126,28 @@ function correctAbbr(inabbr, showOffense) {
 		return 1;
 	} else {
 		return !showOffense;
+	}
+}
+
+function correctAbbr(offAbbr, defAbbr, showOffense) {
+	var offGiven = isAbbr(offAbbr);
+	var defGiven = isAbbr(defAbbr);
+	if (showOffense) {
+		return offGiven;
+	} else {
+		return defGiven;
+	}
+}
+
+function getOtherAbbr(inabbr, abbr1, abbr2) {
+	if (inabbr == abbr1) {
+		return abbr2;
+	}
+	else if (inabbr == abbr2) {
+		return abbr1;
+	}
+	else {
+		alert("abbr '" + abbr + "' did not match '" + abbr1 + "' or '" + abbr2 + "'");
 	}
 }
 
@@ -869,7 +891,10 @@ function makeSacksTable() {
 		}
 	}
 
-	table = table.concat("<tr><td>Total</td><td>" + sackStatsTotals[0] + "</td><td>" + (sackStatsTotals[1] - sackStatsTotals[8]) + "</td><td>" + calculatePercent(sackStatsTotals[1] - sackStatsTotals[8], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[2] + "</td><td>" + calculatePercent(sackStatsTotals[2], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[3] + "</td><td>" + calculatePercent(sackStatsTotals[3], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[4] + "</td><td>" + sackStatsTotals[5] + "</td><td>" + calculatePercent(sackStatsTotals[5], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[6] + "</td><td>" + calculatePercent(sackStatsTotals[6], sackStatsTotals[4] + sackStatsTotals[5]) + "%</td><td>" + sackStatsTotals[7] + "</td><td>" + calculatePercent(sackStatsTotals[7], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[8] + "</td><td>" + calculatePercent(sackStatsTotals[8], sackStatsTotals[0]) + "%</td>");
+	if (abbrs.length > 1) {
+		// don't do a "total" row if there is only one team
+		table = table.concat("<tr><td>Total</td><td>" + sackStatsTotals[0] + "</td><td>" + (sackStatsTotals[1] - sackStatsTotals[8]) + "</td><td>" + calculatePercent(sackStatsTotals[1] - sackStatsTotals[8], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[2] + "</td><td>" + calculatePercent(sackStatsTotals[2], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[3] + "</td><td>" + calculatePercent(sackStatsTotals[3], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[4] + "</td><td>" + sackStatsTotals[5] + "</td><td>" + calculatePercent(sackStatsTotals[5], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[6] + "</td><td>" + calculatePercent(sackStatsTotals[6], sackStatsTotals[4] + sackStatsTotals[5]) + "%</td><td>" + sackStatsTotals[7] + "</td><td>" + calculatePercent(sackStatsTotals[7], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[8] + "</td><td>" + calculatePercent(sackStatsTotals[8], sackStatsTotals[0]) + "%</td>");
+	}
 
 	table = table.concat("</table>");
 	return table;
@@ -899,7 +924,10 @@ function makeKickoffsTable(showOffense) {
 		}
 	}
 
-	table = table.concat("<tr><td>Total</td><td>" + kickoffStatTotals[0] + "</td><td>" + kickoffStatTotals[1] + "</td><td>" + calculatePercent(kickoffStatTotals[1], kickoffStatTotals[0]) + "%</td><td>" + calculateAverage(kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4]-kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + kickoffStatTotals[5] + "</td><td>" + calculatePercent(kickoffStatTotals[5], kickoffStatTotals[2]) + "%</td><td>" + calculateAverage((kickoffStatTotals[1] * 25) + kickoffStatTotals[4], kickoffStatTotals[0]) + "</td>");
+	if (abbrs.length > 1) {
+		// don't do a "total" row if there is only one team
+		table = table.concat("<tr><td>Total</td><td>" + kickoffStatTotals[0] + "</td><td>" + kickoffStatTotals[1] + "</td><td>" + calculatePercent(kickoffStatTotals[1], kickoffStatTotals[0]) + "%</td><td>" + calculateAverage(kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4]-kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + kickoffStatTotals[5] + "</td><td>" + calculatePercent(kickoffStatTotals[5], kickoffStatTotals[2]) + "%</td><td>" + calculateAverage((kickoffStatTotals[1] * 25) + kickoffStatTotals[4], kickoffStatTotals[0]) + "</td>");
+	}
 
 	table = table.concat("</table>");
 	return table;
@@ -998,7 +1026,7 @@ function makeConversionTable() {
 }
 
 function makeConversionTr(min, max, i) {
-	var tr = "<tr><th>" + min + " - " + max + " </th><td> " + conversionStats[i][0] + "</td><td>" + conversionStats[i][1] + "</td><td>" + getConversionPct(i) + "% </td><td>" + getYrdPerFD(i) + "</td><td>" + getYrdPerStp(i) + "</td>";
+	var tr = "<tr><th>&nbsp;" + min + " - " + max + "&nbsp;</th><td> " + conversionStats[i][0] + "</td><td>" + conversionStats[i][1] + "</td><td>" + getConversionPct(i) + "% </td><td>" + getYrdPerFD(i) + "</td><td>" + getYrdPerStp(i) + "</td>";
 	return tr;
 }
 
@@ -1201,7 +1229,7 @@ function makeTableLable(name) {
 function parsePBP(intext) {
 	var startPtr=0, playPtr, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9;
 	var kickoffPtr, onsidesPtr, fieldGoalPtr, puntPtr, endSpecialTeamsPtr;
-	var pkg, defpkg, form, play, abbr, yard, yard2, comp, scramble, INT, incomplete, loss, isTouchdown, isSuccess; 
+	var pkg, defpkg, form, play, abbr, otherAbbr, yard, yard2, yardline, comp, scramble, INT, incomplete, loss, isTouchdown, isSuccess; 
 	var down, togo, distToGo=0, endToGo, gameTime, penalty, noPlay=0, tmp=0, endptr, dumpoff, first_read, preptr=0; 
 	var pkgid, defpkgid, formid, playid, downDistID, index, run, handoff, sneak, pass, att, tmparr, sack, GCOV;
 	var pressScram, coverScram, throwAway, pdef, tkl;
@@ -1309,6 +1337,7 @@ function parsePBP(intext) {
 		}
 		else if (puntPtr >= 0 && puntPtr < endSpecialTeamsPtr && (puntPtr < playPtr || playPtr < 0)) {
 			punt = 1;
+			//alert("Found punt! tmp = " + tmp);
 		}
 
 		if (!(kickoff || onsides || fieldGoal || punt) && playPtr < 0) {
@@ -1377,6 +1406,7 @@ function parsePBP(intext) {
 			ptr4=intext.indexOf("<b>", ptr3); // find location of first bolding on last line 
 			ptr5=intext.indexOf("</b>", ptr4+3); // find location of close of first bolding 
 			abbr=intext.substring(ptr4+3, ptr5); // get bolded text (offensive team abbr) 
+			otherAbbr = getOtherAbbr(abbr, abbr1, abbr2);
 
 			ptr4=intext.indexOf("<b>", ptr5+4); // find second bolding: quarter and time remaining 
 			ptr7=intext.indexOf("</b>", ptr4+3); 
@@ -1390,6 +1420,9 @@ function parsePBP(intext) {
 			ptr7=intext.indexOf(";", ptr4); // find end of distance ("Foot~", "13+", etc)
 			togo=intext.substring(ptr4+12, ptr7); // store distance 
 			endToGo=intext.substring(ptr7-1, ptr7); // get the final char before the ";", which may or not be a "+" or "-" 
+
+			ptr5=intext.indexOf(")", ptr7+2);
+			yardline = intext.substring(ptr7+2, ptr5); // get the yardline in string form (e.g. "Opp 43")
 
 			ptr4=intext.indexOf("a gain of", preptr); // find next "a gain of", if it exists and is before the end move it to ptr5
 			loss=0; 
@@ -2061,7 +2094,7 @@ function parsePBP(intext) {
 
 		isSuccess = getSuccess(yard, distToGo, down, isTouchdown);  
 
-		if (correctAbbr(abbr, showOffense) && (run==1 || pass==1) && distToGo!=-1 && isSuccess!=-1 && pkgid>=0 && pkgid<=7 && (noPlay===0) || withPens) { 
+		if (correctAbbr(abbr, otherAbbr, showOffense) && (run==1 || pass==1) && distToGo!=-1 && isSuccess!=-1 && pkgid>=0 && pkgid<=7 && (noPlay===0) || withPens) { 
 			if (down=="1st") {
 				downDistID=0; 
 				checkRunPass(run, pass, pkgid, downDistID, yard, isSuccess); 
@@ -2086,7 +2119,7 @@ function parsePBP(intext) {
 			} 
 		} // if isAbbr(abbr) ... 
 		
-		if (correctAbbr(abbr, showOffense) && (WRTargetSplits || WRProductionSplits) && (noPlay===0 || withPens) &&
+		if (correctAbbr(abbr, otherAbbr, showOffense) && (WRTargetSplits || WRProductionSplits) && (noPlay===0 || withPens) &&
 			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
 			if (att==1 && WRID!=-1) {
 				if (WRID <= -1) {
@@ -2123,7 +2156,7 @@ function parsePBP(intext) {
 			}
 		}
 		
-		if (defPkgSplits && (showBothTeams || !correctAbbr(abbr, showOffense) || bothTeamsValid) && (noPlay === 0 || withPens) &&
+		if (defPkgSplits && (showBothTeams || correctAbbr(abbr, otherAbbr, !showOffense) || bothTeamsValid) && (noPlay === 0 || withPens) &&
 			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
 			defPkgSplitStats[defpkgid][0]++;
 			if (run) {
@@ -2137,7 +2170,8 @@ function parsePBP(intext) {
 			} // */
 		}
 		
-		if (conversions && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens) && (down == "3rd" || down == "4th")) {
+		if (conversions && (showBothTeams || correctAbbr(abbr, otherAbbr, showOffense)) && (noPlay === 0 || withPens) && (down == "3rd" || down == "4th") && !(punt || fieldGoal)) {
+			//alert(down + " and " + distToGo + " from the " + yardline + ". abbr = " + abbr + ", tmp = " + tmp);
 			downDistID = get3rd4thDownDistID(distToGo);
 			if (downDistID == -1) {
 				alert("downDistID == -1"); 
@@ -2154,7 +2188,7 @@ function parsePBP(intext) {
 			}
 		}
 		
-		if (individualWRStats && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens) &&
+		if (individualWRStats && (showBothTeams || correctAbbr(abbr, otherAbbr, showOffense)) && (noPlay === 0 || withPens) &&
 			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
 			index = -1;
 			
@@ -2196,7 +2230,7 @@ function parsePBP(intext) {
 			}
 		}
 
-		if (individualRunnerStats && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens) &&
+		if (individualRunnerStats && (showBothTeams || correctAbbr(abbr, otherAbbr, showOffense)) && (noPlay === 0 || withPens) &&
 			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo) && distToSuccess != -1) {
 			index = -1;
 
@@ -2219,7 +2253,7 @@ function parsePBP(intext) {
 			alert("!correctAbbr(" + abbr + ", " + showOffense + "), play number " + tmp);
 		} // */
 		
-		if (individualDefenderStats && (showBothTeams || !correctAbbr(abbr, showOffense) || bothTeamsValid) && (noPlay === 0 || withPens) &&
+		if (individualDefenderStats && (showBothTeams || correctAbbr(abbr, otherAbbr, !showOffense) || bothTeamsValid) && (noPlay === 0 || withPens) &&
 			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
 			index = -1;
 			
@@ -2293,7 +2327,7 @@ function parsePBP(intext) {
 			}
 		}
 		
-		if (passDistSplits && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens) && (attYard !== "" || dumpoff) &&
+		if (passDistSplits && (showBothTeams || correctAbbr(abbr, otherAbbr, showOffense)) && (noPlay === 0 || withPens) && (attYard !== "" || dumpoff) &&
 			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
 			var distID = -1;
 			if (dumpoff) {
@@ -2327,7 +2361,7 @@ function parsePBP(intext) {
 			}
 		}
 		
-		if (showSacks && (showBothTeams || correctAbbr(abbr, showOffense)) && (noPlay === 0 || withPens || throwAway)) {
+		if (showSacks && (showBothTeams || correctAbbr(abbr, otherAbbr, showOffense)) && (noPlay === 0 || withPens || throwAway)) {
 			var teamIndex;
 			if (showOffense) {
 				teamIndex = getTeamIndexFromAbbr(abbr);
@@ -2371,7 +2405,7 @@ function parsePBP(intext) {
 		}
 
 		// Only works with individual teams
-		if (kickoffStats_bol && correctAbbr(returnTeamAbbr, showOffense) && (noPlay === 0 || withPens) && kickoff) {
+		if (kickoffStats_bol && correctAbbr(returnTeamAbbr, kickerTeamAbbr, showOffense) && (noPlay === 0 || withPens) && kickoff) {
 			// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
 
 			// set the correct abbreviation
