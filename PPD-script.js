@@ -905,7 +905,7 @@ function makeSacksTable() {
 }
 
 function makeKickoffsTable(showOffense) {
-	// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
+	// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25, KRTDs
 
 	var teamType = "Kicking Team";
 	if (showOffense) {
@@ -913,24 +913,24 @@ function makeKickoffsTable(showOffense) {
 	}
 
 	// create new array for the combined stats from all teams
-	kickoffStatTotals = new Array(6);
-	for (var k=0; k<6; k++) {
+	kickoffStatTotals = new Array(7);
+	for (var k=0; k<7; k++) {
 		kickoffStatTotals[k] = 0;
 	}
 
-	var table = "<table border='1'><th>" + teamType + "</th><th>Kickoffs</th><th>Touchbacks</th><th>TB%</th><th>Avg kick returned from</th><th>Avg field position on returns</th><th>Yards Per Kick Return</th><th>KR <25yd line</th><th>\<25%</th><th>Avg field position</th>";
+	var table = "<table border='1'><th>" + teamType + "</th><th>Kickoffs</th><th>Touchbacks</th><th>TB%</th><th>Avg kick returned from</th><th>Avg field position on returns</th><th>Yards Per Kick Return</th><th>KRTD</th><th>KR <25yd line</th><th>\<25%</th><th>Avg field position</th>";
 
 	for (var i=0; i<abbrs.length; i++) {
-		table = table.concat("<tr><th>" + abbrs[i] + "</th><td>" + kickoffStats_array[i][0] + "</td><td>" + kickoffStats_array[i][1] + "</td><td>" + calculatePercent(kickoffStats_array[i][1], kickoffStats_array[i][0]) + "%</td><td>" + calculateAverage(kickoffStats_array[i][3], kickoffStats_array[i][2]) + "</td><td>" + calculateAverage(kickoffStats_array[i][4], kickoffStats_array[i][2]) + "</td><td>" + calculateAverage(kickoffStats_array[i][4]-kickoffStats_array[i][3], kickoffStats_array[i][2]) + "</td><td>" + kickoffStats_array[i][5] + "</td><td>" + calculatePercent(kickoffStats_array[i][5], kickoffStats_array[i][2]) + "%</td><td>" + calculateAverage((kickoffStats_array[i][1] * 25) + kickoffStats_array[i][4], kickoffStats_array[i][0]) + "</td>");
+		table = table.concat("<tr><th>" + abbrs[i] + "</th><td>" + kickoffStats_array[i][0] + "</td><td>" + kickoffStats_array[i][1] + "</td><td>" + calculatePercent(kickoffStats_array[i][1], kickoffStats_array[i][0]) + "%</td><td>" + calculateAverage(kickoffStats_array[i][3], kickoffStats_array[i][2]) + "</td><td>" + calculateAverage(kickoffStats_array[i][4], kickoffStats_array[i][2]) + "</td><td>" + calculateAverage(kickoffStats_array[i][4]-kickoffStats_array[i][3], kickoffStats_array[i][2]) + "</td><td>" + kickoffStats_array[i][6] + "</td><td>" + kickoffStats_array[i][5] + "</td><td>" + calculatePercent(kickoffStats_array[i][5], kickoffStats_array[i][2]) + "%</td><td>" + calculateAverage((kickoffStats_array[i][1] * 25) + kickoffStats_array[i][4], kickoffStats_array[i][0]) + "</td>");
 
-		for (var j=0; j<6; j++) {
+		for (var j=0; j<7; j++) {
 			kickoffStatTotals[j] += kickoffStats_array[i][j];
 		}
 	}
 
 	if (abbrs.length > 1) {
 		// don't do a "total" row if there is only one team
-		table = table.concat("<tr><td>Total</td><td>" + kickoffStatTotals[0] + "</td><td>" + kickoffStatTotals[1] + "</td><td>" + calculatePercent(kickoffStatTotals[1], kickoffStatTotals[0]) + "%</td><td>" + calculateAverage(kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4]-kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + kickoffStatTotals[5] + "</td><td>" + calculatePercent(kickoffStatTotals[5], kickoffStatTotals[2]) + "%</td><td>" + calculateAverage((kickoffStatTotals[1] * 25) + kickoffStatTotals[4], kickoffStatTotals[0]) + "</td>");
+		table = table.concat("<tr><td>Total</td><td>" + kickoffStatTotals[0] + "</td><td>" + kickoffStatTotals[1] + "</td><td>" + calculatePercent(kickoffStatTotals[1], kickoffStatTotals[0]) + "%</td><td>" + calculateAverage(kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4]-kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + kickoffStatTotals[6] + "</td><td>" + kickoffStatTotals[5] + "</td><td>" + calculatePercent(kickoffStatTotals[5], kickoffStatTotals[2]) + "%</td><td>" + calculateAverage((kickoffStatTotals[1] * 25) + kickoffStatTotals[4], kickoffStatTotals[0]) + "</td>");
 	}
 
 	table = table.concat("</table>");
@@ -1246,7 +1246,7 @@ function parsePBP(intext) {
 	var name1, name2, abbr1, abbr2, defAbbr, name1Index, name2Index, name1AllTeamsIndex, name2AllTeamsIndex;
 	var bothTeamsValid;
 	var kickoff=0, onsides=0, fieldGoal=0, punt=0;
-	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot, kickReturnInside25;
+	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot, kickReturnInside25, kickReturnTouchdown;
 	var fieldGoalDist, fieldGoalMade, fieldGoalBlocked;
 
 	readcount++;
@@ -2014,7 +2014,7 @@ function parsePBP(intext) {
 		}
 		else { // non-scrimmage play
 			//alert("SPECIAL TEAMS! kickoff = " + kickoff + ", onsides = " + onsides + ", fieldGoal = " + fieldGoal + ", punt = " + punt + ", tmp = " + tmp);
-			var kickerPtr1, kickerPtr2, kickerTeamPtr1, kickerTeamPtr2, kickDistPtr1, kickDistPtr2, returnDistPtr1, returnDistPtr2;
+			var kickerPtr1, kickerPtr2, kickerTeamPtr1, kickerTeamPtr2, kickDistPtr1, kickDistPtr2, returnDistPtr1, returnDistPtr2, krtdPtr;
 			var returnerPtr1, returnerPtr2;
 			var gotKickerInfo = 0;
 			var kickDistStr, returnDistStr, returnYardLine, returnFieldSide;
@@ -2102,6 +2102,11 @@ function parsePBP(intext) {
 									}
 									else {
 										kickReturnInside25 = 0;
+									}
+
+									krtdPtr = intext.indexOf("TOUCHDOWN!", returnDistPtr2);
+									if (krtdPtr != -1 && krtdPtr < endptr) {
+										kickReturnTouchdown = 1;
 									}
 									//alert("kickoff returned to the '" + returnFieldSide + "' '" + returnYardLine + "', '" + kickoffReturnSpot + "' yards from the goal line");
 								}
@@ -2449,7 +2454,7 @@ function parsePBP(intext) {
 
 		// Only works with individual teams
 		if (kickoffStats_bol && correctAbbr(returnTeamAbbr, kickerTeamAbbr, showOffense) && (noPlay === 0 || withPens) && kickoff) {
-			// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
+			// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25, KRTDs
 
 			// set the correct abbreviation
 			// TODO: find a more efficient way to do this across all tables
@@ -2470,6 +2475,9 @@ function parsePBP(intext) {
 				if (kickReturnInside25) {
 					kickoffStats_array[teamIndex][5]++; // increment kicks returned short of the 25
 				}
+				if (kickReturnTouchdown) {
+					kickoffStats_array[teamIndex][6]++; // increment kick return touchdowns
+				}
 			}
 		}
 
@@ -2479,6 +2487,7 @@ function parsePBP(intext) {
 		onsides = 0;
 		fieldGoal = 0;
 		punt = 0;
+		kickReturnTouchdown = 0;
 		//startPtr=endptr+21;
 		WRID=-1;
 		RBpID = -1;
@@ -2719,8 +2728,8 @@ function initializeMultiTeamArrays() {
 
 	kickoffStats_array = new Array(abbrs.length);
 	for (a=0; a<abbrs.length; a++) {
-		kickoffStats_array[a] = new Array(6); // kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25
-		for (b=0; b<6; b++) {
+		kickoffStats_array[a] = new Array(7); // kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25, KRTDs
+		for (b=0; b<7; b++) {
 			kickoffStats_array[a][b] = 0;
 		}
 	}
