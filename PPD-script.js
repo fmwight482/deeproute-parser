@@ -1430,7 +1430,10 @@ function parsePBP(intext) {
 			yardline = intext.substring(ptr7+2, ptr5); // get the yardline in string form (e.g. "Opp 43")
 
 			if (fieldGoal) {
+				endptr = endSpecialTeamsPtr;
+
 				var FGDistPtr1, FGDistPtr2, FGDecimalDistPtr1, FGDecimalDistPtr2, FGMadePtr1, FGMadePtr2, FGMadeStr, FGDistYards, FGDistDecimals;
+
 				FGDistPtr1 = intext.indexOf(" coming on for a ", preptr);
 				if (FGDistPtr1 != -1 && FGDistPtr1 < endptr) {
 					FGDistPtr1 += 37;
@@ -1463,7 +1466,7 @@ function parsePBP(intext) {
 				}
 			}
 			else if (punt) {
-
+				endptr = endSpecialTeamsPtr;
 			}
 			else { // not a special teams scrimmage play
 				ptr4=intext.indexOf("a gain of", preptr); // find next "a gain of", if it exists and is before the end move it to ptr5
