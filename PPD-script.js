@@ -1247,6 +1247,7 @@ function parsePBP(intext) {
 	var bothTeamsValid;
 	var kickoff=0, onsides=0, fieldGoal=0, punt=0;
 	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot, kickReturnInside25;
+	var fieldGoalDist, fieldGoalMade, fieldGoalBlocked;
 
 	readcount++;
 	newDiv = document.getElementById('scout_count');
@@ -1429,7 +1430,37 @@ function parsePBP(intext) {
 			yardline = intext.substring(ptr7+2, ptr5); // get the yardline in string form (e.g. "Opp 43")
 
 			if (fieldGoal) {
+				var FGDistPtr1, FGDistPtr2, FGDecimalDistPtr1, FGDecimalDistPtr2, FGMadePtr1, FGMadePtr2, FGMadeStr, FGDistYards, FGDistDecimals;
+				FGDistPtr1 = intext.indexOf(" coming on for a ", preptr);
+				if (FGDistPtr1 != -1 && FGDistPtr1 < endptr) {
+					FGDistPtr1 += 37;
+					FGDistPtr2 = intext.indexOf("</span>", FGDistPtr1);
+					FGDistYards = intext.substring(FGDistPtr1, FGDistPtr2);
 
+					FGDecimalDistPtr1 = intext.indexOf("class='supz'>", FGDistPtr2);
+					FGDecimalDistPtr1 += 13;
+					FGDecimalDistPtr2 = intext.indexOf("</span>", FGDecimalDistPtr1);
+					FGDistDecimals = intext.substring(FGDecimalDistPtr1, FGDecimalDistPtr2);
+
+					fieldGoalDist = parseInt(FGDistYards) + parseInt(FGDistDecimals)/100;
+
+					FGMadePtr1 = intext.indexOf("</span> away is ", FGDistPtr2);
+					if (FGMadePtr1 != -1 && FGMadePtr1 < endptr) {
+						FGMadePtr1 += 16;
+						FGMadePtr2 = intext.indexOf("!", FGMadePtr1);
+						FGMadeStr = intext.substring(FGMadePtr1, FGMadePtr2);
+
+						if (FGMadeStr === "good") {
+							fieldGoalMade = 1;
+						}
+						else if (FGMadeStr === "no good") {
+							fieldGoalMade = 0;
+						}
+						else {
+							alert("field goal neither good nor no good: '" + FGMadeStr + "'");
+						}
+					}
+				}
 			}
 			else if (punt) {
 
