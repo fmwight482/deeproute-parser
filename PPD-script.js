@@ -1417,7 +1417,7 @@ function parsePBP(intext) {
 			ptr7=intext.indexOf("</b>", ptr4+3);
 			gameTime=intext.substring(ptr4+3, ptr7); // store string with quarter and time remaining. 
 
-			//alert("tmp = " + tmp + ", gameTime = " + gameTime);
+			//alert("tmp = " + tmp + ", gameTime = " + gameTime + ", abbr = " + abbr + ", otherAbbr = " + otherAbbr);
 
 			ptr4=intext.indexOf("<b>", ptr7+4); // third bolding: down and distance
 			//ptr7=intext.indexOf("</b>", ptr4+3); 
@@ -2242,6 +2242,8 @@ function parsePBP(intext) {
 		if (individualWRStats && (showBothTeams || correctAbbr(abbr, otherAbbr, showOffense)) && (noPlay === 0 || withPens) &&
 			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
 			index = -1;
+
+			//alert("abbr = " + abbr + ", tmp = " + tmp + ", GCOVdName = " + GCOVdName + ", WRName = " + WRName);
 			
 			// player ID, name, 1st opt passes, targets, yards, successes, GCOVs, INTs, Drops, dump passes, dist downfield, position, catches
 			if (GCOVdpID != -1) {
@@ -2484,6 +2486,8 @@ function parsePBP(intext) {
 			}
 		}
 
+		// reset all variables for the next play
+
 		isTouchdown = 0;
 		isSuccess = 0;
 		kickoff = 0;
@@ -2491,11 +2495,26 @@ function parsePBP(intext) {
 		fieldGoal = 0;
 		punt = 0;
 		kickReturnTouchdown = 0;
-		//startPtr=endptr+21;
-		WRID=-1;
+		pass = 0;
+		att = 0;
+		comp = 0;
+		sack = 0;
+		run = 0;
+		handoff = 0;
+		INT = 0;
+		penalty = 0;
+		noPlay = 0;
+		WRID = -1;
+		WRpID = -1;
 		RBpID = -1;
 		defPlaymakerpID = -1;
-		attYard="";
+		attYard = "";
+		GCOV=0; 
+		GCOVd=-1; 
+		GCOVdID=-1; 
+		GCOVdpID=-1;
+		GCOVerID=-1;
+
 		startThis=startNext;
 		preptr=endptr+21;
 
