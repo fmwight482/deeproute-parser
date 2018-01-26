@@ -335,6 +335,27 @@ function getDefID(def) {
 	return id;
 }
 
+function getFieldGoalDistId(dist) {
+	// PAT, 0-20, 20-30, 30-40, 40-50, 50+
+	var id = -1;
+	if (dist < 20) {
+		id = 1;
+	}
+	else if (dist < 30) {
+		id = 2;
+	}
+	else if (dist < 40) {
+		id = 3;
+	}
+	else if (id < 50) {
+		id = 4;
+	}
+	else {
+		id = 5;
+	}
+	return id;
+}
+
 function checkWRList(id, name, position) {
 	var index = -1;
 	var pos = position.substring(0, 2);
@@ -904,7 +925,7 @@ function makeSacksTable() {
 	return table;
 }
 
-function makeKickoffsTable(showOffense) {
+function makeKickoffsTable() {
 	// kickoffs, touchbacks, returned kicks, net landing spot of returned kicks, net returned spot of returned kicks, kicks returned short of the 25, KRTDs
 
 	var teamType = "Kicking Team";
@@ -941,6 +962,44 @@ function makeKickoffsTable(showOffense) {
 	var row = "<tr><td>" + statArray[0] + "</td><td>" + statArray[1] + "</td><td>" + calculatePercent(statArray[1], statArray[0]) + "%</td><td>" + calculateAverage(statArray[3], statArray[2]) + "</td><td>" + calculateAverage(statArray[4], statArray[2]) + "</td><td>" + calculateAverage(statArray[4]-statArray[3], statArray[2]) + "</td><td>" + statArray[5] + "</td><td>" + calculatePercent(statArray[5], statArray[2]) + "%</td><td>" + calculateAverage((statArray[1] * 25) + statArray[4], statArray[0]) + "</td>";
 	return row;
 } // */
+
+function makeFieldGoalsTable() {
+	// PAT, 0-20, 20-30, 30-40, 40-50, 50+
+	// attempted, made, blocked
+
+	// create new array for the combined stats from all teams
+	fieldGoalStatTotals = new Array(6);
+	for (var k=0; k<6; k++) {
+		fieldGoalStatTotals[k] = new Array(3);
+		for (var l=0; l<3; l++) {
+			fieldGoalStatTotals[k][l] = 0;
+		}
+	}
+
+	var table = "<table border='1'><th></th><th colspan='4'>Extra Points</th><th colspan='4'>0-20 yards</th><th colspan='4'>20-30 yards</th><th colspan='4'>30-40 yards</th><th colspan='4'>40-50 yards</th><th colspan='4'>50+ yards</th>" + "<tr><th></th><th>XPA</th><th>XPM</th><th>XP%</th><th>XP BLK</th><th>FGA</th><th>FGM</th><th>FG%</th><th>FG BLK</th><th>FGA</th><th>FGM</th><th>FG%</th><th>FG BLK</th><th>FGA</th><th>FGM</th><th>FG%</th><th>FG BLK</th><th>FGA</th><th>FGM</th><th>FG%</th><th>FG BLK</th><th>FGA</th><th>FGM</th><th>FG%</th><th>FG BLK</th>";
+
+	for (var i=0; i<abbrs.length; i++) {
+		table = table.concat("<tr><th>" + abbrs[i] + "</th>");
+		for (var m=0; m<6; m++) {
+			table = table.concat("<td>" + fieldGoalStats_array[i][m][0] + "</td><td>" + fieldGoalStats_array[i][m][1] + "</td><td>" + calculatePercent(fieldGoalStats_array[i][m][1], fieldGoalStats_array[i][m][0]) + "%</td><td>" + fieldGoalStats_array[i][m][2] + "</td>");
+
+			for (var n=0; n<3; n++) {
+				fieldGoalStatTotals[m][n] += fieldGoalStats_array[i][m][n];
+			}
+		}
+	}
+
+	if (abbrs.length > 1) {
+		// don't do a "total" row if there is only one team
+		table = table.concat("<tr><th>Total</th>");
+		for (var m=0; m<6; m++) {
+			table = table.concat("<td>" + fieldGoalStatTotals[m][0] + "</td><td>" + fieldGoalStatTotals[m][1] + "</td><td>" + calculatePercent(fieldGoalStatTotals[m][1], fieldGoalStatTotals[m][0]) + "%</td><td>" + fieldGoalStatTotals[m][2] + "</td>");
+		}
+	}
+
+	table = table.concat("</table>");
+	return table;
+}
 
 function getPassDistRowHeader(i) {
 	var header = "";
@@ -1231,8 +1290,8 @@ function makeTableLable(name) {
 }
 
 function parsePBP(intext) {
-	var startPtr=0, playPtr, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9;
-	var kickoffPtr, onsidesPtr, fieldGoalPtr, puntPtr, endSpecialTeamsPtr;
+	var startPtr=0, playPtr, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9, scorePtr;
+	var kickoffPtr, onsidesPtr, fieldGoalPtr, puntPtr, endSpecialTeamsPtr, extraPointPtr;
 	var pkg, defpkg, form, play, abbr, otherAbbr, yard, yard2, yardline, comp, scramble, INT, incomplete, loss, isTouchdown, isSuccess; 
 	var down, togo, distToGo=0, endToGo, gameTime, penalty, noPlay=0, tmp=0, endptr, dumpoff, first_read, preptr=0; 
 	var pkgid, defpkgid, formid, playid, downDistID, index, run, handoff, sneak, pass, att, tmparr, sack, GCOV;
@@ -1245,7 +1304,7 @@ function parsePBP(intext) {
 	var attempts=0, scrambles=0, sacks=0; 
 	var name1, name2, abbr1, abbr2, defAbbr, name1Index, name2Index, name1AllTeamsIndex, name2AllTeamsIndex;
 	var bothTeamsValid;
-	var kickoff=0, onsides=0, fieldGoal=0, punt=0;
+	var kickoff=0, onsides=0, fieldGoal=0, punt=0, extraPoint=0;
 	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot, kickReturnInside25, kickReturnTouchdown;
 	var fieldGoalDist, fieldGoalMade, fieldGoalBlocked;
 
@@ -1363,8 +1422,30 @@ function parsePBP(intext) {
 
 			ptr4=intext.indexOf("ouchdown", ptr3); // find next touchdown after start of the final PBP line 
 			if (ptr4>ptr3 && ptr4 < endptr) { // if the touchdown is after the start of the final PBP line and before the package info
-				isTouchdown=1; 
-				ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr-5); // sets ptr3 to the final PBP line  
+				isTouchdown=1;
+				ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr-5); // sets ptr3 to the final PBP line
+
+				// locate the extra point attempt, if any
+				scorePtr = intext.indexOf("<tr><td bgcolor=\"#eeee99\">", ptr4); // find the score indicator after the touchdown
+				extraPointPtr=intext.indexOf("Extra Point attempt by ", preptr);
+				if (extraPointPtr!=-1 && extraPointPtr < scorePtr) {
+					ptr8=intext.indexOf(" is Good!", extraPointPtr);
+					if (ptr8!=-1 && ptr8 < scorePtr) {
+						fieldGoalMade = 1;
+						extraPoint = 1;
+					}
+					else {
+						ptr9=intext.indexOf(" is No Good!", extraPointPtr);
+						if (ptr9!=-1 && ptr9 < scorePtr) {
+							fieldGoalMade = 0;
+							extraPoint = 1;
+						}
+						else {
+							alert("Extra point attempt neither Good nor No Good! tmp = " + tmp);
+						}
+					}
+					//alert("Extra point attempt! tmp = " + tmp + ", isTouchdown = " + isTouchdown);
+				}
 			} // if ptr4>ptr3 ...
 			coveragePtr=intext.lastIndexOf("was the man covering on the play"); 
 			if (coveragePtr!=-1 && coveragePtr < endptr) {
@@ -1417,7 +1498,9 @@ function parsePBP(intext) {
 			ptr7=intext.indexOf("</b>", ptr4+3);
 			gameTime=intext.substring(ptr4+3, ptr7); // store string with quarter and time remaining. 
 
-			//alert("tmp = " + tmp + ", gameTime = " + gameTime + ", abbr = " + abbr + ", otherAbbr = " + otherAbbr);
+			/*if (tmp > 157 && tmp < 163) {
+				alert("tmp = " + tmp + ", gameTime = " + gameTime + ", abbr = " + abbr + ", otherAbbr = " + otherAbbr);
+			} // */
 
 			ptr4=intext.indexOf("<b>", ptr7+4); // third bolding: down and distance
 			//ptr7=intext.indexOf("</b>", ptr4+3); 
@@ -1428,6 +1511,10 @@ function parsePBP(intext) {
 
 			ptr5=intext.indexOf(")", ptr7+2);
 			yardline = intext.substring(ptr7+2, ptr5); // get the yardline in string form (e.g. "Opp 43")
+
+			/***************************/
+			/******* Field Goals *******/
+			/***************************/
 
 			if (fieldGoal) {
 				endptr = endSpecialTeamsPtr;
@@ -1463,11 +1550,23 @@ function parsePBP(intext) {
 							alert("field goal neither good nor no good: '" + FGMadeStr + "'");
 						}
 					}
+
+					//alert("found field goal attempt. distance = " + fieldGoalDist + ", time = " + gameTime + ", tmp = " + tmp);
 				}
 			}
+
+			/***************************/
+			/********** Punts **********/
+			/***************************/
+
 			else if (punt) {
 				endptr = endSpecialTeamsPtr;
 			}
+
+			/***************************/
+			/***** Offensive Plays *****/
+			/***************************/
+
 			else { // not a special teams scrimmage play
 				ptr4=intext.indexOf("a gain of", preptr); // find next "a gain of", if it exists and is before the end move it to ptr5
 				loss=0;
@@ -2486,6 +2585,38 @@ function parsePBP(intext) {
 			}
 		}
 
+		if (fieldGoalStats_bol && (showBothTeams || correctAbbr(abbr, otherAbbr, showOffense)) && (noPlay === 0 || withPens) && (fieldGoal || extraPoint)) {
+			// PAT, 0-20, 20-30, 30-40, 40-50, 50+
+			// attempted, made, blocked
+			var teamIndex;
+			if (showOffense) {
+				teamIndex = getTeamIndexFromAbbr(abbr);
+			}
+			else if (abbr == abbr1) {
+				teamIndex = getTeamIndexFromAbbr(abbr2);
+			}
+			else {
+				teamIndex = getTeamIndexFromAbbr(abbr1);
+			}
+
+			var fieldGoalDistId;
+			if (extraPoint) {
+				fieldGoalDistId = 0;
+			}
+			else {
+				fieldGoalDistId = getFieldGoalDistId();
+				//alert("recording field goal attempt! distance = " + fieldGoalDist + ", gameTime = " + gameTime);
+			}
+
+			fieldGoalStats_array[teamIndex][fieldGoalDistId][0]++; // increment field goal attempts
+			if (fieldGoalMade) {
+				fieldGoalStats_array[teamIndex][fieldGoalDistId][1]++; // increment made field goals
+			}
+			if (fieldGoalBlocked) {
+				fieldGoalStats_array[teamIndex][fieldGoalDistId][2]++; // increment blocked field goals
+			}
+		}
+
 		// reset all variables for the next play
 
 		isTouchdown = 0;
@@ -2494,6 +2625,10 @@ function parsePBP(intext) {
 		onsides = 0;
 		fieldGoal = 0;
 		punt = 0;
+		extraPoint = 0;
+		fieldGoalMade = 0;
+		fieldGoalBlocked = 0;
+		fieldGoalDist = -1;
 		kickReturnTouchdown = 0;
 		pass = 0;
 		att = 0;
@@ -2603,7 +2738,10 @@ function parsePBP(intext) {
 			tables = tables.concat(makeTableLable("Sack Stats") + makeSacksTable());
 		}
 		if (kickoffStats_bol) {
-			tables = tables.concat(makeTableLable("Kickoff Stats") + makeKickoffsTable(showOffense));
+			tables = tables.concat(makeTableLable("Kickoff Stats") + makeKickoffsTable());
+		}
+		if (fieldGoalStats_bol) {
+			tables = tables.concat(makeTableLable("Field Goal Stats") + makeFieldGoalsTable());
 		}
 		
 		newDiv.innerHTML = tables;
@@ -2738,7 +2876,7 @@ function initializeArrays() {
 
 // initialize arrays for tables with a separate row for each team
 function initializeMultiTeamArrays() {
-	var a, b;
+	var a, b, c;
 
 	sackStats = new Array(abbrs.length);
 	for (a=0; a<abbrs.length; a++) {
@@ -2755,6 +2893,25 @@ function initializeMultiTeamArrays() {
 			kickoffStats_array[a][b] = 0;
 		}
 	}
+
+	fieldGoalStats_array = new Array(abbrs.length);
+	for (a=0; a<abbrs.length; a++) {
+		fieldGoalStats_array[a] = new Array(6); // PAT, 0-20, 20-30, 30-40, 40-50, 50+
+		for (b=0; b<6; b++) {
+			fieldGoalStats_array[a][b] = new Array(3); // attempted, made, blocked
+			for (c=0; c<3; c++) {
+				fieldGoalStats_array[a][b][c] = 0;
+			}
+		}
+	}
+	
+	/*puntStats_array = new Array(abbrs.length);
+	for (a=0; a<abbrs.length; a++) {
+		puntStats_array[a] = new Array(3); // own goal to own 40, own 40 to opp 40, opp 40 to opp goal
+		for (b=0; b<3; b++) {
+			puntStats_array[a][b] = new Array(); // punts, gross yards, punt landing spot, 
+		}
+	} // */
 }
 
 
@@ -3087,6 +3244,7 @@ function selectStatTables() {
 	var passDistStatsDef = "<span title='displays completion percentage, interception rate, average YAC, and other statistics for passes of various distances'>Pass results by distance</span>";
 	var passRushStatsDef = "<span title='displays sacks, throwaways, scrambles, and other plays which help guage how much pressure is applied to the quarterback'>Pressure stats</span>";
 	var kickoffStatsDef = "<span title='displays stats for kickoffs'>Kickoff stats</span>";
+	var fieldGoalStatsDef = "<span title='displays statistics for field goals and extra points, split by distance'>Field Goal Stats</span>";
 
 	var newtd5 = document.createElement('td');
 	newtd5.setAttribute('colspan', '4');
@@ -3102,6 +3260,7 @@ function selectStatTables() {
 		'<span class="teamStatHeader"><b>Team Level Statistics</b></span><br>' + 
 		'<input type="checkbox" name="other" id="sacks"> ' + passRushStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="kickoffs"> ' + kickoffStatsDef + ' <br>' + 
+		'<input type="checkbox" name="other" id="fieldGoals"> ' + fieldGoalStatsDef + ' <br>' + 
 		'<span class="playerStatHeader"><b>Individual Player Statistics</b></span><br>' + 
 		'<input type="checkbox" name="other" id="recievers"> ' + WRStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="runners"> ' + RBStatsDef + ' <br>' + 
@@ -3181,6 +3340,7 @@ function startFunc ()
 		passDistSplits = 0;
 		showSacks = 0;
 		kickoffStats_bol = 0;
+		fieldGoalStats_bol = 0;
 		
 		selectedTable = 0;
 		
@@ -3226,6 +3386,10 @@ function startFunc ()
 		}
 		if (document.getElementById("kickoffs").checked) {
 			kickoffStats_bol = 1;
+			selectedTable = 1;
+		}
+		if (document.getElementById("fieldGoals").checked) {
+			fieldGoalStats_bol = 1;
 			selectedTable = 1;
 		}
 		
