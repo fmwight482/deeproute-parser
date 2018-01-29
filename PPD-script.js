@@ -347,7 +347,7 @@ function getFieldGoalDistId(dist) {
 	else if (dist < 40) {
 		id = 3;
 	}
-	else if (id < 50) {
+	else if (dist < 50) {
 		id = 4;
 	}
 	else {
@@ -976,12 +976,12 @@ function makeFieldGoalsTable() {
 		}
 	}
 
-	var table = "<table border='1'><th></th><th colspan='4'>Extra Points</th><th colspan='4'>0-20 yards</th><th colspan='4'>20-30 yards</th><th colspan='4'>30-40 yards</th><th colspan='4'>40-50 yards</th><th colspan='4'>50+ yards</th>" + "<tr><th></th><th>XPA</th><th>XPM</th><th>XP%</th><th>XP BLK</th><th>FGA</th><th>FGM</th><th>FG%</th><th>FG BLK</th><th>FGA</th><th>FGM</th><th>FG%</th><th>FG BLK</th><th>FGA</th><th>FGM</th><th>FG%</th><th>FG BLK</th><th>FGA</th><th>FGM</th><th>FG%</th><th>FG BLK</th><th>FGA</th><th>FGM</th><th>FG%</th><th>FG BLK</th>";
+	var table = "<table border='1'><th></th><th colspan='4'>Extra Points</th><th colspan='4'>0-20 yards</th><th colspan='4'>20-30 yards</th><th colspan='4'>30-40 yards</th><th colspan='4'>40-50 yards</th><th colspan='4'>50+ yards</th>" + "<tr><th></th><th>XPM</th><th>XPA</th><th>XP%</th><th>XP BLK</th><th>FGM</th><th>FGA</th><th>FG%</th><th>FG BLK</th><th>FGM</th><th>FGA</th><th>FG%</th><th>FG BLK</th><th>FGM</th><th>FGA</th><th>FG%</th><th>FG BLK</th><th>FGM</th><th>FGA</th><th>FG%</th><th>FG BLK</th><th>FGM</th><th>FGA</th><th>FG%</th><th>FG BLK</th>";
 
 	for (var i=0; i<abbrs.length; i++) {
 		table = table.concat("<tr><th>" + abbrs[i] + "</th>");
 		for (var m=0; m<6; m++) {
-			table = table.concat("<td>" + fieldGoalStats_array[i][m][0] + "</td><td>" + fieldGoalStats_array[i][m][1] + "</td><td>" + calculatePercent(fieldGoalStats_array[i][m][1], fieldGoalStats_array[i][m][0]) + "%</td><td>" + fieldGoalStats_array[i][m][2] + "</td>");
+			table = table.concat("<td>" + fieldGoalStats_array[i][m][1] + "</td><td>" + fieldGoalStats_array[i][m][0] + "</td><td>" + calculatePercentOrNone(fieldGoalStats_array[i][m][1], fieldGoalStats_array[i][m][0]) + "%</td><td>" + fieldGoalStats_array[i][m][2] + "</td>");
 
 			for (var n=0; n<3; n++) {
 				fieldGoalStatTotals[m][n] += fieldGoalStats_array[i][m][n];
@@ -993,7 +993,7 @@ function makeFieldGoalsTable() {
 		// don't do a "total" row if there is only one team
 		table = table.concat("<tr><th>Total</th>");
 		for (var m=0; m<6; m++) {
-			table = table.concat("<td>" + fieldGoalStatTotals[m][0] + "</td><td>" + fieldGoalStatTotals[m][1] + "</td><td>" + calculatePercent(fieldGoalStatTotals[m][1], fieldGoalStatTotals[m][0]) + "%</td><td>" + fieldGoalStatTotals[m][2] + "</td>");
+			table = table.concat("<td>" + fieldGoalStatTotals[m][1] + "</td><td>" + fieldGoalStatTotals[m][0] + "</td><td>" + calculatePercentOrNone(fieldGoalStatTotals[m][1], fieldGoalStatTotals[m][0]) + "%</td><td>" + fieldGoalStatTotals[m][2] + "</td>");
 		}
 	}
 
@@ -1074,6 +1074,15 @@ function calculateAverage(numerator, denominator) {
 		result = numerator / denominator;
 	}
 	return result.toFixed(1);
+}
+
+function calculatePercentOrNone(numerator, denominator) {
+	if (denominator === 0) {
+		return "-";
+	}
+	else {
+		return calculatePercent(numerator, denominator);
+	}
 }
 
 function makeConversionTable() {
@@ -1390,18 +1399,25 @@ function parsePBP(intext) {
 
 		if (kickoffPtr >= 0 && kickoffPtr < endSpecialTeamsPtr && (kickoffPtr < playPtr || playPtr < 0)) {
 			kickoff = 1;
+			endptr = endSpecialTeamsPtr;
 			//alert("Found kickoff: " + tmp);
 		}
 		else if (onsidesPtr >= 0 && onsidesPtr < endSpecialTeamsPtr && (onsidesPtr < playPtr || playPtr < 0)) {
 			onsides = 1;
+			endptr = endSpecialTeamsPtr;
 			//alert("Found onsides kick: " + tmp);
 		}
 		else if (fieldGoalPtr >= 0 && fieldGoalPtr < endSpecialTeamsPtr && (fieldGoalPtr < playPtr || playPtr < 0)) {
 			fieldGoal = 1;
+			endptr = endSpecialTeamsPtr;
 		}
 		else if (puntPtr >= 0 && puntPtr < endSpecialTeamsPtr && (puntPtr < playPtr || playPtr < 0)) {
 			punt = 1;
+			endptr = endSpecialTeamsPtr;
 			//alert("Found punt! tmp = " + tmp);
+		}
+		else {
+			endptr=playPtr;
 		}
 
 		if (!(kickoff || onsides || fieldGoal || punt) && playPtr < 0) {
@@ -1410,7 +1426,7 @@ function parsePBP(intext) {
 			break; // if no more offensive plays, leave 
 		}
 		else if (!(kickoff || onsides) && playPtr >= 0) { // if a scrimmage play
-			endptr=playPtr;
+			//endptr=playPtr;
 
 			ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr); // find start of the final PBP line from this play 
 
@@ -1517,7 +1533,7 @@ function parsePBP(intext) {
 			/***************************/
 
 			if (fieldGoal) {
-				endptr = endSpecialTeamsPtr;
+				//endptr = endSpecialTeamsPtr;
 
 				var FGDistPtr1, FGDistPtr2, FGDecimalDistPtr1, FGDecimalDistPtr2, FGMadePtr1, FGMadePtr2, FGMadeStr, FGDistYards, FGDistDecimals;
 
@@ -1551,7 +1567,7 @@ function parsePBP(intext) {
 						}
 					}
 
-					//alert("found field goal attempt. distance = " + fieldGoalDist + ", time = " + gameTime + ", tmp = " + tmp);
+					//alert("found field goal attempt. distance = " + fieldGoalDist + ", time = " + gameTime + ", tmp = " + tmp + ", abbr = " + abbr);
 				}
 			}
 
@@ -1560,7 +1576,7 @@ function parsePBP(intext) {
 			/***************************/
 
 			else if (punt) {
-				endptr = endSpecialTeamsPtr;
+				//endptr = endSpecialTeamsPtr;
 			}
 
 			/***************************/
@@ -2209,6 +2225,29 @@ function parsePBP(intext) {
 									krtdPtr = intext.indexOf("TOUCHDOWN!", returnDistPtr2);
 									if (krtdPtr != -1 && krtdPtr < endptr) {
 										kickReturnTouchdown = 1;
+										isTouchdown = 1;
+
+										// locate the extra point attempt, if any
+										scorePtr = intext.indexOf("<tr><td bgcolor=\"#eeee99\">", ptr4); // find the score indicator after the touchdown
+										extraPointPtr=intext.indexOf("Extra Point attempt by ", preptr);
+										if (extraPointPtr!=-1 && extraPointPtr < scorePtr) {
+											ptr8=intext.indexOf(" is Good!", extraPointPtr);
+											if (ptr8!=-1 && ptr8 < scorePtr) {
+												fieldGoalMade = 1;
+												extraPoint = 1;
+											}
+											else {
+												ptr9=intext.indexOf(" is No Good!", extraPointPtr);
+												if (ptr9!=-1 && ptr9 < scorePtr) {
+													fieldGoalMade = 0;
+													extraPoint = 1;
+												}
+												else {
+													alert("Extra point attempt neither Good nor No Good! tmp = " + tmp);
+												}
+											}
+											alert("Extra point attempt after KRTD! tmp = " + tmp + ", isTouchdown = " + isTouchdown);
+										}
 									}
 									//alert("kickoff returned to the '" + returnFieldSide + "' '" + returnYardLine + "', '" + kickoffReturnSpot + "' yards from the goal line");
 								}
@@ -2585,6 +2624,9 @@ function parsePBP(intext) {
 			}
 		}
 
+		// TODO: this needs to be adjusted to account for extra points on kick return (and punt return?) touchdowns
+		// the following commented line is an initial attempt towards that end
+		// if (fieldGoalStats_bol && (showBothTeams || ((kickoff && correctAbbr(returnTeamAbbr, kickerTeamAbbr, showOffense)) || (!kickoff && correctAbbr(abbr, otherAbbr, showOffense)))) && (noPlay === 0 || withPens) && (fieldGoal || extraPoint)) {
 		if (fieldGoalStats_bol && (showBothTeams || correctAbbr(abbr, otherAbbr, showOffense)) && (noPlay === 0 || withPens) && (fieldGoal || extraPoint)) {
 			// PAT, 0-20, 20-30, 30-40, 40-50, 50+
 			// attempted, made, blocked
@@ -2604,8 +2646,8 @@ function parsePBP(intext) {
 				fieldGoalDistId = 0;
 			}
 			else {
-				fieldGoalDistId = getFieldGoalDistId();
-				//alert("recording field goal attempt! distance = " + fieldGoalDist + ", gameTime = " + gameTime);
+				fieldGoalDistId = getFieldGoalDistId(fieldGoalDist);
+				//alert("recording field goal attempt! distance = " + fieldGoalDist + ", distId = " + fieldGoalDistId + ", gameTime = " + gameTime);
 			}
 
 			fieldGoalStats_array[teamIndex][fieldGoalDistId][0]++; // increment field goal attempts
