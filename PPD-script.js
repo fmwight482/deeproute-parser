@@ -8,7 +8,7 @@
 // @include     http://deeproute.com/?js=scrimmine
 // @grant		GM_xmlhttpRequest
 // @connect	    deeproute.com
-// @version     1.6.6
+// @version     1.6.7
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
@@ -906,10 +906,27 @@ function makeSacksTable() {
 		sackStatsTotals[i] = 0;
 	}
 
-	var table = "<table border='1'><th>" + teamType + "</th><th>Pass Plays</th><th>TGT</th><th>TGT%</th><th>Imediate Sacks</th><th>ImdSk%</th><th>Cover Sacks</th><th>CovSk%</th><th>Pressure Scrambles</th><th>Coverage Scrambles</th><th>CovScram%</th><th>Scramble sacks</th><th>Sk/Scram%</th><th>dumpoffs</th><th>Dump%</th><th>throwaways</th><th>TA%</th>";
+	var TGT_def = "<span title='Targets: pass plays which resulted in a pass thrown to an elegible reciever'>TGT</span>";
+	var TGTPct_def = "<span title='Target Percentage: percentage of all pass plays which resulted in a pass thrown to an elegible reciever'>TGT%</span>";
+	var ImdSk_def = "<span title='Imediate Sacks: sacks which occured very quickly, before the quarterback could make his first read'>Imediate Sacks</span>";
+	var ImdSkPct_def = "<span title='Imediate Sack Percentage: percentage of all pass plays which ended in an Imediate Sack'>ImdSk%</span>";
+	var CovSk_def = "<span title='Coverage Sacks: sacks which occured after a GCOV (meaning the quarterback has progressed past his first read). Scramble sacks are not included.'>Cover Sacks</span>";
+	var CovSkPct_def = "<span title='Coverage Sack Percentage: percentage of all pass plays which ended in a non-scramble Coverage sack'>CovSk%</span>";
+	var PresScram_def = "<span title='Pressure Scrambles: plays where the quarterback was forced to scramble due to pressure'>PresScram</span>";
+	var PresScramPct_def = "<span title='Pressure Scramble Percentage: percentage of all pass plays where the quarterback was forced to scramble due to pressure'>PresScram%</span>";
+	var CovScram_def = "<span title='Coverage Scrambles: plays where the quarterback was forced to scramble because none of the recievers were open'>CovScram</span>";
+	var CovScramPct_def = "<span title='Coverage Scramble Percentage: percentage of all pass plays where the quarterback was forced to scramble because none of the recievers were open'>CovScram%</span>";
+	var ScramSk_def = "<span title='Scramble Sacks: plays where the quarterback was sacked after attempting to scramble'>Scramble Sacks</span>";
+	var ScramSkPct_def = "<span title='Sacks Per Scramble: percentage of scrambles which resulted in a sack'>Sk/Scram%</span>";
+	var Dump_def = "<span title='Dumpoffs: plays where the quarterback decided to dump the ball off to a reciever outside the planned progression'>Dumpoffs</span>";
+	var DumpPct_def = "<span title='Dumpoff Percentage: percentage of all pass plays where the quarterback dumped the ball off'>Dump%</span>";
+	var TA_def = "<span title='Throwaways: plays where the quarterback intentionally threw the ball away. Includes intentional grounding penalties.'>Throwaways</span>";
+	var TAPct_def = "<span title='Throwaway Percentage: percentage of all pass plays where the quarterback threw the ball away'>TA%</span>";
+
+	var table = "<table border='1'><th>" + teamType + "</th><th>Pass Plays</th><th>" + TGT_def + "</th><th>" + TGTPct_def + "</th><th>" + ImdSk_def + "</th><th>" + ImdSkPct_def + "</th><th>" + CovSk_def + "</th><th>" + CovSkPct_def + "</th><th>" + PresScram_def + "</th><th>" + PresScramPct_def + "</th><th>" + CovScram_def + "</th><th>" + CovScramPct_def + "</th><th>" + ScramSk_def + "</th><th>" + ScramSkPct_def + "</th><th>" + Dump_def + "</th><th>" + DumpPct_def + "</th><th>" + TA_def + "</th><th>" + TAPct_def + "</th>";
 
 	for (var j=0; j<abbrs.length; j++) {
-		table = table.concat("<tr><th>" + abbrs[j] + "</th><td>" + sackStats[j][0] + "</td><td>" + (sackStats[j][1] - sackStats[j][8]) + "</td><td>" + calculatePercent(sackStats[j][1] - sackStats[j][8], sackStats[j][0]) + "%</td><td>" + sackStats[j][2] + "</td><td>" + calculatePercent(sackStats[j][2], sackStats[j][0]) + "%</td><td>" + sackStats[j][3] + "</td><td>" + calculatePercent(sackStats[j][3], sackStats[j][0]) + "%</td><td>" + sackStats[j][4] + "</td><td>" + sackStats[j][5] + "</td><td>" + calculatePercent(sackStats[j][5], sackStats[j][0]) + "%</td><td>" + sackStats[j][6] + "</td><td>" + calculatePercent(sackStats[j][6], sackStats[j][4] + sackStats[j][5]) + "%</td><td>" + sackStats[j][7] + "</td><td>" + calculatePercent(sackStats[j][7], sackStats[j][0]) + "%</td><td>" + sackStats[j][8] + "</td><td>" + calculatePercent(sackStats[j][8], sackStats[j][0]) + "%</td>");
+		table = table.concat("<tr><th>" + abbrs[j] + "</th><td>" + sackStats[j][0] + "</td><td>" + (sackStats[j][1] - sackStats[j][8]) + "</td><td>" + calculatePercent(sackStats[j][1] - sackStats[j][8], sackStats[j][0]) + "%</td><td>" + sackStats[j][2] + "</td><td>" + calculatePercent(sackStats[j][2], sackStats[j][0]) + "%</td><td>" + sackStats[j][3] + "</td><td>" + calculatePercent(sackStats[j][3], sackStats[j][0]) + "%</td><td>" + sackStats[j][4] + "</td><td>" + calculatePercent(sackStats[j][4], sackStats[j][0]) + "%</td><td>" + sackStats[j][5] + "</td><td>" + calculatePercent(sackStats[j][5], sackStats[j][0]) + "%</td><td>" + sackStats[j][6] + "</td><td>" + calculatePercent(sackStats[j][6], sackStats[j][4] + sackStats[j][5]) + "%</td><td>" + sackStats[j][7] + "</td><td>" + calculatePercent(sackStats[j][7], sackStats[j][0]) + "%</td><td>" + sackStats[j][8] + "</td><td>" + calculatePercent(sackStats[j][8], sackStats[j][0]) + "%</td>");
 
 		for (var k=0; k<9; k++) {
 			sackStatsTotals[k] += sackStats[j][k];
@@ -918,7 +935,7 @@ function makeSacksTable() {
 
 	if (abbrs.length > 1) {
 		// don't do a "total" row if there is only one team
-		table = table.concat("<tr><td>Total</td><td>" + sackStatsTotals[0] + "</td><td>" + (sackStatsTotals[1] - sackStatsTotals[8]) + "</td><td>" + calculatePercent(sackStatsTotals[1] - sackStatsTotals[8], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[2] + "</td><td>" + calculatePercent(sackStatsTotals[2], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[3] + "</td><td>" + calculatePercent(sackStatsTotals[3], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[4] + "</td><td>" + sackStatsTotals[5] + "</td><td>" + calculatePercent(sackStatsTotals[5], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[6] + "</td><td>" + calculatePercent(sackStatsTotals[6], sackStatsTotals[4] + sackStatsTotals[5]) + "%</td><td>" + sackStatsTotals[7] + "</td><td>" + calculatePercent(sackStatsTotals[7], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[8] + "</td><td>" + calculatePercent(sackStatsTotals[8], sackStatsTotals[0]) + "%</td>");
+		table = table.concat("<tr><td>Total</td><td>" + sackStatsTotals[0] + "</td><td>" + (sackStatsTotals[1] - sackStatsTotals[8]) + "</td><td>" + calculatePercent(sackStatsTotals[1] - sackStatsTotals[8], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[2] + "</td><td>" + calculatePercent(sackStatsTotals[2], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[3] + "</td><td>" + calculatePercent(sackStatsTotals[3], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[4] + "</td><td>" + calculatePercent(sackStatsTotals[j][4], sackStatsTotals[j][0]) + "%</td><td>" + sackStatsTotals[5] + "</td><td>" + calculatePercent(sackStatsTotals[5], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[6] + "</td><td>" + calculatePercent(sackStatsTotals[6], sackStatsTotals[4] + sackStatsTotals[5]) + "%</td><td>" + sackStatsTotals[7] + "</td><td>" + calculatePercent(sackStatsTotals[7], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[8] + "</td><td>" + calculatePercent(sackStatsTotals[8], sackStatsTotals[0]) + "%</td>");
 	}
 
 	table = table.concat("</table>");
@@ -2246,7 +2263,7 @@ function parsePBP(intext) {
 													alert("Extra point attempt neither Good nor No Good! tmp = " + tmp);
 												}
 											}
-											alert("Extra point attempt after KRTD! tmp = " + tmp + ", isTouchdown = " + isTouchdown);
+											//alert("Extra point attempt after KRTD! tmp = " + tmp + ", isTouchdown = " + isTouchdown);
 										}
 									}
 									//alert("kickoff returned to the '" + returnFieldSide + "' '" + returnYardLine + "', '" + kickoffReturnSpot + "' yards from the goal line");
