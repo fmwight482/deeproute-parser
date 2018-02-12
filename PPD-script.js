@@ -166,7 +166,7 @@ function getDistToGo(inTogo, inEndToGo) {
 	if (inTogo=="inches") {
 		distToGo=0.1;
 	} else if (inTogo=="Foot~") {
-		distToGo=0.17;
+		distToGo=0.33;
 	} else if (inTogo=="< 1") {
 		distToGo=0.67;
 	} else {
