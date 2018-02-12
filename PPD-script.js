@@ -1443,8 +1443,7 @@ function parsePBP(intext) {
 			//alert("found " + tmp + " plays");
 			break; // if no more offensive plays, leave 
 		}
-		else if (!(kickoff || onsides) && playPtr >= 0) { // if a scrimmage play
-			//endptr=playPtr;
+		else if (!(kickoff || onsides) && endptr >= 0) { // if a scrimmage play
 
 			ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr); // find start of the final PBP line from this play 
 
@@ -1532,7 +1531,7 @@ function parsePBP(intext) {
 			ptr7=intext.indexOf("</b>", ptr4+3);
 			gameTime=intext.substring(ptr4+3, ptr7); // store string with quarter and time remaining. 
 
-			/*if (tmp > 157 && tmp < 163) {
+			/*if (tmp > 157 && tmp < 164) {
 				alert("tmp = " + tmp + ", gameTime = " + gameTime + ", abbr = " + abbr + ", otherAbbr = " + otherAbbr);
 			} // */
 
@@ -1589,7 +1588,7 @@ function parsePBP(intext) {
 						}
 					}
 
-					//alert("found field goal attempt. distance = " + fieldGoalDist + ", time = " + gameTime + ", tmp = " + tmp + ", abbr = " + abbr);
+					//alert("found field goal attempt. distance = " + fieldGoalDist + ", made = " + fieldGoalMade + ", time = " + gameTime + ", tmp = " + tmp + ", offAbbr = " + offAbbr);
 				}
 			}
 
@@ -2162,7 +2161,7 @@ function parsePBP(intext) {
 		}
 		else { // non-scrimmage play
 			//alert("SPECIAL TEAMS! kickoff = " + kickoff + ", onsides = " + onsides + ", fieldGoal = " + fieldGoal + ", punt = " + punt + ", tmp = " + tmp);
-			var kickerPtr1, kickerPtr2, kickerTeamPtr1, kickerTeamPtr2, kickDistPtr1, kickDistPtr2, returnDistPtr1, returnDistPtr2, krtdPtr;
+			var kickerPtr1, kickerPtr2, kickerTeamPtr1, kickerTeamPtr2, kickDistPtr1, kickDistPtr2, returnDistPtr1, returnDistPtr2;
 			var returnerPtr1, returnerPtr2;
 			var gotKickerInfo = 0;
 			var kickDistStr, returnDistStr, returnYardLine, returnFieldSide;
@@ -2650,7 +2649,8 @@ function parsePBP(intext) {
 		// TODO: this needs to be adjusted to account for extra points on kick return (and punt return?) touchdowns
 		// the following commented line is an initial attempt towards that end
 		// if (fieldGoalStats_bol && (showBothTeams || ((kickoff && correctAbbr(offAbbr, defAbbr, showOffense)) || (!kickoff && correctAbbr(abbr, otherAbbr, showOffense)))) && (noPlay === 0 || withPens) && (fieldGoal || extraPoint)) {
-		if (fieldGoalStats_bol && (showBothTeams || correctAbbr(offAbbr, defAbbr, showOffense)) && (noPlay === 0 || withPens) && (fieldGoal || extraPoint)) {
+		if (fieldGoalStats_bol && (noPlay === 0 || withPens) && ((showBothTeams || correctAbbr(offAbbr, defAbbr, showOffense)) && fieldGoal) || 
+			((showBothTeams || correctAbbr(offAbbr, defAbbr, showOffense)) && extraPoint)) {
 			// PAT, 0-20, 20-30, 30-40, 40-50, 50+
 			// attempted, made, blocked
 			var teamIndex;
@@ -2667,7 +2667,7 @@ function parsePBP(intext) {
 			}
 			else {
 				fieldGoalDistId = getFieldGoalDistId(fieldGoalDist);
-				//alert("recording field goal attempt! distance = " + fieldGoalDist + ", distId = " + fieldGoalDistId + ", gameTime = " + gameTime);
+				//alert("recording field goal attempt! distance = " + fieldGoalDist + ", distId = " + fieldGoalDistId + ", gameTime = " + gameTime + ", tmp = " + tmp + ", made = " + fieldGoalMade);
 			}
 
 			fieldGoalStats_array[teamIndex][fieldGoalDistId][0]++; // increment field goal attempts
