@@ -1316,7 +1316,7 @@ function makeTableLable(name) {
 }
 
 function parsePBP(intext) {
-	var startPtr=0, playPtr, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9, scorePtr;
+	var startPtr=0, playPtr, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9, scorePtr, touchdownPtr;
 	var kickoffPtr, onsidesPtr, fieldGoalPtr, puntPtr, endSpecialTeamsPtr, extraPointPtr;
 	var pkg, defpkg, form, play, yard, yard2, yardline, comp, scramble, INT, incomplete, loss, isTouchdown, isSuccess; 
 	var down, togo, distToGo=0, endToGo, gameTime, penalty, noPlay=0, tmp=0, endptr, dumpoff, first_read, preptr=0; 
@@ -1454,13 +1454,13 @@ function parsePBP(intext) {
 				ptr3=intext.lastIndexOf("<span style='font-size:13;'>", ptr4);
 			}
 
-			ptr4=intext.indexOf("ouchdown", ptr3); // find next touchdown after start of the final PBP line 
-			if (ptr4>ptr3 && ptr4 < endptr) { // if the touchdown is after the start of the final PBP line and before the package info
+			touchdownPtr=intext.indexOf("ouchdown", ptr3); // find next touchdown after start of the final PBP line 
+			if (touchdownPtr>ptr3 && touchdownPtr < endptr) { // if the touchdown is after the start of the final PBP line and before the package info
 				isTouchdown=1;
 				ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr-5); // sets ptr3 to the final PBP line
 
 				// locate the extra point attempt, if any
-				scorePtr = intext.indexOf("<tr><td bgcolor=\"#eeee99\">", ptr4); // find the score indicator after the touchdown
+				scorePtr = intext.indexOf("<tr><td bgcolor=\"#eeee99\">", touchdownPtr); // find the score indicator after the touchdown
 				extraPointPtr=intext.indexOf("Extra Point attempt by ", preptr);
 				if (extraPointPtr!=-1 && extraPointPtr < scorePtr) {
 					ptr8=intext.indexOf(" is Good!", extraPointPtr);
@@ -1480,7 +1480,7 @@ function parsePBP(intext) {
 					}
 					//alert("Extra point attempt! tmp = " + tmp + ", isTouchdown = " + isTouchdown);
 				}
-			} // if ptr4>ptr3 ...
+			}
 			coveragePtr=intext.lastIndexOf("was the man covering on the play"); 
 			if (coveragePtr!=-1 && coveragePtr < endptr) {
 				ptr3=intext.lastIndexOf("<span style='font-size:13;'>", ptr3-5);
@@ -2252,13 +2252,13 @@ function parsePBP(intext) {
 										kickReturnInside25 = 0;
 									}
 
-									krtdPtr = intext.indexOf("TOUCHDOWN!", returnDistPtr2);
-									if (krtdPtr != -1 && krtdPtr < endptr) {
+									touchdownPtr = intext.indexOf("TOUCHDOWN!", returnDistPtr2);
+									if (touchdownPtr != -1 && touchdownPtr < endptr) {
 										kickReturnTouchdown = 1;
 										isTouchdown = 1;
 
 										// locate the extra point attempt, if any
-										scorePtr = intext.indexOf("<tr><td bgcolor=\"#eeee99\">", ptr4); // find the score indicator after the touchdown
+										scorePtr = intext.indexOf("<tr><td bgcolor=\"#eeee99\">", touchdownPtr); // find the score indicator after the touchdown
 										extraPointPtr=intext.indexOf("Extra Point attempt by ", preptr);
 										if (extraPointPtr!=-1 && extraPointPtr < scorePtr) {
 											ptr8=intext.indexOf(" is Good!", extraPointPtr);
