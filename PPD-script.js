@@ -1457,28 +1457,6 @@ function parsePBP(intext) {
 			if (touchdownPtr>ptr3 && touchdownPtr < endptr) { // if the touchdown is after the start of the final PBP line and before the package info
 				isTouchdown=1;
 				ptr3=intext.lastIndexOf("<span style='font-size:13;'>", endptr-5); // sets ptr3 to the final PBP line
-
-				// locate the extra point attempt, if any
-				scorePtr = intext.indexOf("<tr><td bgcolor=\"#eeee99\">", touchdownPtr); // find the score indicator after the touchdown
-				extraPointPtr=intext.indexOf("Extra Point attempt by ", preptr);
-				if (extraPointPtr!=-1 && extraPointPtr < scorePtr) {
-					ptr8=intext.indexOf(" is Good!", extraPointPtr);
-					if (ptr8!=-1 && ptr8 < scorePtr) {
-						fieldGoalMade = 1;
-						extraPoint = 1;
-					}
-					else {
-						ptr9=intext.indexOf(" is No Good!", extraPointPtr);
-						if (ptr9!=-1 && ptr9 < scorePtr) {
-							fieldGoalMade = 0;
-							extraPoint = 1;
-						}
-						else {
-							alert("Extra point attempt neither Good nor No Good! tmp = " + tmp);
-						}
-					}
-					//alert("Extra point attempt! tmp = " + tmp + ", isTouchdown = " + isTouchdown);
-				}
 			}
 			coveragePtr=intext.lastIndexOf("was the man covering on the play"); 
 			if (coveragePtr!=-1 && coveragePtr < endptr) {
@@ -2255,28 +2233,6 @@ function parsePBP(intext) {
 									if (touchdownPtr != -1 && touchdownPtr < endptr) {
 										kickReturnTouchdown = 1;
 										isTouchdown = 1;
-
-										// locate the extra point attempt, if any
-										scorePtr = intext.indexOf("<tr><td bgcolor=\"#eeee99\">", touchdownPtr); // find the score indicator after the touchdown
-										extraPointPtr=intext.indexOf("Extra Point attempt by ", preptr);
-										if (extraPointPtr!=-1 && extraPointPtr < scorePtr) {
-											ptr8=intext.indexOf(" is Good!", extraPointPtr);
-											if (ptr8!=-1 && ptr8 < scorePtr) {
-												fieldGoalMade = 1;
-												extraPoint = 1;
-											}
-											else {
-												ptr9=intext.indexOf(" is No Good!", extraPointPtr);
-												if (ptr9!=-1 && ptr9 < scorePtr) {
-													fieldGoalMade = 0;
-													extraPoint = 1;
-												}
-												else {
-													alert("Extra point attempt neither Good nor No Good! tmp = " + tmp);
-												}
-											}
-											//alert("Extra point attempt after KRTD! tmp = " + tmp + ", isTouchdown = " + isTouchdown);
-										}
 									}
 									//alert("kickoff returned to the '" + returnFieldSide + "' '" + returnYardLine + "', '" + kickoffReturnSpot + "' yards from the goal line");
 								}
@@ -2293,6 +2249,30 @@ function parsePBP(intext) {
 						}
 					}
 				}
+			}
+		}
+
+		if (isTouchdown) {
+			// locate the extra point attempt, if any
+			scorePtr = intext.indexOf("<tr><td bgcolor=\"#eeee99\">", touchdownPtr); // find the score indicator after the touchdown
+			extraPointPtr=intext.indexOf("Extra Point attempt by ", preptr);
+			if (extraPointPtr!=-1 && extraPointPtr < scorePtr) {
+				ptr8=intext.indexOf(" is Good!", extraPointPtr);
+				if (ptr8!=-1 && ptr8 < scorePtr) {
+					fieldGoalMade = 1;
+					extraPoint = 1;
+				}
+				else {
+					ptr9=intext.indexOf(" is No Good!", extraPointPtr);
+					if (ptr9!=-1 && ptr9 < scorePtr) {
+						fieldGoalMade = 0;
+						extraPoint = 1;
+					}
+					else {
+						alert("Extra point attempt neither Good nor No Good! tmp = " + tmp);
+					}
+				}
+				//alert("Extra point attempt after KRTD! tmp = " + tmp + ", isTouchdown = " + isTouchdown);
 			}
 		}
 
