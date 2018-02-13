@@ -1334,6 +1334,7 @@ function parsePBP(intext) {
 	var kickoff=0, onsides=0, fieldGoal=0, punt=0, extraPoint=0;
 	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot, kickReturnInside25, kickReturnTouchdown;
 	var fieldGoalDist, fieldGoalMade, fieldGoalBlocked;
+	var puntDist, puntLandingSpot, puntBlock, puntBlockYards, puntReturn, puntReturnYards;
 
 	readcount++;
 	newDiv = document.getElementById('scout_count');
@@ -1580,6 +1581,25 @@ function parsePBP(intext) {
 				// the offense is the return team
 				offAbbr = otherAbbr;
 				defAbbr = abbr;
+
+				var puntDistPtr1, puntDistPtr2, puntDecimalDistPtr1, puntDecimalDistPtr2;
+				var puntDistYards, puntDistDecimals;
+
+				puntDistPtr1 = intext.indexOf("</b></a> for <span class='supza'>", preptr);
+				if (puntDistPtr1 != -1 && puntDistPtr1 < endptr) { // if successfully punted
+					puntDistPtr2 = intext.indexOf("</span>", puntDistPtr1);
+					puntDistYards = intext.substring(puntDistPtr1+33, puntDistPtr2);
+					puntDecimalDistPtr1 = puntDistPtr2+32;
+					puntDecimalDistPtr2 = intext.indexOf("</span>", puntDecimalDistPtr1);
+					puntDistDecimals = intext.substring(puntDecimalDistPtr1, puntDecimalDistPtr2);
+
+					puntDist = parseInt(puntDistYards) + parseInt(puntDistDecimals)/100;
+
+					//alert("puntDist = " + puntDist + ", yards = " + puntDistYards + ", decimals = " + puntDistDecimals);
+				}
+				else { // if blocked
+					
+				}
 			}
 
 			/***************************/
@@ -2947,13 +2967,16 @@ function initializeMultiTeamArrays() {
 		}
 	}
 	
-	/*puntStats_array = new Array(abbrs.length);
+	puntStats_array = new Array(abbrs.length);
 	for (a=0; a<abbrs.length; a++) {
 		puntStats_array[a] = new Array(3); // own goal to own 40, own 40 to opp 40, opp 40 to opp goal
 		for (b=0; b<3; b++) {
-			puntStats_array[a][b] = new Array(); // punts, gross yards, punt landing spot, 
+			puntStats_array[a][b] = new Array(8); // punts, gross yards, punt landing spot, touchbacks, returns, return yards, blocks, block yards
+			for (c=0; c<8; c++) {
+				puntStats_array[a][b][c] = 0;
+			}
 		}
-	} // */
+	}
 }
 
 
@@ -3287,6 +3310,7 @@ function selectStatTables() {
 	var passRushStatsDef = "<span title='displays sacks, throwaways, scrambles, and other plays which help guage how much pressure is applied to the quarterback'>Pressure stats</span>";
 	var kickoffStatsDef = "<span title='displays stats for kickoffs'>Kickoff stats</span>";
 	var fieldGoalStatsDef = "<span title='displays statistics for field goals and extra points, split by distance'>Field Goal Stats</span>";
+	var puntStatsDef = "<span title='displays statistics for punts, split by field position'>Punting Stats</span>";
 
 	var newtd5 = document.createElement('td');
 	newtd5.setAttribute('colspan', '4');
@@ -3303,6 +3327,7 @@ function selectStatTables() {
 		'<input type="checkbox" name="other" id="sacks"> ' + passRushStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="kickoffs"> ' + kickoffStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="fieldGoals"> ' + fieldGoalStatsDef + ' <br>' + 
+		'<input type="checkbox" name="other" id="punts"> ' + puntStatsDef + ' <br>' + 
 		'<span class="playerStatHeader"><b>Individual Player Statistics</b></span><br>' + 
 		'<input type="checkbox" name="other" id="recievers"> ' + WRStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="runners"> ' + RBStatsDef + ' <br>' + 
@@ -3432,6 +3457,10 @@ function startFunc ()
 		}
 		if (document.getElementById("fieldGoals").checked) {
 			fieldGoalStats_bol = 1;
+			selectedTable = 1;
+		}
+		if (document.getElementById("punts").checked) {
+			kickoffStats_bol = 1;
 			selectedTable = 1;
 		}
 		
