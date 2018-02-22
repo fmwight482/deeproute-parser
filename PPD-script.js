@@ -1583,7 +1583,12 @@ function parsePBP(intext) {
 				defAbbr = abbr;
 
 				var puntDistPtr1, puntDistPtr2, puntDecimalDistPtr1, puntDecimalDistPtr2;
-				var puntDistYards, puntDistDecimals;
+				var returnDistPtr1, returnDistPtr2, returnDecimalPtr1, returnDecimalPtr2;
+				var puntDistYards = 0;
+				var puntDistDecimals = 0;
+				var returnDistYards = 0;
+				var returnDistDecimals = 0;
+				var puntBlockReturnYards = 0;
 
 				puntDistPtr1 = intext.indexOf("</b></a> for <span class='supza'>", preptr);
 				if (puntDistPtr1 != -1 && puntDistPtr1 < endptr) { // if successfully punted
@@ -1598,7 +1603,35 @@ function parsePBP(intext) {
 					//alert("puntDist = " + puntDist + ", yards = " + puntDistYards + ", decimals = " + puntDistDecimals);
 				}
 				else { // if blocked
-					
+					puntDistPtr1 = intext.indexOf(" was BLOCKED backwards for <span class='supza'>", preptr);
+					if (puntDistPtr1 != -1 && puntDecimalDistPtr1 < endptr) {
+						puntDistPtr2 = intext.indexOf("</span>", puntDistPtr1);
+						puntDistYards = intext.substring(puntDistPtr1+47, puntDistPtr2);
+						puntDecimalDistPtr1 = puntDistPtr2+32;
+						puntDecimalDistPtr2 = intext.indexOf("</span>", puntDecimalDistPtr1);
+						puntDistDecimals = intext.substring(puntDecimalDistPtr1, puntDecimalDistPtr2);
+
+						puntBlockYards = parseInt(puntDistYards) + parseInt(puntDistDecimals)/100;
+
+						var recoveryPtr = intext.indexOf(" and recovered by the defense.", puntDecimalDistPtr2);
+						if (recoveryPtr != -1 && recoveryPtr < endptr) {
+							// the blocked punt was recovered by the defense and potentially returned
+							// the block and the return are considered separate plays in the log, with separate times shown 
+							endptr = intext.indexOf("The play required ", endSpecialTeamsPtr+20);
+
+							returnDistPtr1 = intext.indexOf("The blocked punt was returned ", endSpecialTeamsPtr);
+							if (returnDistPtr1 != -1 && returnDistPtr1 < endptr) { // if the blocked punt is returned
+								returnDistPtr2 = intext.indexOf(" for a TOUCHDOWN", returnDistPtr1);
+								if (returnDistPtr1 == -1 || returnDistPtr1 >= endptr) { // if the blocked punt is not returned for a touchdown
+									returnDistPtr2 = intext.indexOf(" yards. ", returnDistPtr1);
+								}
+								returnDistYards = intext.substring(returnDistPtr1+30, returnDistPtr2);
+							}
+						}
+						puntBlockReturnYards = parseInt(returnDistYards);
+						//alert("Punt blocked backwards " + puntBlockYards + " yards and returned " + puntBlockReturnYards + " yards.");
+						puntBlockYards += puntBlockReturnYards;
+					}
 				}
 			}
 
@@ -2692,6 +2725,7 @@ function parsePBP(intext) {
 		fieldGoalBlocked = 0;
 		fieldGoalDist = -1;
 		kickReturnTouchdown = 0;
+		puntDist = 0;
 		pass = 0;
 		att = 0;
 		comp = 0;
