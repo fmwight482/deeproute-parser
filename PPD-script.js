@@ -1622,13 +1622,13 @@ function parsePBP(intext) {
 							returnDistPtr1 = intext.indexOf("The blocked punt was returned ", endSpecialTeamsPtr);
 							if (returnDistPtr1 != -1 && returnDistPtr1 < endptr) { // if the blocked punt is returned
 								returnDistPtr2 = intext.indexOf(" for a TOUCHDOWN", returnDistPtr1);
-								if (returnDistPtr1 == -1 || returnDistPtr1 >= endptr) { // if the blocked punt is not returned for a touchdown
-									returnDistPtr2 = intext.indexOf(" yards. ", returnDistPtr1);
+								if (returnDistPtr2 === -1 || returnDistPtr2 >= endptr) { // if the blocked punt is not returned for a touchdown
+									returnDistPtr2 = intext.indexOf(" yards.", returnDistPtr1);
 								}
 								returnDistYards = intext.substring(returnDistPtr1+30, returnDistPtr2);
+								puntBlockReturnYards = parseInt(returnDistYards);
 							}
 						}
-						puntBlockReturnYards = parseInt(returnDistYards);
 						//alert("Punt blocked backwards " + puntBlockYards + " yards and returned " + puntBlockReturnYards + " yards.");
 						puntBlockYards += puntBlockReturnYards;
 					}
