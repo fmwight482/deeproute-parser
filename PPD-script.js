@@ -672,6 +672,7 @@ function addWrTgtTr(pkgid, wr) {
 }
 
 /* Utility Functions for Reciever Target Splits table */
+/* For each of these functions, a downDistID of 7 means "get the data across all down/distance combinations" */
 
 function getFirst(wr, pkgid, downDistID) {
 	var wrid = getWRID(wr);
