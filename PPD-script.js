@@ -627,6 +627,8 @@ function makeDDTableSection(downDistID) {
 	return tableSection; 
 }
 
+/* Table construction functions for Reciever Target Splits table */
+
 function make_WR_target_table(FIRST_def, TGT_def, DMP_def, DIST_def) {
 	var stat_defs = "<td>" + FIRST_def + "</td> <td>" + TGT_def + "</td> <td>" + DIST_def + "</td> <td>" + DMP_def + "</td>"; 
 	var table = 
@@ -634,8 +636,8 @@ function make_WR_target_table(FIRST_def, TGT_def, DMP_def, DIST_def) {
 		"<th rowspan='2'>Package</th> <th rowspan='2'>WR</th> <th colspan='4'>1st Down</th> <th colspan='4'>2nd and 0-"+shortSplit+
 		"</th> <th colspan='4'>2nd and "+shortSplit+"-"+longSplit+"</th> <th colspan='4'>2nd and "+longSplit+
 		"+</th> <th colspan='4'>3rd/4th and 0-"+shortSplit+"</th> <th colspan='4'>3rd/4th and "+shortSplit+"-"+longSplit+
-		"</th> <th colspan='4'>3rd/4th and "+longSplit+"+</th>" + 
-		"<tr>" + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + 
+		"</th> <th colspan='4'>3rd/4th and "+longSplit+"+</th> <th colspan='4'>Total</th>" + 
+		"<tr>" + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + 
 		addWrTgtPkgTr("HFT12", "WR1", "WR2", "TE1", "HB", "FB") + 
 		addWrTgtPkgTr("HFTt1", "WR1", "TE1", "TE2", "HB", "FB") + 
 		addWrTgtPkgTr("HTt12", "WR1", "WR2", "TE1", "TE2", "HB") + 
@@ -650,29 +652,98 @@ function make_WR_target_table(FIRST_def, TGT_def, DMP_def, DIST_def) {
 
 function addWrTgtPkgTr(pkg, wr1, wr2, wr3, wr4, wr5) {
 	pkgid = getPkgid(pkg); 
-	var row = 
-		"<tr> <th rowspan='5'>" + pkg + "</th> <th>" + wr1 + "</th> <td>" +
-		getFirst(wr1, pkgid, 0) + "</td> <td>" + getTGTs(wr1, pkgid, 0) + "</td> <td>" + getAveDist(wr1, pkgid, 0) + "</td> <td>" + getDumpoffs(wr1, pkgid, 0) + "</td> <td>" +
-		getFirst(wr1, pkgid, 1) + "</td> <td>" + getTGTs(wr1, pkgid, 1) + "</td> <td>" + getAveDist(wr1, pkgid, 1) + "</td> <td>" + getDumpoffs(wr1, pkgid, 1) + "</td> <td>" +
-		getFirst(wr1, pkgid, 2) + "</td> <td>" + getTGTs(wr1, pkgid, 2) + "</td> <td>" + getAveDist(wr1, pkgid, 2) + "</td> <td>" + getDumpoffs(wr1, pkgid, 2) + "</td> <td>" +
-		getFirst(wr1, pkgid, 3) + "</td> <td>" + getTGTs(wr1, pkgid, 3) + "</td> <td>" + getAveDist(wr1, pkgid, 3) + "</td> <td>" + getDumpoffs(wr1, pkgid, 3) + "</td> <td>" +
-		getFirst(wr1, pkgid, 4) + "</td> <td>" + getTGTs(wr1, pkgid, 4) + "</td> <td>" + getAveDist(wr1, pkgid, 4) + "</td> <td>" + getDumpoffs(wr1, pkgid, 4) + "</td> <td>" +
-		getFirst(wr1, pkgid, 5) + "</td> <td>" + getTGTs(wr1, pkgid, 5) + "</td> <td>" + getAveDist(wr1, pkgid, 5) + "</td> <td>" + getDumpoffs(wr1, pkgid, 5) + "</td> <td>" +
-		getFirst(wr1, pkgid, 6) + "</td> <td>" + getTGTs(wr1, pkgid, 6) + "</td> <td>" + getAveDist(wr1, pkgid, 6) + "</td> <td>" + getDumpoffs(wr1, pkgid, 6) + "</td>" +
-		addWrTgtTr(pkgid, wr2) + addWrTgtTr(pkgid, wr3) + addWrTgtTr(pkgid, wr4) + addWrTgtTr(pkgid, wr5); // */
+	var row = "<tr> <th rowspan='5'>" + pkg + "</th> <th>" + wr1 + "</th>";
+	for (var i=0; i<8; i++) {
+		row = row.concat("<td>" + getFirst(wr1, pkgid, i) + "</td> <td>" + getTGTs(wr1, pkgid, i) + "</td> <td>" + getAveDist(wr1, pkgid, i) + "</td> <td>" + getDumpoffs(wr1, pkgid, i) + "</td>");
+	}
+	row = row.concat(addWrTgtTr(pkgid, wr2));
+	row = row.concat(addWrTgtTr(pkgid, wr3));
+	row = row.concat(addWrTgtTr(pkgid, wr4));
+	row = row.concat(addWrTgtTr(pkgid, wr5));
 	return row; 
 }
 
 function addWrTgtTr(pkgid, wr) {
-	var row = "<tr> <th>" + wr + "</th> <td>" + getFirst(wr, pkgid, 0) + "</td> <td>" + getTGTs(wr, pkgid, 0) + "</td> <td>" + getAveDist(wr, pkgid, 0) + "</td> <td>" + getDumpoffs(wr, pkgid, 0) + "</td>" + 
-		"<td>" + getFirst(wr, pkgid, 1) + "</td> <td>" + getTGTs(wr, pkgid, 1) + "</td> <td>" + getAveDist(wr, pkgid, 1) + "</td> <td>" + getDumpoffs(wr, pkgid, 1) + "</td>" + 
-		"<td>" + getFirst(wr, pkgid, 2) + "</td> <td>" + getTGTs(wr, pkgid, 2) + "</td> <td>" + getAveDist(wr, pkgid, 2) + "</td> <td>" + getDumpoffs(wr, pkgid, 2) + "</td>" + 
-		"<td>" + getFirst(wr, pkgid, 3) + "</td> <td>" + getTGTs(wr, pkgid, 3) + "</td> <td>" + getAveDist(wr, pkgid, 3) + "</td> <td>" + getDumpoffs(wr, pkgid, 3) + "</td>" + 
-		"<td>" + getFirst(wr, pkgid, 4) + "</td> <td>" + getTGTs(wr, pkgid, 4) + "</td> <td>" + getAveDist(wr, pkgid, 4) + "</td> <td>" + getDumpoffs(wr, pkgid, 4) + "</td>" + 
-		"<td>" + getFirst(wr, pkgid, 5) + "</td> <td>" + getTGTs(wr, pkgid, 5) + "</td> <td>" + getAveDist(wr, pkgid, 5) + "</td> <td>" + getDumpoffs(wr, pkgid, 5) + "</td>" + 
-		"<td>" + getFirst(wr, pkgid, 6) + "</td> <td>" + getTGTs(wr, pkgid, 6) + "</td> <td>" + getAveDist(wr, pkgid, 6) + "</td> <td>" + getDumpoffs(wr, pkgid, 6) + "</td>"; // */
+	var row = "<tr> <th>" + wr + "</th>";
+	for (var i=0; i<8; i++) {
+		row = row.concat("<td>" + getFirst(wr, pkgid, i) + "</td> <td>" + getTGTs(wr, pkgid, i) + "</td> <td>" + getAveDist(wr, pkgid, i) + "</td> <td>" + getDumpoffs(wr, pkgid, i) + "</td>");
+	}
 	return row; 
 }
+
+/* Utility Functions for Reciever Target Splits table */
+
+function getFirst(wr, pkgid, downDistID) {
+	var wrid = getWRID(wr);
+	if (wrid == -1) {
+		alert("wrid = -1, WR = " + wr);
+	}
+
+	var total = 0;
+	if (downDistID < 7) {
+		total = WRSplitStats[pkgid][downDistID][wrid][0] + WRSplitStats[pkgid][downDistID][wrid][1];
+	}
+	else {
+		for (var i=0; i<7; i++) {
+			total += (WRSplitStats[pkgid][i][wrid][0] + WRSplitStats[pkgid][i][wrid][1]);
+		}
+	}
+	return total;
+}
+
+function getTGTs(wr, pkgid, downDistID) {
+	var wrid = getWRID(wr);
+	var total = 0;
+	if (downDistID < 7) {
+		total = WRSplitStats[pkgid][downDistID][wrid][5] - WRSplitStats[pkgid][downDistID][wrid][2];
+	}
+	else {
+		for (var i=0; i<7; i++) {
+			total += (WRSplitStats[pkgid][i][wrid][5] - WRSplitStats[pkgid][i][wrid][2]);
+		}
+	}
+	return total;
+}
+
+function getDumpoffs(wr, pkgid, downDistID) {
+	wrid = getWRID(wr);
+	var total = 0;
+	if (downDistID < 7) {
+		total = WRSplitStats[pkgid][downDistID][wrid][2];
+	}
+	else {
+		for (var i=0; i<7; i++) {
+			total += WRSplitStats[pkgid][i][wrid][2];
+		}
+	}
+	return total;
+}
+
+function getAveDist(wr, pkgid, downDistID) { 
+	wrid = getWRID(wr); 
+	var dist = 0; 
+	var atts = 0;
+
+	if (downDistID < 7) {
+		dist = WRSplitStats[pkgid][downDistID][wrid][4];
+		atts = WRSplitStats[pkgid][downDistID][wrid][5] - (WRSplitStats[pkgid][downDistID][wrid][2] + WRSplitStats[pkgid][downDistID][wrid][3]);
+	}
+	else {
+		for (var i=0; i<7; i++) {
+			dist += WRSplitStats[pkgid][i][wrid][4];
+			atts += WRSplitStats[pkgid][i][wrid][5] - (WRSplitStats[pkgid][i][wrid][2] + WRSplitStats[pkgid][i][wrid][3]);
+		}
+	}
+
+	if (dist === 0) {
+		return 0; 
+	}
+	else {
+		return (dist/atts).toFixed(1); 
+	}
+}
+
+/* Table construction functions for Reciever Production Splits table */
 
 function make_WR_production_table(GCOVpct_def, SR_def, YPT_def, INTpct_def) {
 	var stat_defs = "<td>" + GCOVpct_def + "</td> <td>" + SR_def + "</td> <td>" + YPT_def + "</td> <td>" + INTpct_def + "</td>"; 
@@ -1151,36 +1222,6 @@ function getYrdPerStp(i) {
 		YPS = (conversionStats[i][3]/stops).toFixed(1);
 	}
 	return YPS;
-}
-
-function getFirst(wr, pkgid, downDistID) {
-	wrid = getWRID(wr); 
-	if (wrid == -1) {
-		alert("wrid = -1, WR = " + wr); 
-	}
-	return (WRSplitStats[pkgid][downDistID][wrid][0] + WRSplitStats[pkgid][downDistID][wrid][1]); 
-}
-
-function getTGTs(wr, pkgid, downDistID) {
-	wrid = getWRID(wr); 
-	return (WRSplitStats[pkgid][downDistID][wrid][5] - WRSplitStats[pkgid][downDistID][wrid][2]); 
-}
-
-function getDumpoffs(wr, pkgid, downDistID) {
-	wrid = getWRID(wr); 
-	return WRSplitStats[pkgid][downDistID][wrid][2]; 
-}
-
-function getAveDist(wr, pkgid, downDistID) { 
-	wrid = getWRID(wr); 
-	var dist = WRSplitStats[pkgid][downDistID][wrid][4]; 
-	var atts = WRSplitStats[pkgid][downDistID][wrid][5] - (WRSplitStats[pkgid][downDistID][wrid][2] + WRSplitStats[pkgid][downDistID][wrid][3]);
-	if (dist === 0) {
-		return 0; 
-	}
-	else {
-		return (dist/atts).toFixed(1); 
-	}
 }
 
 function getWrSR(wr, pkgid, downDistID) {
