@@ -832,7 +832,7 @@ function getWrSR(wr, pkgid, downDistID) {
 		}
 	}
 
-	var SR = calculatePercent(SC, targets);
+	var SR = calculatePercentOrNone(SC, targets);
 	return "<span title='" + SC + " successful plays in " + targets + " targets'>" + SR + "</span>%";
 }
 
@@ -872,7 +872,7 @@ function getGCOVpct(wr, pkgid, downDistID) {
 		}
 	}
 
-	var GCOVpct = calculatePercent(gcovs, firstOpts);
+	var GCOVpct = calculatePercentOrNone(gcovs, firstOpts);
 	return "<span title='" + gcovs + " GCOVs in " + firstOpts + " first option checks'>" + GCOVpct + "</span>%";
 }
 
@@ -892,7 +892,7 @@ function getINTpct(wr, pkgid, downDistID) {
 		}
 	}
 
-	var INTpct = calculatePercent(ints, targets);
+	var INTpct = calculatePercentOrNone(ints, targets);
 	return "<span title='" + ints + " Interceptions in " + targets + " target(s)'>" + INTpct + "</span>%";
 }
 
