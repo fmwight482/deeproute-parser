@@ -2610,7 +2610,7 @@ function parsePBP(intext) {
 			}
 			if (passDefenderpID != -1) {
 				/*if (passDefenderName == "Some Cornerback") {
-					alert("found " + passDefenderName + " at " + gameTime);
+					alert("found " + passDefenderName + " at " + gameTime + ". offAbbr = " + offAbbr + ", defAbbr = " + defAbbr + ", touchdown = " + isTouchdown + ", kickoff = " + kickoff);
 				} // */
 				//alert("pass targeted at reciever " + WRName + ". tmp = " + tmp);
 				index = checkIDPList(passDefenderpID, passDefenderName);
@@ -2834,13 +2834,14 @@ function parsePBP(intext) {
 		WRID = -1;
 		WRpID = -1;
 		RBpID = -1;
-		defPlaymakerpID = -1;
 		attYard = "";
 		GCOV=0; 
 		GCOVd=-1; 
 		GCOVdID=-1; 
 		GCOVdpID=-1;
 		GCOVerID=-1;
+		defPlaymakerpID = -1;
+		passDefenderpID = -1;
 
 		startThis=startNext;
 		preptr=endptr+21;
