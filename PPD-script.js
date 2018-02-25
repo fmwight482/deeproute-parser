@@ -651,7 +651,7 @@ function make_WR_target_table(FIRST_def, TGT_def, DMP_def, DIST_def) {
 }
 
 function addWrTgtPkgTr(pkg, wr1, wr2, wr3, wr4, wr5) {
-	pkgid = getPkgid(pkg); 
+	var pkgid = getPkgid(pkg); 
 	var row = "<tr> <th rowspan='5'>" + pkg + "</th> <th>" + wr1 + "</th>";
 	for (var i=0; i<8; i++) {
 		row = row.concat("<td>" + getFirst(wr1, pkgid, i) + "</td> <td>" + getTGTs(wr1, pkgid, i) + "</td> <td>" + getAveDist(wr1, pkgid, i) + "</td> <td>" + getDumpoffs(wr1, pkgid, i) + "</td>");
@@ -753,8 +753,8 @@ function make_WR_production_table(GCOVpct_def, SR_def, YPT_def, INTpct_def) {
 		"<th rowspan='2'>Package</th> <th rowspan='2'>WR</th> <th colspan='4'>1st Down</th> <th colspan='4'>2nd and 0-"+shortSplit+
 		"</th> <th colspan='4'>2nd and "+shortSplit+"-"+longSplit+"</th> <th colspan='4'>2nd and "+longSplit+
 		"+</th> <th colspan='4'>3rd/4th and 0-"+shortSplit+"</th> <th colspan='4'>3rd/4th and "+shortSplit+"-"+longSplit+
-		"</th> <th colspan='4'>3rd/4th and "+longSplit+"+</th>" + 
-		"<tr>" + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + 
+		"</th> <th colspan='4'>3rd/4th and "+longSplit+"+</th> <th colspan='4'>Total</th>" + 
+		"<tr>" + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + stat_defs + 
 		addWrProdPkgTr("HFT12", "WR1", "WR2", "TE1", "HB", "FB") + 
 		addWrProdPkgTr("HFTt1", "WR1", "TE1", "TE2", "HB", "FB") + 
 		addWrProdPkgTr("HTt12", "WR1", "WR2", "TE1", "TE2", "HB") + 
@@ -767,7 +767,7 @@ function make_WR_production_table(GCOVpct_def, SR_def, YPT_def, INTpct_def) {
 	return table;
 }
 
-function addWrProdPkgTr(pkg, wr1, wr2, wr3, wr4, wr5) {
+function addWrProdPkgTr_OLD(pkg, wr1, wr2, wr3, wr4, wr5) {
 	pkgid = getPkgid(pkg); 
 	var row = 
 		"<tr> <th rowspan='5'>" + pkg + "</th> <th>" + wr1 + "</th> <td>" +
@@ -782,7 +782,28 @@ function addWrProdPkgTr(pkg, wr1, wr2, wr3, wr4, wr5) {
 	return row; 
 }
 
+function addWrProdPkgTr(pkg, wr1, wr2, wr3, wr4, wr5) {
+	var pkgid = getPkgid(pkg);
+	var row = "<tr> <th rowspan='5'>" + pkg + "</th> <th>" + wr1 + "</th>";
+	for (var i=0; i<8; i++) {
+		row = row.concat(" <td>" + getGCOVpct(wr1, pkgid, i) + "</td> <td>" + getWrSR(wr1, pkgid, i) + "</td> <td>" + getYPT(wr1, pkgid, i) + "</td> <td>" + getINTpct(wr1, pkgid, i) + "</td>");
+	}
+	row = row.concat(addWrProdTr(pkgid, wr2));
+	row = row.concat(addWrProdTr(pkgid, wr3));
+	row = row.concat(addWrProdTr(pkgid, wr4));
+	row = row.concat(addWrProdTr(pkgid, wr5));
+	return row; 
+}
+
 function addWrProdTr(pkgid, wr) {
+	var row = "<tr> <th>" + wr + "</th>";
+	for (var i=0; i<8; i++) {
+		row = row.concat(" <td>" + getGCOVpct(wr, pkgid, i) + "</td> <td>" + getWrSR(wr, pkgid, i) + "</td> <td>" + getYPT(wr, pkgid, i) + "</td> <td>" + getINTpct(wr, pkgid, i) + "</td>");
+	}
+	return row; 
+}
+
+function addWrProdTr_OLD(pkgid, wr) {
 	var row = "<tr> <th>" + wr + "</th> <td>" + getGCOVpct(wr, pkgid, 0) + "</td> <td>" + getWrSR(wr, pkgid, 0) + "</td> <td>" + getYPT(wr, pkgid, 0) + "</td> <td>" + getINTpct(wr, pkgid, 0) + "</td>" + 
 		"<td>" + getGCOVpct(wr, pkgid, 1) + "</td> <td>" + getWrSR(wr, pkgid, 1) + "</td> <td>" + getYPT(wr, pkgid, 1) + "</td> <td>" + getINTpct(wr, pkgid, 1) + "</td>" + 
 		"<td>" + getGCOVpct(wr, pkgid, 2) + "</td> <td>" + getWrSR(wr, pkgid, 2) + "</td> <td>" + getYPT(wr, pkgid, 2) + "</td> <td>" + getINTpct(wr, pkgid, 2) + "</td>" + 
@@ -791,6 +812,88 @@ function addWrProdTr(pkgid, wr) {
 		"<td>" + getGCOVpct(wr, pkgid, 5) + "</td> <td>" + getWrSR(wr, pkgid, 5) + "</td> <td>" + getYPT(wr, pkgid, 5) + "</td> <td>" + getINTpct(wr, pkgid, 5) + "</td>" + 
 		"<td>" + getGCOVpct(wr, pkgid, 6) + "</td> <td>" + getWrSR(wr, pkgid, 6) + "</td> <td>" + getYPT(wr, pkgid, 6) + "</td> <td>" + getINTpct(wr, pkgid, 6) + "</td>"; // */
 	return row; 
+}
+
+/* Utility functions for Reciever Production Splits table */
+
+function getWrSR(wr, pkgid, downDistID) {
+	var wrid = getWRID(wr);
+	var SC = 0;
+	var targets = 0;
+
+	if (downDistID < 7) {
+		SC = WRSplitStats[pkgid][downDistID][wrid][7];
+		targets = WRSplitStats[pkgid][downDistID][wrid][5];
+	}
+	else {
+		for (var i=0; i<7; i++) {
+			SC += WRSplitStats[pkgid][i][wrid][7];
+			targets += WRSplitStats[pkgid][i][wrid][5];
+		}
+	}
+
+	var SR = calculatePercent(SC, targets);
+	return "<span title='" + SC + " successful plays in " + targets + " targets'>" + SR + "</span>%";
+}
+
+function getYPT(wr, pkgid, downDistID) {
+	var wrid = getWRID(wr);
+	var yards = 0;
+	var targets = 0;
+
+	if (downDistID < 7) {
+		yards = WRSplitStats[pkgid][downDistID][wrid][6];
+		targets = WRSplitStats[pkgid][downDistID][wrid][5];
+	}
+	else {
+		for (var i=0; i<7; i++) {
+			yards += WRSplitStats[pkgid][i][wrid][6];
+			targets += WRSplitStats[pkgid][i][wrid][5];
+		}
+	}
+
+	var YPT = calculateAverage(yards, targets);
+	return "<span title='" + yards.toFixed(1) + " recieving yards in " + targets + " targets'>" + YPT + "</span>"; 
+} 
+
+function getGCOVpct(wr, pkgid, downDistID) {
+	var wrid = getWRID(wr);
+	var firstOpts = 0;
+	var gcovs = 0;
+
+	if (downDistID < 7) {
+		firstOpts = WRSplitStats[pkgid][downDistID][wrid][0] + WRSplitStats[pkgid][downDistID][wrid][1];
+		gcovs = WRSplitStats[pkgid][downDistID][wrid][0];
+	}
+	else {
+		for (var i=0; i<7; i++) {
+			firstOpts += (WRSplitStats[pkgid][i][wrid][0] + WRSplitStats[pkgid][i][wrid][1]);
+			gcovs += WRSplitStats[pkgid][i][wrid][0];
+		}
+	}
+
+	var GCOVpct = calculatePercent(gcovs, firstOpts);
+	return "<span title='" + gcovs + " GCOVs in " + firstOpts + " first option checks'>" + GCOVpct + "</span>%";
+}
+
+function getINTpct(wr, pkgid, downDistID) {
+	var wrid = getWRID(wr);
+	var ints = 0;
+	var targets = 0;
+
+	if (downDistID < 7) {
+		ints = WRSplitStats[pkgid][downDistID][wrid][8];
+		targets = WRSplitStats[pkgid][downDistID][wrid][5];
+	}
+	else {
+		for (var i=0; i<7; i++) {
+			ints += WRSplitStats[pkgid][i][wrid][8];
+			targets += WRSplitStats[pkgid][i][wrid][5];
+		}
+	}
+
+	var INTpct = calculatePercent(ints, targets);
+	return "<span title='" + ints + " Interceptions in " + targets + " target(s)'>" + INTpct + "</span>%";
 }
 
 /*******************************************/
@@ -1223,55 +1326,6 @@ function getYrdPerStp(i) {
 		YPS = (conversionStats[i][3]/stops).toFixed(1);
 	}
 	return YPS;
-}
-
-function getWrSR(wr, pkgid, downDistID) {
-	wrid = getWRID(wr); 
-	var SR; 
-	if (WRSplitStats[pkgid][downDistID][wrid][5] === 0) {
-		SR = 0; 
-	}
-	else {
-		SR = (100*WRSplitStats[pkgid][downDistID][wrid][7]/WRSplitStats[pkgid][downDistID][wrid][5]).toFixed(0);  
-	}
-	return "<span title='" + WRSplitStats[pkgid][downDistID][wrid][7] + " successful plays in " + WRSplitStats[pkgid][downDistID][wrid][5] + " targets'>" + SR + "</span>%"; 
-}
-
-function getYPT(wr, pkgid, downDistID) {
-	wrid = getWRID(wr); 
-	var YPT; 
-	if (WRSplitStats[pkgid][downDistID][wrid][5] === 0) {
-		YPT = 0; 
-	}
-	else {
-		YPT = (WRSplitStats[pkgid][downDistID][wrid][6]/WRSplitStats[pkgid][downDistID][wrid][5]).toFixed(1); 
-	}
-	return "<span title='" + (WRSplitStats[pkgid][downDistID][wrid][6]).toFixed(1) + " recieving yards in " + WRSplitStats[pkgid][downDistID][wrid][5] + " targets'>" + YPT + "</span>"; 
-} 
-
-function getGCOVpct(wr, pkgid, downDistID) {
-	wrid = getWRID(wr); 
-	var firstOpt = WRSplitStats[pkgid][downDistID][wrid][0] + WRSplitStats[pkgid][downDistID][wrid][1]; 
-	var GCOVpct; 
-	if (firstOpt === 0) {
-		GCOVpct = 0; 
-	}
-	else {
-		GCOVpct = (100 * WRSplitStats[pkgid][downDistID][wrid][0] / firstOpt).toFixed(0); 
-	}
-	return "<span title='" + WRSplitStats[pkgid][downDistID][wrid][0] + " GCOVs in " + firstOpt + " first option checks'>" + GCOVpct + "</span>%"; 
-}
-
-function getINTpct(wr, pkgid, downDistID) {
-	wrid = getWRID(wr); 
-	var INTpct; 
-	if (WRSplitStats[pkgid][downDistID][wrid][5] === 0) {
-		INTpct = 0; 
-	}
-	else {
-		INTpct = (100 * WRSplitStats[pkgid][downDistID][wrid][8]/WRSplitStats[pkgid][downDistID][wrid][5]).toFixed(1); 
-	} // */
-	return "<span title='" + WRSplitStats[pkgid][downDistID][wrid][8] + " Interceptions in " + WRSplitStats[pkgid][downDistID][wrid][5] + " target(s)'>" + INTpct + "</span>%"; 
 }
 
 function get3rd4thDownDistID(dist) {
