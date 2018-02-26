@@ -1131,10 +1131,21 @@ function makeKickoffsTable() {
 		kickoffStatTotals[k] = 0;
 	}
 
-	var table = "<table border='1'><th>" + teamType + "</th><th>Kickoffs</th><th>Touchbacks</th><th>TB%</th><th>Avg kick returned from</th><th>Avg field position on returns</th><th>Yards Per Kick Return</th><th>KRTD</th><th>KR <25yd line</th><th>\<25%</th><th>Avg field position</th>";
+	var table = "<table border='1'><th>" + teamType + "</th><th>Kickoffs</th><th>Touchbacks</th><th>TB%</th><th>Avg kick returned from</th><th>Avg field position on returns</th><th>Yards Per Kick Return</th><th>KRTD</th><th>KRTD%</th><th>KR <25yd line</th><th>\<25%</th><th>Avg field position</th>";
 
 	for (var i=0; i<abbrs.length; i++) {
-		table = table.concat("<tr><th>" + abbrs[i] + "</th><td>" + kickoffStats_array[i][0] + "</td><td>" + kickoffStats_array[i][1] + "</td><td>" + calculatePercent(kickoffStats_array[i][1], kickoffStats_array[i][0]) + "%</td><td>" + calculateAverage(kickoffStats_array[i][3], kickoffStats_array[i][2]) + "</td><td>" + calculateAverage(kickoffStats_array[i][4], kickoffStats_array[i][2]) + "</td><td>" + calculateAverage(kickoffStats_array[i][4]-kickoffStats_array[i][3], kickoffStats_array[i][2]) + "</td><td>" + kickoffStats_array[i][6] + "</td><td>" + kickoffStats_array[i][5] + "</td><td>" + calculatePercent(kickoffStats_array[i][5], kickoffStats_array[i][2]) + "%</td><td>" + calculateAverage((kickoffStats_array[i][1] * 25) + kickoffStats_array[i][4], kickoffStats_array[i][0]) + "</td>");
+		table = table.concat("<tr><th>" + abbrs[i] + "</th><td>" + 
+			kickoffStats_array[i][0] + "</td><td>" + 
+			kickoffStats_array[i][1] + "</td><td>" + 
+			calculatePercent(kickoffStats_array[i][1], kickoffStats_array[i][0]) + "%</td><td>" + 
+			calculateAverage(kickoffStats_array[i][3], kickoffStats_array[i][2]) + "</td><td>" + 
+			calculateAverage(kickoffStats_array[i][4], kickoffStats_array[i][2]) + "</td><td>" + 
+			calculateAverage(kickoffStats_array[i][4]-kickoffStats_array[i][3], kickoffStats_array[i][2]) + "</td><td>" + 
+			kickoffStats_array[i][6] + "</td><td>" + 
+			calculatePercent(kickoffStats_array[i][6], kickoffStats_array[i][2]) + "%</td><td>" + 
+			kickoffStats_array[i][5] + "</td><td>" + 
+			calculatePercent(kickoffStats_array[i][5], kickoffStats_array[i][2]) + "%</td><td>" + 
+			calculateAverage((kickoffStats_array[i][1] * 25) + kickoffStats_array[i][4], kickoffStats_array[i][0]) + "</td>");
 
 		for (var j=0; j<7; j++) {
 			kickoffStatTotals[j] += kickoffStats_array[i][j];
