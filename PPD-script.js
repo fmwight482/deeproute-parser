@@ -1179,25 +1179,58 @@ function makeFieldGoalsTable() {
 		}
 	}
 
-	var table = "<table border='1'><th></th><th colspan='4'>Extra Points</th><th colspan='4'>0-20 yards</th><th colspan='4'>20-30 yards</th><th colspan='4'>30-40 yards</th><th colspan='4'>40-50 yards</th><th colspan='4'>50+ yards</th>" + "<tr><th></th><th>XPM</th><th>XPA</th><th>XP%</th><th>XP BLK</th><th>FGM</th><th>FGA</th><th>FG%</th><th>FG BLK</th><th>FGM</th><th>FGA</th><th>FG%</th><th>FG BLK</th><th>FGM</th><th>FGA</th><th>FG%</th><th>FG BLK</th><th>FGM</th><th>FGA</th><th>FG%</th><th>FG BLK</th><th>FGM</th><th>FGA</th><th>FG%</th><th>FG BLK</th>";
+	var FGStatHeader = "<th><span title='Field Goals Made'>FGM</span></th><th><span title='Field Goal Attempts'>FGA</span></th><th><span title='Field Goal Percentage'>FG%</span></th><th><span title='Blocked field goals'>FG BLK</span></th>";
+
+	var table = "<table border='1'><th></th><th colspan='4'>Extra Points</th><th colspan='4'>0-20 yards</th><th colspan='4'>20-30 yards</th><th colspan='4'>30-40 yards</th><th colspan='4'>40-50 yards</th><th colspan='4'>50+ yards</th><th colspan='4'>All Field Goals</th>" + "<tr><th></th><th>XPM</th><th>XPA</th><th>XP%</th><th>XP BLK</th>" + FGStatHeader + FGStatHeader + FGStatHeader + FGStatHeader + FGStatHeader + FGStatHeader;
 
 	for (var i=0; i<abbrs.length; i++) {
+		// sum and store the totals for each team across all ranges
+		var teamFGM = 0;
+		var teamFGA = 0;
+		var teamFGBLK = 0;
+
 		table = table.concat("<tr><th>" + abbrs[i] + "</th>");
+
+		// add columns for EXPs and each distance split
 		for (var m=0; m<6; m++) {
 			table = table.concat("<td>" + fieldGoalStats_array[i][m][1] + "</td><td>" + fieldGoalStats_array[i][m][0] + "</td><td>" + calculatePercentOrNone(fieldGoalStats_array[i][m][1], fieldGoalStats_array[i][m][0]) + "%</td><td>" + fieldGoalStats_array[i][m][2] + "</td>");
+			if (m > 0) {
+				teamFGM += fieldGoalStats_array[i][m][1];
+				teamFGA += fieldGoalStats_array[i][m][0];
+				teamFGBLK += fieldGoalStats_array[i][m][2];
+			}
 
+			// add to multi-team totals
 			for (var n=0; n<3; n++) {
 				fieldGoalStatTotals[m][n] += fieldGoalStats_array[i][m][n];
 			}
 		}
+
+		// add totals column for all FGs by this team
+		table = table.concat("<td>" + teamFGM + "</td><td>" + teamFGA + "</td><td>" + calculatePercentOrNone(teamFGM, teamFGA) + "%</td><td>" + teamFGBLK + "</td>");
 	}
 
 	if (abbrs.length > 1) {
 		// don't do a "total" row if there is only one team
+
+		// sum and store the totals for all teams across all ranges
+		var allFGM = 0;
+		var allFGA = 0;
+		var allFGBLK = 0;
+
 		table = table.concat("<tr><th>Total</th>");
 		for (var m=0; m<6; m++) {
 			table = table.concat("<td>" + fieldGoalStatTotals[m][1] + "</td><td>" + fieldGoalStatTotals[m][0] + "</td><td>" + calculatePercentOrNone(fieldGoalStatTotals[m][1], fieldGoalStatTotals[m][0]) + "%</td><td>" + fieldGoalStatTotals[m][2] + "</td>");
+
+			if (m > 0) {
+				allFGM += fieldGoalStatTotals[m][1];
+				allFGA += fieldGoalStatTotals[m][0];
+				allFGBLK += fieldGoalStatTotals[m][2];
+			}
 		}
+
+		// add totals column for all FGs by all teams
+		table = table.concat("<td>" + allFGM + "</td><td>" + allFGA + "</td><td>" + calculatePercentOrNone(allFGM, allFGA) + "%</td><td>" + allFGBLK + "</td>");
 	}
 
 	table = table.concat("</table>");
