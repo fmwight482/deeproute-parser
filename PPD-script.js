@@ -1675,7 +1675,9 @@ function parsePBP(intext) {
 				offAbbr = abbr;
 				defAbbr = otherAbbr;
 
-				var FGDistPtr1, FGDistPtr2, FGDecimalDistPtr1, FGDecimalDistPtr2, FGMadePtr1, FGMadePtr2, FGMadeStr, FGDistYards, FGDistDecimals;
+				var FGDistPtr1, FGDistPtr2, FGDecimalDistPtr1, FGDecimalDistPtr2, FGMadePtr1, FGMadePtr2, FGBlkPtr1, FGBlkPtr2;
+				var FGMadeStr, FGDistYards, FGDistDecimals;
+				fieldGoalBlocked = 0;
 
 				FGDistPtr1 = intext.indexOf(" coming on for a ", preptr);
 				if (FGDistPtr1 != -1 && FGDistPtr1 < endptr) {
@@ -1704,6 +1706,27 @@ function parsePBP(intext) {
 						}
 						else {
 							alert("field goal neither good nor no good: '" + FGMadeStr + "'");
+						}
+					}
+					else {
+						FGBlkPtr1 = intext.indexOf(" was BLOCKED backwards for ", FGDistPtr2);
+						if (FGBlkPtr1 != -1 && FGBlkPtr1 < endptr) {
+							FGBlkPtr2 = intext.indexOf(" yards and recovered by the ", FGBlkPtr1);
+							if (FGBlkPtr2 != -1 && FGBlkPtr2 < endptr) {
+								var recoveryTeam = intext.substring(FGBlkPtr2+28, FGBlkPtr2+35);
+								if (recoveryTeam === "defense") {
+									// blocked kick recovered by the defense, the play will have read in the wrong abbreviation. Swap them.
+									offAbbr = otherAbbr;
+									defAbbr = abbr;
+								}
+								else if (recoveryTeam !== "offense") {
+									alert("Blocked field goal recovered by unknown team '" + recoveryTeam + "'");
+								}
+							}
+							//alert("Field goal blocked! dist = " + fieldGoalDist + ", time = " + gameTime + ", offAbbr = " + offAbbr + ", defAbbr = " + defAbbr);
+							fieldGoalBlocked = 1;
+							fieldGoalMade = 0;
+
 						}
 					}
 
