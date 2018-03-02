@@ -1474,7 +1474,7 @@ function parsePBP(intext) {
 	var kickoff=0, onsides=0, fieldGoal=0, punt=0, extraPoint=0;
 	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot, kickReturnInside25, kickReturnTouchdown;
 	var fieldGoalDist, fieldGoalMade, fieldGoalBlocked;
-	var puntDist, puntLandingSpot, puntBlock, puntBlockYards, puntReturn, puntReturnYards;
+	var puntDist, puntLandingSpot, puntBlock, puntBlockYards, puntReturn, puntReturnYards, puntReturnSpot;
 
 	readcount++;
 	newDiv = document.getElementById('scout_count');
@@ -1745,13 +1745,16 @@ function parsePBP(intext) {
 				offAbbr = otherAbbr;
 				defAbbr = abbr;
 
-				var puntDistPtr1, puntDistPtr2, puntDecimalDistPtr1, puntDecimalDistPtr2;
+				var puntDistPtr1, puntDistPtr2, puntDecimalDistPtr1, puntDecimalDistPtr2, puntResultPtr;
 				var returnDistPtr1, returnDistPtr2, returnDecimalPtr1, returnDecimalPtr2;
 				var puntDistYards = 0;
 				var puntDistDecimals = 0;
 				var returnDistYards = 0;
 				var returnDistDecimals = 0;
 				var puntBlockReturnYards = 0;
+				var returnDistStr;
+				var returnYardLine;
+				var returnFieldSide; 
 
 				puntDistPtr1 = intext.indexOf("</b></a> for <span class='supza'>", preptr);
 				if (puntDistPtr1 != -1 && puntDistPtr1 < endptr) { // if successfully punted
@@ -1764,6 +1767,58 @@ function parsePBP(intext) {
 					puntDist = parseInt(puntDistYards) + parseInt(puntDistDecimals)/100;
 
 					//alert("puntDist = " + puntDist + ", yards = " + puntDistYards + ", decimals = " + puntDistDecimals);
+
+					puntResultPtr = intext.indexOf(" yards; touchback.", puntDecimalDistPtr2);
+					if (puntResultPtr != -1 && puntResultPtr < endptr) {
+						puntReturn = 0;
+						touchback = 1;
+						//alert("Punt touchback! time = " + gameTime);
+					}
+					else {
+						puntResultPtr = intext.indexOf(" yards; no return.", puntDecimalDistPtr2);
+						if (puntResultPtr != -1 && puntResultPtr < endptr) {
+							puntReturn = 0;
+							touchback = 0;
+							//alert("Punt not returnable! time = " + gameTime);
+						}
+						else {
+							puntResultPtr = intext.indexOf(" yards.. looks to be returnable.", puntDecimalDistPtr2);
+							if (puntResultPtr != -1 && puntResultPtr < endptr) {
+								puntReturn = 1;
+								touchback = 0;
+								//alert("Punt returned! time = " + gameTime);
+
+								returnDistPtr1 = intext.indexOf(" yards to the ", puntResultPtr);
+								if (returnDistPtr1 != -1 && returnDistPtr1 < endptr) {
+									returnDistPtr1 += 14;
+									returnDistPtr2 = intext.indexOf(" yardline.", returnDistPtr1);
+									if (returnDistPtr2 != -1 && returnDistPtr2 < endptr) {
+										returnDistStr = intext.substring(returnDistPtr1, returnDistPtr2);
+										if (returnDistStr.includes("Midfield")) {
+											puntReturnSpot = 50;
+											returnYardLine = "50";
+											returnFieldSide = "midfield";
+										}
+										else {
+											returnFieldSide = returnDistStr.substring(0, 3);
+											returnYardLine = returnDistStr.substring(4, returnDistStr.length);
+											puntReturnSpot = parseInt(returnYardLine);
+											if (returnFieldSide == "Opp") {
+												puntReturnSpot = 100 - puntReturnSpot;
+											}
+										}
+
+										touchdownPtr = intext.indexOf("TOUCHDOWN!", returnDistPtr2);
+										if (touchdownPtr != -1 && touchdownPtr < endptr) {
+											puntReturnTouchdown = 1;
+											isTouchdown = 1;
+										}
+										//alert("punt returned to the '" + returnFieldSide + "' '" + returnYardLine + "', '" + puntReturnSpot + "' yards from the goal line");
+									}
+								}
+							}
+						}
+					}
 				}
 				else { // if blocked
 					puntDistPtr1 = intext.indexOf(" was BLOCKED backwards for <span class='supza'>", preptr);
@@ -3502,7 +3557,7 @@ function selectStatTables() {
 	var defPkgSplitsDef = "<span title='displays number of snaps for each defensive package'>Defensive package splits</span>";
 	var thirdFourthDownsDef = "<span title='displays 3rd and 4th down conversion attempts and success rate for a wide variety of distances'>3rd/4th downs</span>";
 	var WRStatsDef = "<span title='displays 1st option checks, yards per target, success rate, and various other statistics for each individual reciever'>Individual reciever stats</span>";
-	var RBStatsDef = "<span title='displas YPC, success rate, and and other rushing statistics'>Individual rushing stats</span>";
+	var RBStatsDef = "<span title='displays YPC, success rate, and and other rushing statistics'>Individual rushing stats</span>";
 	var IDPStatsDef = "<span title='displays 1st option checks, yards per target, success rate, and various other statistics for the recievers matched up against each individual defensive player'>Individual defensive player stats</span>";
 	var passDistStatsDef = "<span title='displays completion percentage, interception rate, average YAC, and other statistics for passes of various distances'>Pass results by distance</span>";
 	var passRushStatsDef = "<span title='displays sacks, throwaways, scrambles, and other plays which help guage how much pressure is applied to the quarterback'>Pressure stats</span>";
