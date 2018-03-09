@@ -1154,7 +1154,7 @@ function makeKickoffsTable() {
 
 	if (abbrs.length > 1) {
 		// don't do a "total" row if there is only one team
-		table = table.concat("<tr><td>Total</td><td>" + kickoffStatTotals[0] + "</td><td>" + kickoffStatTotals[1] + "</td><td>" + calculatePercent(kickoffStatTotals[1], kickoffStatTotals[0]) + "%</td><td>" + calculateAverage(kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4]-kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + kickoffStatTotals[6] + "</td><td>" + kickoffStatTotals[5] + "</td><td>" + calculatePercent(kickoffStatTotals[5], kickoffStatTotals[2]) + "%</td><td>" + calculateAverage((kickoffStatTotals[1] * 25) + kickoffStatTotals[4], kickoffStatTotals[0]) + "</td>");
+		table = table.concat("<tr><td>Total</td><td>" + kickoffStatTotals[0] + "</td><td>" + kickoffStatTotals[1] + "</td><td>" + calculatePercent(kickoffStatTotals[1], kickoffStatTotals[0]) + "%</td><td>" + calculateAverage(kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4], kickoffStatTotals[2]) + "</td><td>" + calculateAverage(kickoffStatTotals[4]-kickoffStatTotals[3], kickoffStatTotals[2]) + "</td><td>" + kickoffStatTotals[6] + "</td><td>" + calculatePercent(kickoffStatTotals[6], kickoffStatTotals[2]) + "%</td><td>" + kickoffStatTotals[5] + "</td><td>" + calculatePercent(kickoffStatTotals[5], kickoffStatTotals[2]) + "%</td><td>" + calculateAverage((kickoffStatTotals[1] * 25) + kickoffStatTotals[4], kickoffStatTotals[0]) + "</td>");
 	}
 
 	table = table.concat("</table>");
