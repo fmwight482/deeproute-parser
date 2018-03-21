@@ -1110,7 +1110,7 @@ function makeSacksTable() {
 
 	if (abbrs.length > 1) {
 		// don't do a "total" row if there is only one team
-		table = table.concat("<tr><td>Total</td><td>" + sackStatsTotals[0] + "</td><td>" + (sackStatsTotals[1] - sackStatsTotals[8]) + "</td><td>" + calculatePercent(sackStatsTotals[1] - sackStatsTotals[8], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[2] + "</td><td>" + calculatePercent(sackStatsTotals[2], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[3] + "</td><td>" + calculatePercent(sackStatsTotals[3], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[4] + "</td><td>" + calculatePercent(sackStatsTotals[j][4], sackStatsTotals[j][0]) + "%</td><td>" + sackStatsTotals[5] + "</td><td>" + calculatePercent(sackStatsTotals[5], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[6] + "</td><td>" + calculatePercent(sackStatsTotals[6], sackStatsTotals[4] + sackStatsTotals[5]) + "%</td><td>" + sackStatsTotals[7] + "</td><td>" + calculatePercent(sackStatsTotals[7], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[8] + "</td><td>" + calculatePercent(sackStatsTotals[8], sackStatsTotals[0]) + "%</td>");
+		table = table.concat("<tr><td>Total</td><td>" + sackStatsTotals[0] + "</td><td>" + (sackStatsTotals[1] - sackStatsTotals[8]) + "</td><td>" + calculatePercent(sackStatsTotals[1] - sackStatsTotals[8], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[2] + "</td><td>" + calculatePercent(sackStatsTotals[2], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[3] + "</td><td>" + calculatePercent(sackStatsTotals[3], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[4] + "</td><td>" + calculatePercent(sackStatsTotals[4], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[5] + "</td><td>" + calculatePercent(sackStatsTotals[5], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[6] + "</td><td>" + calculatePercent(sackStatsTotals[6], sackStatsTotals[4] + sackStatsTotals[5]) + "%</td><td>" + sackStatsTotals[7] + "</td><td>" + calculatePercent(sackStatsTotals[7], sackStatsTotals[0]) + "%</td><td>" + sackStatsTotals[8] + "</td><td>" + calculatePercent(sackStatsTotals[8], sackStatsTotals[0]) + "%</td>");
 	}
 
 	table = table.concat("</table>");
@@ -1219,13 +1219,13 @@ function makeFieldGoalsTable() {
 		var allFGBLK = 0;
 
 		table = table.concat("<tr><th>Total</th>");
-		for (var m=0; m<6; m++) {
-			table = table.concat("<td>" + fieldGoalStatTotals[m][1] + "</td><td>" + fieldGoalStatTotals[m][0] + "</td><td>" + calculatePercentOrNone(fieldGoalStatTotals[m][1], fieldGoalStatTotals[m][0]) + "%</td><td>" + fieldGoalStatTotals[m][2] + "</td>");
+		for (var p=0; p<6; p++) {
+			table = table.concat("<td>" + fieldGoalStatTotals[p][1] + "</td><td>" + fieldGoalStatTotals[p][0] + "</td><td>" + calculatePercentOrNone(fieldGoalStatTotals[p][1], fieldGoalStatTotals[p][0]) + "%</td><td>" + fieldGoalStatTotals[p][2] + "</td>");
 
-			if (m > 0) {
-				allFGM += fieldGoalStatTotals[m][1];
-				allFGA += fieldGoalStatTotals[m][0];
-				allFGBLK += fieldGoalStatTotals[m][2];
+			if (p > 0) {
+				allFGM += fieldGoalStatTotals[p][1];
+				allFGA += fieldGoalStatTotals[p][0];
+				allFGBLK += fieldGoalStatTotals[p][2];
 			}
 		}
 
@@ -1746,15 +1746,15 @@ function parsePBP(intext) {
 				defAbbr = abbr;
 
 				var puntDistPtr1, puntDistPtr2, puntDecimalDistPtr1, puntDecimalDistPtr2, puntResultPtr;
-				var returnDistPtr1, returnDistPtr2, returnDecimalPtr1, returnDecimalPtr2;
+				var puntReturnDistPtr1, puntReturnDistPtr2, returnDecimalPtr1, returnDecimalPtr2;
 				var puntDistYards = 0;
 				var puntDistDecimals = 0;
 				var returnDistYards = 0;
 				var returnDistDecimals = 0;
 				var puntBlockReturnYards = 0;
-				var returnDistStr;
-				var returnYardLine;
-				var returnFieldSide; 
+				var puntReturnDistStr;
+				var puntReturnYardLine;
+				var puntReturnFieldSide; 
 
 				puntDistPtr1 = intext.indexOf("</b></a> for <span class='supza'>", preptr);
 				if (puntDistPtr1 != -1 && puntDistPtr1 < endptr) { // if successfully punted
@@ -1788,32 +1788,32 @@ function parsePBP(intext) {
 								touchback = 0;
 								//alert("Punt returned! time = " + gameTime);
 
-								returnDistPtr1 = intext.indexOf(" yards to the ", puntResultPtr);
-								if (returnDistPtr1 != -1 && returnDistPtr1 < endptr) {
-									returnDistPtr1 += 14;
-									returnDistPtr2 = intext.indexOf(" yardline.", returnDistPtr1);
-									if (returnDistPtr2 != -1 && returnDistPtr2 < endptr) {
-										returnDistStr = intext.substring(returnDistPtr1, returnDistPtr2);
-										if (returnDistStr.includes("Midfield")) {
+								puntReturnDistPtr1 = intext.indexOf(" yards to the ", puntResultPtr);
+								if (puntReturnDistPtr1 != -1 && puntReturnDistPtr1 < endptr) {
+									puntReturnDistPtr1 += 14;
+									puntReturnDistPtr2 = intext.indexOf(" yardline.", puntReturnDistPtr1);
+									if (puntReturnDistPtr2 != -1 && puntReturnDistPtr2 < endptr) {
+										puntReturnDistStr = intext.substring(puntReturnDistPtr1, puntReturnDistPtr2);
+										if (puntReturnDistStr.includes("Midfield")) {
 											puntReturnSpot = 50;
-											returnYardLine = "50";
-											returnFieldSide = "midfield";
+											puntReturnYardLine = "50";
+											puntReturnFieldSide = "midfield";
 										}
 										else {
-											returnFieldSide = returnDistStr.substring(0, 3);
-											returnYardLine = returnDistStr.substring(4, returnDistStr.length);
-											puntReturnSpot = parseInt(returnYardLine);
-											if (returnFieldSide == "Opp") {
+											puntReturnFieldSide = puntReturnDistStr.substring(0, 3);
+											puntReturnYardLine = puntReturnDistStr.substring(4, puntReturnDistStr.length);
+											puntReturnSpot = parseInt(puntReturnYardLine);
+											if (puntReturnFieldSide == "Opp") {
 												puntReturnSpot = 100 - puntReturnSpot;
 											}
 										}
 
-										touchdownPtr = intext.indexOf("TOUCHDOWN!", returnDistPtr2);
+										touchdownPtr = intext.indexOf("TOUCHDOWN!", puntReturnDistPtr2);
 										if (touchdownPtr != -1 && touchdownPtr < endptr) {
 											puntReturnTouchdown = 1;
 											isTouchdown = 1;
 										}
-										//alert("punt returned to the '" + returnFieldSide + "' '" + returnYardLine + "', '" + puntReturnSpot + "' yards from the goal line");
+										//alert("punt returned to the '" + puntReturnFieldSide + "' '" + puntReturnYardLine + "', '" + puntReturnSpot + "' yards from the goal line");
 									}
 								}
 							}
@@ -1837,13 +1837,13 @@ function parsePBP(intext) {
 							// the block and the return are considered separate plays in the log, with separate times shown 
 							endptr = intext.indexOf("The play required ", endSpecialTeamsPtr+20);
 
-							returnDistPtr1 = intext.indexOf("The blocked punt was returned ", endSpecialTeamsPtr);
-							if (returnDistPtr1 != -1 && returnDistPtr1 < endptr) { // if the blocked punt is returned
-								returnDistPtr2 = intext.indexOf(" for a TOUCHDOWN", returnDistPtr1);
-								if (returnDistPtr2 === -1 || returnDistPtr2 >= endptr) { // if the blocked punt is not returned for a touchdown
-									returnDistPtr2 = intext.indexOf(" yards.", returnDistPtr1);
+							puntReturnDistPtr1 = intext.indexOf("The blocked punt was returned ", endSpecialTeamsPtr);
+							if (puntReturnDistPtr1 != -1 && puntReturnDistPtr1 < endptr) { // if the blocked punt is returned
+								puntReturnDistPtr2 = intext.indexOf(" for a TOUCHDOWN", puntReturnDistPtr1);
+								if (puntReturnDistPtr2 === -1 || puntReturnDistPtr2 >= endptr) { // if the blocked punt is not returned for a touchdown
+									puntReturnDistPtr2 = intext.indexOf(" yards.", puntReturnDistPtr1);
 								}
-								returnDistYards = intext.substring(returnDistPtr1+30, returnDistPtr2);
+								returnDistYards = intext.substring(puntReturnDistPtr1+30, puntReturnDistPtr2);
 								puntBlockReturnYards = parseInt(returnDistYards);
 							}
 						}
@@ -2829,42 +2829,42 @@ function parsePBP(intext) {
 		}
 		
 		if (showSacks && (showBothTeams || correctAbbr(offAbbr, defAbbr, showOffense)) && (noPlay === 0 || withPens || throwAway)) {
-			var teamIndex;
+			var sacksTeamIndex;
 			if (showOffense) {
-				teamIndex = getTeamIndexFromAbbr(offAbbr);
+				sacksTeamIndex = getTeamIndexFromAbbr(offAbbr);
 			}
 			else {
-				teamIndex = getTeamIndexFromAbbr(defAbbr);
+				sacksTeamIndex = getTeamIndexFromAbbr(defAbbr);
 			}
 
 			// pass plays, passes, immediate sacks, cover sacks, pressure scrambles, cover scrambles, scramble sacks, dumpoffs, throw aways
 			if (pass) {
-				sackStats[teamIndex][0]++; // increment pass plays
+				sackStats[sacksTeamIndex][0]++; // increment pass plays
 			}
 			if (att) {
-				sackStats[teamIndex][1]++; // increment pass attempts
+				sackStats[sacksTeamIndex][1]++; // increment pass attempts
 			}
 			if (sack) {
 				if (scramble) {
-					sackStats[teamIndex][6]++; // increment scramble sacks
-					//alert("found scrample sack at play " + tmp + "! Total: " + sackStats[teamIndex][6]);
+					sackStats[sacksTeamIndex][6]++; // increment scramble sacks
+					//alert("found scrample sack at play " + tmp + "! Total: " + sackStats[sacksTeamIndex][6]);
 				}
 				else if (GCOV) {
-					sackStats[teamIndex][2]++; // increment cover sacks
+					sackStats[sacksTeamIndex][2]++; // increment cover sacks
 				}
 				else {
-					sackStats[teamIndex][3]++; // increment immediate sacks
+					sackStats[sacksTeamIndex][3]++; // increment immediate sacks
 				}
 			}
 			// no pressure scrambles
 			if (coverScram) {
-				sackStats[teamIndex][5]++; // increment cover scrambles
+				sackStats[sacksTeamIndex][5]++; // increment cover scrambles
 			}
 			if (dumpoff) {
-				sackStats[teamIndex][7]++; // increment dumpoffs
+				sackStats[sacksTeamIndex][7]++; // increment dumpoffs
 			}
 			if (throwAway) {
-				sackStats[teamIndex][8]++; // increment throw aways
+				sackStats[sacksTeamIndex][8]++; // increment throw aways
 			}
 		}
 
@@ -2874,25 +2874,25 @@ function parsePBP(intext) {
 
 			// set the correct abbreviation
 			// TODO: find a more efficient way to do this across all tables
-			var teamIndex = getTeamIndex(kickerTeamName);
+			var kickoffsTeamIndex = getTeamIndex(kickerTeamName);
 			if (showOffense) {
-				teamIndex = getTeamIndex(returnTeamName);
+				kickoffsTeamIndex = getTeamIndex(returnTeamName);
 			}
-			//alert("kicking team is '" + kickerTeamName + "', return team is '" + returnTeamName + "', team index is " + teamIndex);
+			//alert("kicking team is '" + kickerTeamName + "', return team is '" + returnTeamName + "', team index is " + kickoffsTeamIndex);
 
-			kickoffStats_array[teamIndex][0]++; // increment kickoffs
+			kickoffStats_array[kickoffsTeamIndex][0]++; // increment kickoffs
 			if (touchback) {
-				kickoffStats_array[teamIndex][1]++; // increment touchbacks
+				kickoffStats_array[kickoffsTeamIndex][1]++; // increment touchbacks
 			}
 			else {
-				kickoffStats_array[teamIndex][2]++; // increment kick returns
-				kickoffStats_array[teamIndex][3]+=kickoffLandingSpot;
-				kickoffStats_array[teamIndex][4]+=kickoffReturnSpot;
+				kickoffStats_array[kickoffsTeamIndex][2]++; // increment kick returns
+				kickoffStats_array[kickoffsTeamIndex][3]+=kickoffLandingSpot;
+				kickoffStats_array[kickoffsTeamIndex][4]+=kickoffReturnSpot;
 				if (kickReturnInside25) {
-					kickoffStats_array[teamIndex][5]++; // increment kicks returned short of the 25
+					kickoffStats_array[kickoffsTeamIndex][5]++; // increment kicks returned short of the 25
 				}
 				if (kickReturnTouchdown) {
-					kickoffStats_array[teamIndex][6]++; // increment kick return touchdowns
+					kickoffStats_array[kickoffsTeamIndex][6]++; // increment kick return touchdowns
 				}
 			}
 		}
@@ -2904,12 +2904,12 @@ function parsePBP(intext) {
 			((showBothTeams || correctAbbr(offAbbr, defAbbr, showOffense)) && extraPoint)) {
 			// PAT, 0-20, 20-30, 30-40, 40-50, 50+
 			// attempted, made, blocked
-			var teamIndex;
+			var fieldGoalsTeamIndex;
 			if (showOffense) {
-				teamIndex = getTeamIndexFromAbbr(offAbbr);
+				fieldGoalsTeamIndex = getTeamIndexFromAbbr(offAbbr);
 			}
 			else {
-				teamIndex = getTeamIndexFromAbbr(defAbbr);
+				fieldGoalsTeamIndex = getTeamIndexFromAbbr(defAbbr);
 			}
 
 			var fieldGoalDistId;
@@ -2921,12 +2921,12 @@ function parsePBP(intext) {
 				//alert("recording field goal attempt! distance = " + fieldGoalDist + ", distId = " + fieldGoalDistId + ", gameTime = " + gameTime + ", tmp = " + tmp + ", made = " + fieldGoalMade);
 			}
 
-			fieldGoalStats_array[teamIndex][fieldGoalDistId][0]++; // increment field goal attempts
+			fieldGoalStats_array[fieldGoalsTeamIndex][fieldGoalDistId][0]++; // increment field goal attempts
 			if (fieldGoalMade) {
-				fieldGoalStats_array[teamIndex][fieldGoalDistId][1]++; // increment made field goals
+				fieldGoalStats_array[fieldGoalsTeamIndex][fieldGoalDistId][1]++; // increment made field goals
 			}
 			if (fieldGoalBlocked) {
-				fieldGoalStats_array[teamIndex][fieldGoalDistId][2]++; // increment blocked field goals
+				fieldGoalStats_array[fieldGoalsTeamIndex][fieldGoalDistId][2]++; // increment blocked field goals
 			}
 		}
 
