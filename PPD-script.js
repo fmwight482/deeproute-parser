@@ -8,7 +8,7 @@
 // @include     http://deeproute.com/?js=scrimmine
 // @grant		GM_xmlhttpRequest
 // @connect	    deeproute.com
-// @version     1.6.7
+// @version     1.6.8
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
@@ -3580,7 +3580,7 @@ function selectStatTables() {
 		'<input type="checkbox" name="other" id="sacks"> ' + passRushStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="kickoffs"> ' + kickoffStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="fieldGoals"> ' + fieldGoalStatsDef + ' <br>' + 
-		'<input type="checkbox" name="other" id="punts"> ' + puntStatsDef + ' <br>' + 
+		/* '<input type="checkbox" name="other" id="punts"> ' + puntStatsDef + ' <br>' + // */
 		'<span class="playerStatHeader"><b>Individual Player Statistics</b></span><br>' + 
 		'<input type="checkbox" name="other" id="recievers"> ' + WRStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="runners"> ' + RBStatsDef + ' <br>' + 
@@ -3712,10 +3712,10 @@ function startFunc ()
 			fieldGoalStats_bol = 1;
 			selectedTable = 1;
 		}
-		if (document.getElementById("punts").checked) {
+		/*if (document.getElementById("punts").checked) {
 			kickoffStats_bol = 1;
 			selectedTable = 1;
-		}
+		} */
 		
 		if (document.getElementById("pre").checked) {
 			Preseason = 1; 
