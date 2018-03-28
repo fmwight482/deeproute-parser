@@ -1815,6 +1815,7 @@ function parsePBP(intext) {
 								touchback = 0;
 								//alert("Punt returned! time = " + gameTime);
 
+								// find the yardline the punt was returned to
 								puntReturnDistPtr1 = intext.indexOf(" yards to the ", puntResultPtr);
 								if (puntReturnDistPtr1 != -1 && puntReturnDistPtr1 < endptr) {
 									puntReturnDistPtr1 += 14;
@@ -1848,6 +1849,7 @@ function parsePBP(intext) {
 					}
 				}
 				else { // if blocked
+					puntBlock = 1;
 					puntDistPtr1 = intext.indexOf(" was BLOCKED backwards for <span class='supza'>", preptr);
 					if (puntDistPtr1 != -1 && puntDecimalDistPtr1 < endptr) {
 						puntDistPtr2 = intext.indexOf("</span>", puntDistPtr1);
@@ -1877,6 +1879,7 @@ function parsePBP(intext) {
 						//alert("Punt blocked backwards " + puntBlockYards + " yards and returned " + puntBlockReturnYards + " yards.");
 						puntBlockYards += puntBlockReturnYards;
 					}
+					alert("Blocked punt not parsed properly! timestamp = " + gameTime + ", offAbbr = " + offAbbr + ", defAbbr = " + defAbbr);
 				}
 			}
 
@@ -2957,6 +2960,38 @@ function parsePBP(intext) {
 			}
 		}
 
+		if (puntStats_bol && (noPlay === 0 || withPens) && (showBothTeams || correctAbbr(offAbbr, defAbbr, showOffense)) && punt) {
+			// own goal to own 40, own 40 to opp 40, opp 40 to opp goal
+			// punts, gross yards, punt landing spot, touchbacks, returns, return yards, blocks, block yards
+			var puntFieldPosId = getPuntFieldPositionId(yardline);
+
+			// The field position of the return team following the punt
+			// this value starts as the field position prior to the punt, and is adjusted as other stats are recorded
+			var netFieldPosition = getDistToGoal(yardline, 0);
+
+			if (puntBlock) {
+				puntStats_array[puntFieldPosId][6]++; // increment blocked punts
+				puntStats_array[puntFieldPosId][7] += puntBlockYards;
+				netFieldPosition -= puntBlockYards;
+			}
+			else {
+				puntStats_array[puntFieldPosId][0]++; // increment punts
+				puntStats_array[puntFieldPosId][1] += puntDist; // add gross punt yardage
+				netFieldPosition += puntDist;
+
+				if (touchback) {
+					puntStats_array[puntFieldPosId][3]++; // increment touchbacks
+					netFieldPosition += 20;
+				}
+				else if (puntReturn) {
+					puntStats_array[puntFieldPosId][4]++; // increment punt returns
+					puntStats_array[puntFieldPosId][5] += (netFieldPosition - puntReturnSpot); // calculate and add punt return yards
+					netFieldPosition = puntReturnSpot;
+				}
+			}
+			puntStats_array[puntFieldPosId][2] += netFieldPosition; // add net post-punt field position
+		}
+
 		// reset all variables for the next play
 
 		isTouchdown = 0;
@@ -2971,6 +3006,9 @@ function parsePBP(intext) {
 		fieldGoalDist = -1;
 		kickReturnTouchdown = 0;
 		puntDist = 0;
+		puntBlock = 0;
+		puntBlockYards = 0;
+		touchback = 0;
 		pass = 0;
 		att = 0;
 		comp = 0;
