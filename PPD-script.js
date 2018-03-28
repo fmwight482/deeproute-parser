@@ -347,6 +347,38 @@ function getFieldGoalDistId(dist) {
 	return id;
 }
 
+function getPuntFieldPositionId(yardline) {
+	// own goal to own 40, own 40 to opp 40, opp 40 to opp goal
+	var id = -1;
+	var distToGoal = getDistToGoal(yardline, 1);
+
+	if (distToGoal <= 40) {
+		id = 0;
+	}
+	else if (distToGoal <= 60) {
+		id = 1;
+	}
+	else {
+		id = 2;
+	}
+
+	return id;
+}
+
+// convert a yardline (eg, "Opp 43") into distance from the goal line
+// "Opp 43" would be 43 yards as the Offensive team, 57 yards as the Defensive team
+// the Offensive team is defined as the team currently posessing the ball
+function getDistToGoal(yardline, asOffense) {
+	var fieldSide = yardline.substring(0, 3);
+	var distToGoal = parseInt(yardline.substring(4));
+
+	if ((asOffense && fieldSide === "Own") || (!asOffense && fieldSide == "Opp")) {
+		distToGoal = 100 - distToGoal;
+	}
+
+	return distToGoal;
+}
+
 function calculatePercent(numerator, denominator) {
 	var result = 0;
 	if (denominator !== 0) {
