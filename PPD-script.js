@@ -67,19 +67,6 @@ var longSplit = 7;
 var withPens = 0;
 var isFirstRun = 1;
 
-
-function getElementsByClassName(classname, par){
-	 var a=[];
-	 var re = new RegExp('\\b' + classname + '\\b');
-	 var els = par.getElementsByTagName("*"); // node list of every element under par (document, presumably the scedule page?)
-	 for(var i=0,j=els.length; i<j; i++){ // while i is less than the number of elements under par
-			if(re.test(els[i].className)){ // if an element includes "team_checkbox", push the element into a
-				 a.push(els[i]);
-			}
-	 }
-	 return a;
-}
-
 /*************************************/
 /***** Generic Utility Functions *****/
 /*************************************/
@@ -3339,6 +3326,18 @@ function parseTeamStatsForAbbrs(intext) {
 	startFunc();
 }
 
+
+function getElementsByClassName(classname, par){
+	 var a=[];
+	 var re = new RegExp('\\b' + classname + '\\b');
+	 var els = par.getElementsByTagName("*"); // node list of every element under par (document, presumably the scedule page?)
+	 for(var i=0,j=els.length; i<j; i++){ // while i is less than the number of elements under par
+			if(re.test(els[i].className)){ // if an element includes "team_checkbox", push the element into a
+				 a.push(els[i]);
+			}
+	 }
+	 return a;
+}
 
 function buildGameList(input) 
 {
