@@ -352,10 +352,10 @@ function getPuntFieldPositionId(yardline) {
 	var id = -1;
 	var distToGoal = getDistToGoal(yardline, 1);
 
-	if (distToGoal <= 40) {
+	if (distToGoal > 60) {
 		id = 0;
 	}
-	else if (distToGoal <= 60) {
+	else if (distToGoal > 40) {
 		id = 1;
 	}
 	else {
@@ -1482,6 +1482,35 @@ function makeFieldGoalsTable() {
 	return table;
 }
 
+function makePuntStatsTable() {
+	// own goal to own 40, own 40 to opp 40, opp 40 to opp goal
+	// punts, gross yards, punt landing spot, touchbacks, returns, return yards, blocks, block yards
+
+	// create new array for the combined stats of all teams
+	var puntStatTotals = new Array(3);
+	for (var i=0; i<3; i++) {
+		puntStatTotals[i] = new Array(8);
+		for (var j=0; j<8; j++) {
+			puntStatTotals[i][j] = 0;
+		}
+	}
+
+	var puntStatHeader = "<th>Punts</th><th>AVG</th><th>NET</th><th>Avg Opp Start</th><th>Touchbacks</th><th>returns</th><th>blocks</th>";
+	var table = "<table border='1'><th></th><th colspan='7'>Own 0 to Own 40</th><th colspan='7'>Own 40 to Opp 40</th><th colspan='7'>Opp 40 to Opp 0</th>" + "<tr><th></th>" + puntStatHeader + puntStatHeader + puntStatHeader;
+
+	for (var k=0; k<abbrs.length; k++) {
+		table = table.concat("<tr><th>" + abbrs[k] + "</th>");
+
+		for (var l=0; l<3; l++) {
+			var netYards = puntStats_array[k][l][1] - puntStats_array[k][l][3] * 20 - puntStats_array[k][l][5];
+			table = table.concat("<td>" + puntStats_array[k][l][0] + "</td><td>" + calculateAverage(puntStats_array[k][l][1], puntStats_array[k][l][0]) + "</td><td>" + calculateAverage(netYards, puntStats_array[k][l][0]) + "</td><td>" + calculateAverage(puntStats_array[k][l][2], puntStats_array[k][l][0] + puntStats_array[k][l][6]) + "</td><td>" + puntStats_array[k][l][3] + "</td><td>" + puntStats_array[k][l][4] + "</td><td>" + puntStats_array[k][l][6]);
+		}
+	}
+
+	table = table.concat("</table>");
+	return table;
+}
+
 function parsePBP(intext) {
 	var startPtr=0, playPtr, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9, scorePtr, touchdownPtr;
 	var kickoffPtr, onsidesPtr, fieldGoalPtr, puntPtr, endSpecialTeamsPtr, extraPointPtr;
@@ -1851,7 +1880,7 @@ function parsePBP(intext) {
 				else { // if blocked
 					puntBlock = 1;
 					puntDistPtr1 = intext.indexOf(" was BLOCKED backwards for <span class='supza'>", preptr);
-					if (puntDistPtr1 != -1 && puntDecimalDistPtr1 < endptr) {
+					if (puntDistPtr1 != -1 && puntDistPtr1 < endptr) {
 						puntDistPtr2 = intext.indexOf("</span>", puntDistPtr1);
 						puntDistYards = intext.substring(puntDistPtr1+47, puntDistPtr2);
 						puntDecimalDistPtr1 = puntDistPtr2+32;
@@ -1879,7 +1908,9 @@ function parsePBP(intext) {
 						//alert("Punt blocked backwards " + puntBlockYards + " yards and returned " + puntBlockReturnYards + " yards.");
 						puntBlockYards += puntBlockReturnYards;
 					}
-					alert("Blocked punt not parsed properly! timestamp = " + gameTime + ", offAbbr = " + offAbbr + ", defAbbr = " + defAbbr);
+					else {
+						alert("Blocked punt not parsed properly! timestamp = " + gameTime + ", offAbbr = " + offAbbr + ", defAbbr = " + defAbbr);
+					}
 				}
 			}
 
@@ -2963,33 +2994,43 @@ function parsePBP(intext) {
 		if (puntStats_bol && (noPlay === 0 || withPens) && (showBothTeams || correctAbbr(offAbbr, defAbbr, showOffense)) && punt) {
 			// own goal to own 40, own 40 to opp 40, opp 40 to opp goal
 			// punts, gross yards, punt landing spot, touchbacks, returns, return yards, blocks, block yards
+			var puntTeamIndex;
+			if (showOffense) {
+				puntTeamIndex = getTeamIndexFromAbbr(offAbbr);
+			}
+			else {
+				puntTeamIndex = getTeamIndexFromAbbr(defAbbr);
+			}
+
 			var puntFieldPosId = getPuntFieldPositionId(yardline);
 
 			// The field position of the return team following the punt
 			// this value starts as the field position prior to the punt, and is adjusted as other stats are recorded
-			var netFieldPosition = getDistToGoal(yardline, 0);
+			var netFieldPosition = getDistToGoal(yardline, 1);
 
 			if (puntBlock) {
-				puntStats_array[puntFieldPosId][6]++; // increment blocked punts
-				puntStats_array[puntFieldPosId][7] += puntBlockYards;
-				netFieldPosition -= puntBlockYards;
+				puntStats_array[puntTeamIndex][puntFieldPosId][6]++; // increment blocked punts
+				puntStats_array[puntTeamIndex][puntFieldPosId][7] += puntBlockYards;
+				netFieldPosition += puntBlockYards;
 			}
 			else {
-				puntStats_array[puntFieldPosId][0]++; // increment punts
-				puntStats_array[puntFieldPosId][1] += puntDist; // add gross punt yardage
-				netFieldPosition += puntDist;
+				puntStats_array[puntTeamIndex][puntFieldPosId][0]++; // increment punts
+				puntStats_array[puntTeamIndex][puntFieldPosId][1] += puntDist; // add gross punt yardage
+				netFieldPosition -= puntDist;
 
 				if (touchback) {
-					puntStats_array[puntFieldPosId][3]++; // increment touchbacks
-					netFieldPosition += 20;
+					puntStats_array[puntTeamIndex][puntFieldPosId][3]++; // increment touchbacks
+					netFieldPosition = 20;
 				}
 				else if (puntReturn) {
-					puntStats_array[puntFieldPosId][4]++; // increment punt returns
-					puntStats_array[puntFieldPosId][5] += (netFieldPosition - puntReturnSpot); // calculate and add punt return yards
+					puntStats_array[puntTeamIndex][puntFieldPosId][4]++; // increment punt returns
+					puntStats_array[puntTeamIndex][puntFieldPosId][5] += (puntReturnSpot - netFieldPosition); // calculate and add punt return yards
 					netFieldPosition = puntReturnSpot;
 				}
 			}
-			puntStats_array[puntFieldPosId][2] += netFieldPosition; // add net post-punt field position
+			puntStats_array[puntTeamIndex][puntFieldPosId][2] += netFieldPosition; // add net post-punt field position
+
+			//alert("Recording a punt! gameTime = " + gameTime + ", yardline = " + yardline + ", puntFieldPosId = " + puntFieldPosId + ", offAbbr = " + offAbbr + ", defAbbr = " + defAbbr);
 		}
 
 		// reset all variables for the next play
@@ -3122,6 +3163,9 @@ function parsePBP(intext) {
 		}
 		if (fieldGoalStats_bol) {
 			tables = tables.concat(makeTableLable("Field Goal Stats") + makeFieldGoalsTable());
+		}
+		if (puntStats_bol) {
+			tables = tables.concat(makeTableLable("Punt Stats") + makePuntStatsTable());
 		}
 		
 		newDiv.innerHTML = tables;
@@ -3657,7 +3701,7 @@ function selectStatTables() {
 		'<input type="checkbox" name="other" id="sacks"> ' + passRushStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="kickoffs"> ' + kickoffStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="fieldGoals"> ' + fieldGoalStatsDef + ' <br>' + 
-		/* '<input type="checkbox" name="other" id="punts"> ' + puntStatsDef + ' <br>' + // */
+		'<input type="checkbox" name="other" id="punts"> ' + puntStatsDef + ' <br>' + // */
 		'<span class="playerStatHeader"><b>Individual Player Statistics</b></span><br>' + 
 		'<input type="checkbox" name="other" id="recievers"> ' + WRStatsDef + ' <br>' + 
 		'<input type="checkbox" name="other" id="runners"> ' + RBStatsDef + ' <br>' + 
@@ -3738,6 +3782,7 @@ function startFunc ()
 		showSacks = 0;
 		kickoffStats_bol = 0;
 		fieldGoalStats_bol = 0;
+		puntStats_bol = 0;
 		
 		selectedTable = 0;
 		
@@ -3789,10 +3834,10 @@ function startFunc ()
 			fieldGoalStats_bol = 1;
 			selectedTable = 1;
 		}
-		/*if (document.getElementById("punts").checked) {
-			kickoffStats_bol = 1;
+		if (document.getElementById("punts").checked) {
+			puntStats_bol = 1;
 			selectedTable = 1;
-		} */
+		} // */
 		
 		if (document.getElementById("pre").checked) {
 			Preseason = 1; 
