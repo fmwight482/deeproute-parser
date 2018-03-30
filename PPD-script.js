@@ -358,7 +358,7 @@ function getPuntFieldPositionId(yardline) {
 	else if (distToGoal > 40) {
 		id = 1;
 	}
-	else {
+	else if (distToGoal > -1) {
 		id = 2;
 	}
 
@@ -369,11 +369,19 @@ function getPuntFieldPositionId(yardline) {
 // "Opp 43" would be 43 yards as the Offensive team, 57 yards as the Defensive team
 // the Offensive team is defined as the team currently posessing the ball
 function getDistToGoal(yardline, asOffense) {
-	var fieldSide = yardline.substring(0, 3);
-	var distToGoal = parseInt(yardline.substring(4));
+	var fieldSide;
+	var distToGoal;
 
-	if ((asOffense && fieldSide === "Own") || (!asOffense && fieldSide == "Opp")) {
-		distToGoal = 100 - distToGoal;
+	if (yardline.includes("Midfield")) {
+		distToGoal = 50;
+	}
+	else {
+		fieldSide = yardline.substring(0, 3);
+		distToGoal = parseInt(yardline.substring(4));
+
+		if ((asOffense && fieldSide === "Own") || (!asOffense && fieldSide == "Opp")) {
+			distToGoal = 100 - distToGoal;
+		}
 	}
 
 	return distToGoal;
@@ -1495,15 +1503,20 @@ function makePuntStatsTable() {
 		}
 	}
 
-	var puntStatHeader = "<th>Punts</th><th>AVG</th><th>NET</th><th>Avg Opp Start</th><th>Touchbacks</th><th>returns</th><th>blocks</th>";
-	var table = "<table border='1'><th></th><th colspan='7'>Own 0 to Own 40</th><th colspan='7'>Own 40 to Opp 40</th><th colspan='7'>Opp 40 to Opp 0</th>" + "<tr><th></th>" + puntStatHeader + puntStatHeader + puntStatHeader;
+	var teamType = "Punting Team";
+	if (showOffense) {
+		teamType = "Return Team";
+	}
+
+	var puntStatHeader = "<th>Punts</th><th>AVG</th><th>NET</th><th>Avg Start</th><th>Touchbacks</th><th>TB%</th><th>RET</th><th>RET%</th><th>Yrd/RET</th><th>BLK</th><th>Yrd/BLK</th>";
+	var table = "<table border='1'><th rowspan='2'>" + teamType + "</th><th colspan='11'>Own 0 to Own 40</th><th colspan='11'>Own 40 to Opp 40</th><th colspan='11'>Opp 40 to Opp 0</th>" + "<tr>" + puntStatHeader + puntStatHeader + puntStatHeader;
 
 	for (var k=0; k<abbrs.length; k++) {
 		table = table.concat("<tr><th>" + abbrs[k] + "</th>");
 
 		for (var l=0; l<3; l++) {
 			var netYards = puntStats_array[k][l][1] - puntStats_array[k][l][3] * 20 - puntStats_array[k][l][5];
-			table = table.concat("<td>" + puntStats_array[k][l][0] + "</td><td>" + calculateAverage(puntStats_array[k][l][1], puntStats_array[k][l][0]) + "</td><td>" + calculateAverage(netYards, puntStats_array[k][l][0]) + "</td><td>" + calculateAverage(puntStats_array[k][l][2], puntStats_array[k][l][0] + puntStats_array[k][l][6]) + "</td><td>" + puntStats_array[k][l][3] + "</td><td>" + puntStats_array[k][l][4] + "</td><td>" + puntStats_array[k][l][6]);
+			table = table.concat("<td>" + puntStats_array[k][l][0] + "</td><td>" + calculateAverage(puntStats_array[k][l][1], puntStats_array[k][l][0]) + "</td><td>" + calculateAverage(netYards, puntStats_array[k][l][0]) + "</td><td>" + calculateAverage(puntStats_array[k][l][2], puntStats_array[k][l][0] + puntStats_array[k][l][6]) + "</td><td>" + puntStats_array[k][l][3] + "</td><td>" + calculatePercent(puntStats_array[k][l][3], puntStats_array[k][l][0]) + "%</td><td>" + puntStats_array[k][l][4] + "</td><td>" + calculatePercent(puntStats_array[k][l][4], puntStats_array[k][l][0]) + "%</td><td>" + calculateAverage(puntStats_array[k][l][5], puntStats_array[k][l][4]) + "</td><td>" + puntStats_array[k][l][6] + "</td><td>" + calculateAverage(puntStats_array[k][l][7], puntStats_array[k][l][6]) + "</td>");
 		}
 	}
 
@@ -3004,6 +3017,10 @@ function parsePBP(intext) {
 
 			var puntFieldPosId = getPuntFieldPositionId(yardline);
 
+			if (puntFieldPosId === -1) {
+				alert("Recording a punt! gameTime = " + gameTime + ", yardline = " + yardline + ", puntFieldPosId = " + puntFieldPosId + ", offAbbr = " + offAbbr + ", defAbbr = " + defAbbr);
+			} // */
+
 			// The field position of the return team following the punt
 			// this value starts as the field position prior to the punt, and is adjusted as other stats are recorded
 			var netFieldPosition = getDistToGoal(yardline, 1);
@@ -3029,8 +3046,6 @@ function parsePBP(intext) {
 				}
 			}
 			puntStats_array[puntTeamIndex][puntFieldPosId][2] += netFieldPosition; // add net post-punt field position
-
-			//alert("Recording a punt! gameTime = " + gameTime + ", yardline = " + yardline + ", puntFieldPosId = " + puntFieldPosId + ", offAbbr = " + offAbbr + ", defAbbr = " + defAbbr);
 		}
 
 		// reset all variables for the next play
