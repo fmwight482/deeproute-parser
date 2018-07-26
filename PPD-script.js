@@ -1517,6 +1517,22 @@ function makePuntStatsTable() {
 		for (var l=0; l<3; l++) {
 			var netYards = puntStats_array[k][l][1] - puntStats_array[k][l][3] * 20 - puntStats_array[k][l][5];
 			table = table.concat("<td>" + puntStats_array[k][l][0] + "</td><td>" + calculateAverage(puntStats_array[k][l][1], puntStats_array[k][l][0]) + "</td><td>" + calculateAverage(netYards, puntStats_array[k][l][0]) + "</td><td>" + calculateAverage(puntStats_array[k][l][2], puntStats_array[k][l][0] + puntStats_array[k][l][6]) + "</td><td>" + puntStats_array[k][l][3] + "</td><td>" + calculatePercent(puntStats_array[k][l][3], puntStats_array[k][l][0]) + "%</td><td>" + puntStats_array[k][l][4] + "</td><td>" + calculatePercent(puntStats_array[k][l][4], puntStats_array[k][l][0]) + "%</td><td>" + calculateAverage(puntStats_array[k][l][5], puntStats_array[k][l][4]) + "</td><td>" + puntStats_array[k][l][6] + "</td><td>" + calculateAverage(puntStats_array[k][l][7], puntStats_array[k][l][6]) + "</td>");
+
+			// add to mulit-team totals
+			for (var m=0; m<8; m++) {
+				puntStatTotals[l][m] += puntStats_array[k][l][m];
+			}
+		}
+	}
+
+	if (abbrs.length > 1) {
+		// don't do a "total" row if there is only one team
+
+		table = table.concat("<tr><th>Total</th>");
+
+		for (var n=0; n<3; n++) {
+			var netYards = puntStatTotals[n][1] - puntStatTotals[n][3] * 20 - puntStatTotals[n][5];
+			table = table.concat("<td>" + puntStatTotals[n][0] + "</td><td>" + calculateAverage(puntStatTotals[n][1], puntStatTotals[n][0]) + "</td><td>" + calculateAverage(netYards, puntStatTotals[n][0]) + "</td><td>" + calculateAverage(puntStatTotals[n][2], puntStatTotals[n][0] + puntStatTotals[n][6]) + "</td><td>" + puntStatTotals[n][3] + "</td><td>" + calculatePercent(puntStatTotals[n][3], puntStatTotals[n][0]) + "%</td><td>" + puntStatTotals[n][4] + "</td><td>" + calculatePercent(puntStatTotals[n][4], puntStatTotals[n][0]) + "%</td><td>" + calculateAverage(puntStatTotals[n][5], puntStatTotals[n][4]) + "</td><td>" + puntStatTotals[n][6] + "</td><td>" + calculateAverage(puntStatTotals[n][7], puntStatTotals[n][6]) + "</td>");
 		}
 	}
 
