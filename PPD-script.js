@@ -3575,20 +3575,20 @@ function buildGameList(input)
 
 function fillGames(season) {
 	var i;
-	var string = "<br><table border=\x220\x22 cellpadding=\x221\x22 style=\x22margin-left:20px;\x22 id=\x22" + season + "_spoiler_table\x22><col width=\x2240\x22><col width=\x2240\x22>";
+	var string = "<br><table border=\"0\" cellpadding=\"1\" style=\"margin-left:20px;\" id=\"" + season + "_spoiler_table\"><col width=\"40\"><col width=\"40\">";
 	if (season == "pre") {
 		for (i=0; i<4; i++) {
-			string = string.concat("<tr><td colspan=\x222\x22><input type=\x22checkbox\x22 name=\x22week\x22 class=\x22pre_checkbox\x22 id=\x22X-" + (i+1) + "\x22 checked=\x22checked\x22>Week " + (i+1) + "</input></td>");
+			string = string.concat("<tr><td colspan=\"2\"><input type=\"checkbox\" name=\"week\" class=\"pre_checkbox\" id=\"X-" + (i+1) + "\" checked=\"checked\">Week " + (i+1) + "</input></td>");
 		}
 	}
 	else if (season == "reg") {
 		for (i=0; i<16; i++) {
-			string = string.concat("<tr><td colspan=\x222\x22><input type=\x22checkbox\x22 name=\x22week\x22 class=\x22reg_checkbox\x22 id=\x22R-" + (i+1) + "\x22 checked=\x22checked\x22>Week " + (i+1) + "</input></td>");
+			string = string.concat("<tr><td colspan=\"2\"><input type=\"checkbox\" name=\"week\" class=\"reg_checkbox\" id=\"R-" + (i+1) + "\" checked=\"checked\">Week " + (i+1) + "</input></td>");
 		}
 	}
 	else if (season == "post") {
 		for (i=0; i<4; i++) {
-			string = string.concat("<tr><td colspan=\x222\x22><input type=\x22checkbox\x22 name=\x22week\x22 class=\x22post_checkbox\x22 id=\x22P-" + (i+1) + "\x22 checked=\x22checked\x22>Week " + (i+1) + "</input></td>");
+			string = string.concat("<tr><td colspan=\"2\"><input type=\"checkbox\" name=\"week\" class=\"post_checkbox\" id=\"P-" + (i+1) + "\" checked=\"checked\">Week " + (i+1) + "</input></td>");
 		}
 	}
 	string = string.concat("</table>");
@@ -3626,9 +3626,9 @@ function addButtons(season) {
 
 function getGameDropdown(season) {
 	var gameDropdown = 
-		"<a id=\x22" + season + "_show_id\x22 onclick=\x22document.getElementById('" + season + "_spoiler_id').style.display=''; document.getElementById('" + season + "_spoiler_span').style.display=''; document.getElementById('" + season + "_show_id').style.display='none';\x22 class=\x22link\x22>" + 
-		" vv</a> <a id=\x22" + season + "_spoiler_id\x22 style=\x22display: none\x22 onclick=\x22document.getElementById('" + season + "_spoiler_id').style.display='none'; document.getElementById('" + season + "_spoiler_span').style.display='none'; document.getElementById('" + season + "_show_id').style.display='';\x22 class=\x22link\x22>" + 
-		" ^^ </a> <span id=\x22" + season + "_spoiler_span\x22 style=\x22display: none\x22>" + fillGames(season) + " </span>"; // */
+		"<a id=\"" + season + "_show_id\" onclick=\"document.getElementById('" + season + "_spoiler_id').style.display=''; document.getElementById('" + season + "_spoiler_span').style.display=''; document.getElementById('" + season + "_show_id').style.display='none';\" class=\"link\">" + 
+		" vv</a> <a id=\"" + season + "_spoiler_id\" style=\"display: none\" onclick=\"document.getElementById('" + season + "_spoiler_id').style.display='none'; document.getElementById('" + season + "_spoiler_span').style.display='none'; document.getElementById('" + season + "_show_id').style.display='';\" class=\"link\">" + 
+		" ^^ </a> <span id=\"" + season + "_spoiler_span\" style=\"display: none\">" + fillGames(season) + " </span>"; // */
 	return gameDropdown;
 }
 
