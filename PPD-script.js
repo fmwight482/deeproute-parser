@@ -1560,6 +1560,7 @@ function parsePBP(intext) {
 	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot, kickReturnInside25, kickReturnTouchdown;
 	var fieldGoalDist, fieldGoalMade, fieldGoalBlocked;
 	var puntDist, puntLandingSpot, puntBlock, puntBlockYards, puntReturn, puntReturnYards, puntReturnSpot;
+	var timeoutPtr = 0;
 
 	readcount++;
 	newDiv = document.getElementById('scout_count');
@@ -1632,6 +1633,9 @@ function parsePBP(intext) {
 
 	while (1) {
 		tmp++; // increment 
+
+		timeoutPtr = intext.indexOf(" time outs remaining.", preptr);
+		//if (timeoutPtr != -1)
 
 		kickoffPtr=intext.indexOf("Kickoff by", preptr);
 		onsidesPtr=intext.indexOf("is lining up to try an onside kick.", preptr);
