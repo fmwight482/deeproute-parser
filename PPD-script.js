@@ -8,7 +8,7 @@
 // @include     http://deeproute.com/?js=scrimmine
 // @grant		GM_xmlhttpRequest
 // @connect	    deeproute.com
-// @version     1.6.8
+// @version     1.6.9
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
@@ -34,7 +34,7 @@ var RBPlayerStats=[];
 var rushGainSplits=[]; 
 var defPkgSplitStats =[];
 var defPkgs=[];
-var conversionsStats=[];
+var conversionStats=[];
 var passDistSplitStats=[];
 var sackStats=[];
 var kickoffStats_array=[];
@@ -43,9 +43,9 @@ var fieldGoalStats_array=[];
 
 var showOffense = 1;
 var showBothTeams = 0;
-var runPassSplits = 0; 
-var WRTargetSplits = 0; 
-var WRProductionSplits = 0; 
+var runPassSplits = 0;
+var WRTargetSplits = 0;
+var WRProductionSplits = 0;
 var individualWRStats = 0;
 var individualDefenderStats = 0;
 var individualRunnerStats = 0;
@@ -57,9 +57,9 @@ var kickoffStats_bol = 0;
 var puntStats_bol = 0;
 var fieldGoalStats_bol = 0;
 
-var Preseason = 0; 
-var RegularSeason = 0; 
-var Postseason = 0; 
+var Preseason = 0;
+var RegularSeason = 0;
+var Postseason = 0;
 
 var shortSplit = 3;
 var longSplit = 7;
@@ -116,14 +116,14 @@ function isAbbr(inabbr) {
 	return 0;
 }
 
-function correctAbbr(inabbr, showOffense) {
+/*function correctAbbr(inabbr, showOffense) {
 	var isGiven = isAbbr(inabbr);
 	if (isGiven) {
 		return 1;
 	} else {
 		return !showOffense;
 	}
-}
+}*/
 
 function correctAbbr(offAbbr, defAbbr, showOffense) {
 	var offGiven = isAbbr(offAbbr);
@@ -143,13 +143,14 @@ function getOtherAbbr(inabbr, abbr1, abbr2) {
 		return abbr1;
 	}
 	else {
-		alert("abbr '" + abbr + "' did not match '" + abbr1 + "' or '" + abbr2 + "'");
+		alert("abbr '" + inabbr + "' did not match '" + abbr1 + "' or '" + abbr2 + "'");
 	}
 }
 
 function isID(inid) {
-	for (var x=0; x<teamID.length; x++)
+	for (var x=0; x<teamID.length; x++) {
 		if (teamID[x]==inid) return 1;
+	}
 	return 0;
 }
 
@@ -768,7 +769,7 @@ function getTGTs(wr, pkgid, downDistID) {
 }
 
 function getDumpoffs(wr, pkgid, downDistID) {
-	wrid = getWRID(wr);
+	var wrid = getWRID(wr);
 	var total = 0;
 	if (downDistID < 7) {
 		total = WRSplitStats[pkgid][downDistID][wrid][2];
@@ -782,7 +783,7 @@ function getDumpoffs(wr, pkgid, downDistID) {
 }
 
 function getAveDist(wr, pkgid, downDistID) { 
-	wrid = getWRID(wr); 
+	var wrid = getWRID(wr); 
 	var dist = 0; 
 	var atts = 0;
 
@@ -829,7 +830,7 @@ function make_WR_production_table(GCOVpct_def, SR_def, YPT_def, INTpct_def) {
 }
 
 function addWrProdPkgTr_OLD(pkg, wr1, wr2, wr3, wr4, wr5) {
-	pkgid = getPkgid(pkg); 
+	var pkgid = getPkgid(pkg); 
 	var row = 
 		"<tr> <th rowspan='5'>" + pkg + "</th> <th>" + wr1 + "</th> <td>" +
 		getGCOVpct(wr1, pkgid, 0) + "</td> <td>" + getWrSR(wr1, pkgid, 0) + "</td> <td>" + getYPT(wr1, pkgid, 0) + "</td> <td>" + getINTpct(wr1, pkgid, 0) + "</td> <td>" +
@@ -1187,7 +1188,7 @@ function makeIndividualWRStatTable() {
 	var SC_def="<span title='Success Count: the number of plays in which this player was targeted which were a net positive for the offense'>SC</span>";
 
 	var table = "<table border='1' cellpadding='5'><th>Name</th><th>POS</th><th>" + FIRST_def + "</th><th>" + TGT_def + "</th><th>" + CMP_def + "</th><th>COMP%</th><th>Yards</th><th>" + 
-		YPT_def + "</th>" + "<th>" + SC_def + "</th><th>" + SR_def + "</th><th>" + GCOV_def + "</th><th>" + GCOVpct_def + "</th><th>" + INT_def + "</th><th>" + INTpct_def + 
+		YPT_def + "</th><th>" + SC_def + "</th><th>" + SR_def + "</th><th>" + GCOV_def + "</th><th>" + GCOVpct_def + "</th><th>" + INT_def + "</th><th>" + INTpct_def + 
 		"</th><th>" + PDEF_def + "</th><th>" + PDEFpct_def + "</th><th>" + DMP_def + "</th><th>" + DIST_def + "</th>";
 	for (var i=0; i<WRPlayerStats.length; i++) {
 		table = table.concat("<tr><td>" + WRPlayerStats[i][1] + 
@@ -1239,7 +1240,7 @@ function makeIDPStatTable() {
 	var rmTKL_def="<span title='Roamer Tackles: the number of times this player tackled a reciever they were NOT covering'>rmTKL</span>";
 
 	var table = "<table border='1' cellpadding='5'><th>Name</th><th>" + FIRST_def + "</th><th>" + TGT_def + "</th><th>" + CMP_def + "</th><th>COMP%</th><th>" + YRD_def + "</th><th>" + 
-		YPT_def + "</th>" + "<th>" + SC_def + "</th><th>" + SR_def + "</th><th>" + GCOV_def + "</th><th>" + GCOVpct_def + "</th><th>" + cvINT_def + "</th><th>" + INTpct_def + 
+		YPT_def + "</th><th>" + SC_def + "</th><th>" + SR_def + "</th><th>" + GCOV_def + "</th><th>" + GCOVpct_def + "</th><th>" + cvINT_def + "</th><th>" + INTpct_def + 
 		"</th><th>" + cvPDEF_def + "</th><th>" + PDEFpct_def + "</th><th>" + cvTKL_def + "</th><th>" + DMP_def + "</th><th>" + DIST_def + "</th><th>" + rmINT_def + "</th><th>" + 
 		rmPDEF_def + "</th><th>" + rmTKL_def + "</th><th>" + runTKL_def + "</th><th>" + runSTP_def + "</th>";
 	for (var i=0; i<IDPStats.length; i++) {
@@ -1329,7 +1330,7 @@ function makeSacksTable() {
 	}
 
 	// create new array for the combined stats from all teams
-	sackStatsTotals = new Array(9);
+	var sackStatsTotals = new Array(9);
 	for (var i=0; i<9; i++) {
 		sackStatsTotals[i] = 0;
 	}
@@ -1379,7 +1380,7 @@ function makeKickoffsTable() {
 	}
 
 	// create new array for the combined stats from all teams
-	kickoffStatTotals = new Array(7);
+	var kickoffStatTotals = new Array(7);
 	for (var k=0; k<7; k++) {
 		kickoffStatTotals[k] = 0;
 	}
@@ -1424,7 +1425,7 @@ function makeFieldGoalsTable() {
 	// attempted, made, blocked
 
 	// create new array for the combined stats from all teams
-	fieldGoalStatTotals = new Array(6);
+	var fieldGoalStatTotals = new Array(6);
 	for (var k=0; k<6; k++) {
 		fieldGoalStatTotals[k] = new Array(3);
 		for (var l=0; l<3; l++) {
@@ -1434,7 +1435,7 @@ function makeFieldGoalsTable() {
 
 	var FGStatHeader = "<th><span title='Field Goals Made'>FGM</span></th><th><span title='Field Goal Attempts'>FGA</span></th><th><span title='Field Goal Percentage'>FG%</span></th><th><span title='Blocked field goals'>FG BLK</span></th>";
 
-	var table = "<table border='1'><th></th><th colspan='4'>Extra Points</th><th colspan='4'>0-20 yards</th><th colspan='4'>20-30 yards</th><th colspan='4'>30-40 yards</th><th colspan='4'>40-50 yards</th><th colspan='4'>50+ yards</th><th colspan='4'>All Field Goals</th>" + "<tr><th></th><th>XPM</th><th>XPA</th><th>XP%</th><th>XP BLK</th>" + FGStatHeader + FGStatHeader + FGStatHeader + FGStatHeader + FGStatHeader + FGStatHeader;
+	var table = "<table border='1'><th></th><th colspan='4'>Extra Points</th><th colspan='4'>0-20 yards</th><th colspan='4'>20-30 yards</th><th colspan='4'>30-40 yards</th><th colspan='4'>40-50 yards</th><th colspan='4'>50+ yards</th><th colspan='4'>All Field Goals</th><tr><th></th><th>XPM</th><th>XPA</th><th>XP%</th><th>XP BLK</th>" + FGStatHeader + FGStatHeader + FGStatHeader + FGStatHeader + FGStatHeader + FGStatHeader;
 
 	for (var i=0; i<abbrs.length; i++) {
 		// sum and store the totals for each team across all ranges
@@ -1509,7 +1510,7 @@ function makePuntStatsTable() {
 	}
 
 	var puntStatHeader = "<th>Punts</th><th>AVG</th><th>NET</th><th>Avg Start</th><th>Touchbacks</th><th>TB%</th><th>RET</th><th>RET%</th><th>Yrd/RET</th><th>BLK</th><th>Yrd/BLK</th>";
-	var table = "<table border='1'><th rowspan='2'>" + teamType + "</th><th colspan='11'>Own 0 to Own 40</th><th colspan='11'>Own 40 to Opp 40</th><th colspan='11'>Opp 40 to Opp 0</th>" + "<tr>" + puntStatHeader + puntStatHeader + puntStatHeader;
+	var table = "<table border='1'><th rowspan='2'>" + teamType + "</th><th colspan='11'>Own 0 to Own 40</th><th colspan='11'>Own 40 to Opp 40</th><th colspan='11'>Opp 40 to Opp 0</th><tr>" + puntStatHeader + puntStatHeader + puntStatHeader;
 
 	for (var k=0; k<abbrs.length; k++) {
 		table = table.concat("<tr><th>" + abbrs[k] + "</th>");
@@ -1531,8 +1532,8 @@ function makePuntStatsTable() {
 		table = table.concat("<tr><th>Total</th>");
 
 		for (var n=0; n<3; n++) {
-			var netYards = puntStatTotals[n][1] - puntStatTotals[n][3] * 20 - puntStatTotals[n][5];
-			table = table.concat("<td>" + puntStatTotals[n][0] + "</td><td>" + calculateAverage(puntStatTotals[n][1], puntStatTotals[n][0]) + "</td><td>" + calculateAverage(netYards, puntStatTotals[n][0]) + "</td><td>" + calculateAverage(puntStatTotals[n][2], puntStatTotals[n][0] + puntStatTotals[n][6]) + "</td><td>" + puntStatTotals[n][3] + "</td><td>" + calculatePercent(puntStatTotals[n][3], puntStatTotals[n][0]) + "%</td><td>" + puntStatTotals[n][4] + "</td><td>" + calculatePercent(puntStatTotals[n][4], puntStatTotals[n][0]) + "%</td><td>" + calculateAverage(puntStatTotals[n][5], puntStatTotals[n][4]) + "</td><td>" + puntStatTotals[n][6] + "</td><td>" + calculateAverage(puntStatTotals[n][7], puntStatTotals[n][6]) + "</td>");
+			var totalNetYards = puntStatTotals[n][1] - puntStatTotals[n][3] * 20 - puntStatTotals[n][5];
+			table = table.concat("<td>" + puntStatTotals[n][0] + "</td><td>" + calculateAverage(puntStatTotals[n][1], puntStatTotals[n][0]) + "</td><td>" + calculateAverage(totalNetYards, puntStatTotals[n][0]) + "</td><td>" + calculateAverage(puntStatTotals[n][2], puntStatTotals[n][0] + puntStatTotals[n][6]) + "</td><td>" + puntStatTotals[n][3] + "</td><td>" + calculatePercent(puntStatTotals[n][3], puntStatTotals[n][0]) + "%</td><td>" + puntStatTotals[n][4] + "</td><td>" + calculatePercent(puntStatTotals[n][4], puntStatTotals[n][0]) + "%</td><td>" + calculateAverage(puntStatTotals[n][5], puntStatTotals[n][4]) + "</td><td>" + puntStatTotals[n][6] + "</td><td>" + calculateAverage(puntStatTotals[n][7], puntStatTotals[n][6]) + "</td>");
 		}
 	}
 
@@ -1542,7 +1543,7 @@ function makePuntStatsTable() {
 
 function parsePBP(intext) {
 	var startPtr=0, playPtr, ptr2, ptr3, ptr4, ptr5, ptr6, ptr7, ptr8, ptr9, scorePtr, touchdownPtr;
-	var kickoffPtr, onsidesPtr, fieldGoalPtr, puntPtr, endSpecialTeamsPtr, extraPointPtr;
+	var kickoffPtr, onsidesPtr, fieldGoalPtr, puntPtr, endSpecialTeamsPtr, extraPointPtr, coveragePtr;
 	var pkg, defpkg, form, play, yard, yard2, yardline, comp, scramble, INT, incomplete, loss, isTouchdown, isSuccess; 
 	var down, togo, distToGo=0, endToGo, gameTime, penalty, noPlay=0, tmp=0, endptr, dumpoff, first_read, preptr=0; 
 	var pkgid, defpkgid, formid, playid, downDistID, index, run, handoff, sneak, pass, att, tmparr, sack, GCOV;
@@ -1559,11 +1560,11 @@ function parsePBP(intext) {
 	var kickoff=0, onsides=0, fieldGoal=0, punt=0, extraPoint=0;
 	var touchback, kickReturn, squib, kickoffLandingSpot, kickoffReturnSpot, kickReturnInside25, kickReturnTouchdown;
 	var fieldGoalDist, fieldGoalMade, fieldGoalBlocked;
-	var puntDist, puntLandingSpot, puntBlock, puntBlockYards, puntReturn, puntReturnYards, puntReturnSpot;
+	var puntDist, puntLandingSpot, puntBlock, puntBlockYards, puntReturn, puntReturnYards, puntReturnSpot, puntReturnTouchdown;
 	var timeoutPtr = 0;
 
 	readcount++;
-	newDiv = document.getElementById('scout_count');
+	var newDiv = document.getElementById('scout_count');
 	newDiv.innerHTML= '<span style="background-color:white">' + readcount.toString() + ' of ' + readtarget + ' games</span>';
 
 	// scan for two team names at the top of the log, get team abbrs for each and set them as abbr1, abbr2. 
@@ -2651,9 +2652,9 @@ function parsePBP(intext) {
 		
 		distToGo = getDistToGo(togo, endToGo);
 
-		distToSuccess = getDistToSuccess(distToGo, down);
+		var distToSuccess = getDistToSuccess(distToGo, down);
 
-		downInt = convertDownToInt(down);
+		var downInt = convertDownToInt(down);
 
 		isSuccess = getSuccess(yard, distToGo, down, isTouchdown);  
 
@@ -3211,23 +3212,23 @@ function initializeArrays() {
 	var a, b, c, d, pkgs, plays, stats, tmp;
 	detailedPackageStats=new Array(7); // initialize stat array (1st down, 2nd & short, 2nd & medium, 2nd & long, 3rd/4th & short, 3rd/4th & medium, 3rd/4th & long) 
 	for (a=0; a<7; a++) { 
-		pkgs=new Array(8);  // initialize row of packages (HFT12, HFTt1, HTt12, HF123, HT123, H1234, T1234, 12345) 
+		pkgs=new Array(8); // initialize row of packages (HFT12, HFTt1, HTt12, HF123, HT123, H1234, T1234, 12345) 
 		for (b=0; b<8; b++) {
 			plays=new Array(2); // initialize row of play types (run/pass/unknown)
 			for (c=0; c<2; c++) {
 				stats=new Array(3); // initialize row of stats (plays, yards, successes) 
 				for (d=0; d<3; d++) {
-					stats[d]=0;  // initialize each slot in the array (filled in the ParsePBP function) 
+					stats[d]=0; // initialize each slot in the array (filled in the ParsePBP function) 
 					
 				}
-				plays[c]=stats; 
+				plays[c]=stats;
 			}
-			pkgs[b]=plays; 
+			pkgs[b]=plays;
 		}
-		detailedPackageStats[a]=pkgs;  
-	} 
+		detailedPackageStats[a]=pkgs;
+	}
 	
-	packageStats=new Array(7); // initialize stat array (1st down, 2nd & short, 2nd & medium, 2nd & long, 3rd/4th & short, 3rd/4th & medium, 3rd/4th & long) 
+	/*packageStats=new Array(7); // initialize stat array (1st down, 2nd & short, 2nd & medium, 2nd & long, 3rd/4th & short, 3rd/4th & medium, 3rd/4th & long) 
 	for (a=0; a<7; a++) { 
 		pkgs=new Array(8);  // initialize row of packages (HFT12, HFTt1, HTt12, HF123, HT123, H1234, T1234, 12345) 
 		for (b=0; b<8; b++) {
@@ -3238,45 +3239,45 @@ function initializeArrays() {
 			pkgs[b]=tmp; 
 		}
 		packageStats[a]=pkgs;  
-	} 
+	}*/
 	
 	packageYards=new Array(7);
-	for (var x=0; x<7; x++) { 
-		pkgs=new Array(8);  
-		for (y=0; y<8; y++) {
-			tmp=new Array(2); 
-			for (var z=0; z<2; z++) {
-				tmp[z]=0;  
+	for (a=0; a<7; a++) {
+		pkgs=new Array(8);
+		for (b=0; b<8; b++) {
+			tmp=new Array(2);
+			for (c=0; c<2; c++) {
+				tmp[c]=0;
 			}
-			pkgs[y]=tmp; 
+			pkgs[b]=tmp;
 		}
-		packageYards[x]=pkgs; 
+		packageYards[a]=pkgs;
 	}
 	
-	sumPackageStats=new Array(8); 
+	sumPackageStats=new Array(8);
 	for (b=0; b<8; b++) {
-		plays=new Array(2); 
+		plays=new Array(2);
 		for (c=0; c<2; c++) {
-			stats=new Array(3); 
+			stats=new Array(3);
 			for (d=0; d<3; d++) {
-				stats[d]=0; 
+				stats[d]=0;
 			}
-			plays[c]=stats; 
+			plays[c]=stats;
 		}
-		sumPackageStats[b]=plays; 
+		sumPackageStats[b]=plays;
 	}
 
-	sumDownStats=new Array(7); 
+	sumDownStats=new Array(7);
 	for (a=0; a<7; a++) {
-		plays=new Array(2); 
+		plays=new Array(2);
 		for (c=0; c<2; c++) {
-			stats=new Array(3); 
+			stats=new Array(3);
 			for (d=0; d<3; d++) {
-				stats[d]=0; 
+				stats[d]=0;
 			}
-			plays[c]=stats; 
+			plays[c]=stats;
 		}
-		sumDownStats[a]=plays; 
+		sumDownStats[a]=plays;
 	}
 	
 	sumAllPackages = new Array(2);
@@ -3288,21 +3289,21 @@ function initializeArrays() {
 		sumAllPackages[a] = stats;
 	} // */
 
-	WRSplitStats= new Array(8); 
+	WRSplitStats= new Array(8);
 	for (a=0; a<8; a++) { // 8 packages 
-		var DDs=new Array(7); 
+		var DDs=new Array(7);
 		for (b=0; b<7; b++) { // 7 down and distance combos
-			var WRs=new Array(9); 
+			var WRs=new Array(9);
 			for (c=0; c<9; c++) { // 9 recievers 
-				stats=new Array(9); 
+				stats=new Array(9);
 				for (d=0; d<9; d++) { // 9 stats (to date) - GCOVs, 1st opt passes, dump passes, drops, dist downfield, targets, yards, successes, INTs. 
-					stats[d] = 0; 
+					stats[d] = 0;
 				}
-				WRs[c]=stats; 
+				WRs[c]=stats;
 			}
-			DDs[b]=WRs; 
+			DDs[b]=WRs;
 		}
-		WRSplitStats[a]=DDs; 
+		WRSplitStats[a]=DDs;
 	}
 	
 	defPkgSplitStats= new Array(19);
@@ -3498,9 +3499,9 @@ function buildGameList(input)
 
 	var checkbox = getElementsByClassName('team_checkbox', document); // array of elements including the term "team_checkbox" in the (scedule?) page. 
 
-	for (var i=0; i < checkbox.length; i++) { // for each element in checkbox
-		 if (checkbox[i].checked) {            // if the checkbox for this team is checked 
-				teams[teams.length]=teamlist[i];   // add team and team abbreviation to appropriate array 
+	for (var i=0; i < checkbox.length; i++) {		// for each element in checkbox
+		 if (checkbox[i].checked) {					// if the checkbox for this team is checked 
+				teams[teams.length]=teamlist[i];	// add team and team abbreviation to appropriate array 
 				abbrs[abbrs.length]=abbrlist[i];
 		 }
 	}
@@ -3510,18 +3511,18 @@ function buildGameList(input)
 	}
 
 
-	ptr1=input.indexOf("\"teaminfo\"", 0);            // location of the first occurence of "teaminfo\" in input (the scedule page?) 
-	if (ptr1<0) ptr1=input.indexOf("teaminfo ", 0);   // if "teaminfo\" is not there, find first occurence of "teaminfo " in input
-	endptr=input.indexOf("hidden", ptr1+8);           // location of "hidden" in input, starting 8 chars after "teaminfo"
+	ptr1=input.indexOf("\"teaminfo\"", 0);			// location of the first occurence of "teaminfo\" in input (the scedule page?) 
+	if (ptr1<0) ptr1=input.indexOf("teaminfo ", 0);	// if "teaminfo\" is not there, find first occurence of "teaminfo " in input
+	endptr=input.indexOf("hidden", ptr1+8);			// location of "hidden" in input, starting 8 chars after "teaminfo"
 
 	while (1) {
-		ptr2=input.indexOf("!", ptr1);  // ptr2 = location of "!" after 'teaminfo' (old ptr2 for later loops) 
-		if (ptr2 > endptr) break; // if "!" is after "hidden", break 
-		ptr3=input.indexOf("^", ptr2+1);  // ptr3 = location of "^" starting 1 char after "!" 
-		id=input.substring(ptr2+1, ptr3); // id = all chars between the "!" and "^" 
-		ptr2=input.indexOf("^", ptr3+1);  // ptr2 = location of "^" starting one char after "^" 
-		name=input.substring(ptr3+1, ptr2); // name = all chars between "^" and "^" 
-		if (isTeam(name)) teamID[teamID.length]=id; // if id is a valid team name, adds id to teamID array 
+		ptr2=input.indexOf("!", ptr1); 				// ptr2 = location of "!" after 'teaminfo' (old ptr2 for later loops) 
+		if (ptr2 > endptr) break;					// if "!" is after "hidden", break 
+		ptr3=input.indexOf("^", ptr2+1);			// ptr3 = location of "^" starting 1 char after "!" 
+		id=input.substring(ptr2+1, ptr3);			// id = all chars between the "!" and "^" 
+		ptr2=input.indexOf("^", ptr3+1);			// ptr2 = location of "^" starting one char after "^" 
+		name=input.substring(ptr3+1, ptr2);			// name = all chars between "^" and "^" 
+		if (isTeam(name)) teamID[teamID.length]=id;	// if id is a valid team name, adds id to teamID array 
 		ptr1=ptr2;
 	}
 
@@ -3578,21 +3579,35 @@ function fillGames(season) {
 	var string = "<br><table border=\"0\" cellpadding=\"1\" style=\"margin-left:20px;\" id=\"" + season + "_spoiler_table\"><col width=\"40\"><col width=\"40\">";
 	if (season == "pre") {
 		for (i=0; i<4; i++) {
-			string = string.concat("<tr><td colspan=\"2\"><input type=\"checkbox\" name=\"week\" class=\"pre_checkbox\" id=\"X-" + (i+1) + "\" checked=\"checked\">Week " + (i+1) + "</input></td>");
+			string = string.concat("<tr><td colspan=\"2\"><input type=\"checkbox\" name=\"week\" class=\"pre_checkbox\" id=\"X-" + (i+1) + "\" checked=\"checked\"><span onclick=\"selectThisWeekOnly(\'pre\', " + i+1 + ")\">Week " + (i+1) + "</span></input></td>");
 		}
 	}
 	else if (season == "reg") {
 		for (i=0; i<16; i++) {
-			string = string.concat("<tr><td colspan=\"2\"><input type=\"checkbox\" name=\"week\" class=\"reg_checkbox\" id=\"R-" + (i+1) + "\" checked=\"checked\">Week " + (i+1) + "</input></td>");
+			string = string.concat("<tr><td colspan=\"2\"><input type=\"checkbox\" name=\"week\" class=\"reg_checkbox\" id=\"R-" + (i+1) + "\" checked=\"checked\"><span onclick=\"selectThisWeekOnly(\'reg\', " + i+1 + ")\">Week " + (i+1) + "</span></input></td>");
 		}
 	}
 	else if (season == "post") {
 		for (i=0; i<4; i++) {
-			string = string.concat("<tr><td colspan=\"2\"><input type=\"checkbox\" name=\"week\" class=\"post_checkbox\" id=\"P-" + (i+1) + "\" checked=\"checked\">Week " + (i+1) + "</input></td>");
+			string = string.concat("<tr><td colspan=\"2\"><input type=\"checkbox\" name=\"week\" class=\"post_checkbox\" id=\"P-" + (i+1) + "\" checked=\"checked\"><span onclick=\"selectThisWeekOnly(\'post\', " + i+1 + ")\">Week " + (i+1) + "</span></input></td>");
 		}
 	}
 	string = string.concat("</table>");
 	return string;
+}
+
+function selectThisWeekOnly(seasonAbr, week) {
+	var els = document.getElementsByClassName(seasonAbr + "_checkbox");
+
+	Array.from(els).forEach((el) => {
+		var parsedWeek = parseInt(el.id.substring(2, el.id.length));
+		if (parsedWeek == week) {
+			el.checked = true;
+		}
+		else {
+			el.checked = false;
+		}
+	});
 }
 
 function addButtons(season) {
@@ -3601,16 +3616,18 @@ function addButtons(season) {
 	buttonDiv1.innerHTML = '<input type="button" style="font-size: 6pt; font-weight: bold; width: 100%; height: 15px" value="Clear All">';
 	buttonDiv1.addEventListener('click', function() {
 		var checkbox = getElementsByClassName(className, document);  
-		for (var i=0; i < checkbox.length; i++) 
+		for (var i=0; i < checkbox.length; i++) {
 			checkbox[i].checked=false;   
+		}
 	}, true); // */
 	
 	var buttonDiv2 = document.createElement('div');
 	buttonDiv2.innerHTML = '<input type="button" style="font-size: 6pt; font-weight: bold; width: 100%; height: 15px" value="Select All">';
 	buttonDiv2.addEventListener('click', function() {
 		var checkbox = getElementsByClassName(className, document);  
-		for (var i=0; i < checkbox.length; i++) 
+		for (var i=0; i < checkbox.length; i++) {
 			checkbox[i].checked=true;   
+		}
 	}, true); // */
 	
 	var spoilerTable = document.getElementById(season + "_spoiler_table");
@@ -3748,9 +3765,31 @@ function selectStatTables() {
 }
 
 function selectPreRegPost() {
-	var newtd6 = document.createElement('td'); 
-	newtd6.setAttribute('colspan', '3'); 
-	var newDiv6 = document.createElement('div'); 
+	var newtd6 = document.createElement('td');
+	newtd6.setAttribute('colspan', '3');
+	var newDiv6 = document.createElement('div');
+
+	var pre = document.createElement('input');
+	pre.setAttribute("type", "checkbox");
+	pre.setAttribute("name", "season");
+	pre.setAttribute("id", "pre");
+	pre.checked = false;
+	var reg = document.createElement('input');
+	reg.setAttribute("type", "checkbox");
+	reg.setAttribute("name", "season");
+	reg.setAttribute("id", "reg");
+	reg.checked = false;
+	var post = document.createElement('input');
+	post.setAttribute("type", "checkbox");
+	post.setAttribute("name", "season");
+	post.setAttribute("id", "post");
+	post.checked = false;
+	/*pre.insertAdjacentHTML(' Preseason ' + getGameDropdown("pre") + ' <br> ');
+	/*newDiv6.appendChild(pre);
+	reg.insertAdjacentHTML(' Regular season ' + getGameDropdown("reg") + ' <br> ');
+	newDiv6.appendChild(reg);
+	post.insertAdjacentHTML(' Postseason ' + getGameDropdown("post") + ' <br> ');
+	newDiv6.appendChild(post); // */
 	newDiv6.innerHTML = 
 		'<input type="checkbox" name="season" id="pre"> Preseason ' + getGameDropdown("pre") + ' <br> ' + 
 		'<input type="checkbox" name="season" id="reg" checked="checked"> Regular season ' + getGameDropdown("reg") + ' <br> ' + 
@@ -3761,13 +3800,13 @@ function selectPreRegPost() {
 }
 
 function selectWithPens() {
-	var withPensDef = "<span title='If this box is checked, statistics produced will include plays which were nullified by a penalty and not included in official statistics. If the box is not checked, these plays will be left out'> Include nullified plays "; 
+	var withPensDef = "<span title='If this box is checked, statistics produced will include plays which were nullified by a penalty and not included in official statistics. If the box is not checked, these plays will be left out'> Include nullified plays ";
 
-	var newtd7 = document.createElement('td'); 
-	newtd7.setAttribute('colspan', '1'); 
-	var newDiv7 = document.createElement('div'); 
+	var newtd7 = document.createElement('td');
+	newtd7.setAttribute('colspan', '1');
+	var newDiv7 = document.createElement('div');
 	newDiv7.innerHTML = 
-	'<input type="checkbox" name="pens" id="withPens">' + withPensDef; 
+	'<input type="checkbox" name="pens" id="withPens">' + withPensDef;
 	newtd7.appendChild(newDiv7);
 
 	return newtd7;
@@ -3776,7 +3815,7 @@ function selectWithPens() {
 function startFunc () 
 {
 	var input=document.body.innerHTML, ptr1, ptr2, ptr3, id, id2, name, endptr;
-	var withGameDropdown = 0; 
+	var withGameDropdown = 0;
 	var selectedTable;
 
 	var target = document.getElementById('imonstatus');
@@ -3790,12 +3829,12 @@ function startFunc ()
 	newtd1.setAttribute('colspan', '2');
 	var newDiv2 = document.createElement('div');
 	newDiv2.align = 'center';
-	newDiv2.innerHTML = '<input type="button" style="font-size: 10pt; font-weight: bold; width: 100%; height: 30px" value="Start">'; 
+	newDiv2.innerHTML = '<input type="button" style="font-size: 10pt; font-weight: bold; width: 100%; height: 30px" value="Start">';
 	newDiv2.addEventListener('click', function() {
 		if (document.getElementById("offense").checked) {
-			showOffense = 1; 
+			showOffense = 1;
 		} else {
-			showOffense = 0; 
+			showOffense = 0;
 		}
 		
 		if (document.getElementById("both").checked) {
@@ -3898,7 +3937,7 @@ function startFunc ()
 			initializeMultiTeamArrays();
 			startReadLog();
 		}
-	}, true);                // "Start" button, runs script 
+	}, true); // "Start" button, runs script 
 	newtd1.appendChild(newDiv2);
 	newtr.appendChild(newtd1);
 
@@ -3909,7 +3948,9 @@ function startFunc ()
 	newDiv3.innerHTML = '<input type="button" style="font-size: 10pt; font-weight: bold; width: 100%; height: 30px" value="Select all teams">'; 
 	newDiv3.addEventListener('click', function() {
 			var checkbox = getElementsByClassName('team_checkbox', document);  
-			for (var i=0; i < checkbox.length; i++) checkbox[i].checked=true;   
+			for (var i=0; i < checkbox.length; i++) {
+				checkbox[i].checked=true;   
+			}
 	}, true);
 	newtd2.appendChild(newDiv3);
 	newtr.appendChild(newtd2);
@@ -3921,8 +3962,9 @@ function startFunc ()
 	newDivA.innerHTML = '<input type="button" style="font-size: 10pt; font-weight: bold; width: 100%; height: 30px" value="Clear selected teams">'; 
 	newDivA.addEventListener('click', function() {
 		var checkbox = getElementsByClassName('team_checkbox', document);  
-		for (var i=0; i < checkbox.length; i++) 
+		for (var i=0; i < checkbox.length; i++) {
 			checkbox[i].checked=false;   
+		}
 	}, true);
 	newtd3.appendChild(newDivA);
 	newtr.appendChild(newtd3);
@@ -3960,12 +4002,19 @@ function startFunc ()
 	newtr.appendChild(newtd8);
 
 
-	if (target) target.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.insertBefore(buttontable, 
-						target.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling);
+	if (target) {
+		target.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.insertBefore(buttontable, target.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling);
+	}
 	
 	addButtons("pre");
 	addButtons("reg");
 	addButtons("post");
+
+	// dumb hackey way of injecting a javascript function
+	// better idea would be to replace all these html strings with actual code, like above
+	var script = document.createElement("script");
+	script.appendChild(document.createTextNode('('+ selectThisWeekOnly +')();'));
+	(document.body || document.head || document.documentElement).appendChild(script);
 }
 
 
