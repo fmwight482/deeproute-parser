@@ -8,9 +8,13 @@
 // @include     http://deeproute.com/?js=scrimmine
 // @grant		GM_xmlhttpRequest
 // @connect	    deeproute.com
-// @version     1.6.9
+// @version     1.6.8.1
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
+
+// temporary coverage string parameter
+var expectedCoverageString = ""; // ex: Cover 3
+var expectedCoverage2String = ""; // ex: Tampa
 
 // temporary down/distance parameters to be modified 
 var downMin = 1;
@@ -525,6 +529,16 @@ function checkIDPList(id, name) {
 		IDPStats[index][1] = name;
 	}
 	return index;
+}
+
+function coverageMatchesExpected(coverage1, coverage2) {
+	var match1 = (expectedCoverageString === "" || expectedCoverageString === coverage1.trim());
+	var match2 = (expectedCoverage2String === "" || expectedCoverage2String === coverage2.trim());
+	var isMatch = match1 && match2;
+
+	//alert("comparing '" + expectedCoverageString + "' to '" + coverage1 + "' and '" + expectedCoverage2String + "' to '" + coverage2 + "', result: " + isMatch);
+
+	return isMatch;
 }
 
 /* Table construction functions for Rushing and Passing splits table */
@@ -1562,6 +1576,7 @@ function parsePBP(intext) {
 	var fieldGoalDist, fieldGoalMade, fieldGoalBlocked;
 	var puntDist, puntLandingSpot, puntBlock, puntBlockYards, puntReturn, puntReturnYards, puntReturnSpot, puntReturnTouchdown;
 	var timeoutPtr = 0;
+	var coverageCall1="", coverageCall2="", coverageCall3="";
 
 	readcount++;
 	var newDiv = document.getElementById('scout_count');
@@ -1722,6 +1737,30 @@ function parsePBP(intext) {
 				defpkg=intext.substring(ptr4+29, ptr4+34);
 				defpkgid=getDefPkgid(defpkg);
 			}
+
+			ptr5=intext.indexOf("<b>Coverage : </b>", ptr4)+18;
+			if (ptr5!=-1 && ptr5 < startNext) {
+				ptr6=intext.indexOf("; ", ptr5);
+				if (ptr6!=-1 && ptr6 < startNext) {
+					coverageCall1 = intext.substring(ptr5, ptr6);
+					ptr7=intext.indexOf("; ", ptr6+2);
+					if (ptr7!=-1 && ptr7 < startNext) {
+						coverageCall2 = intext.substring(ptr6+2, ptr7);
+					}
+					else {
+						ptr7 = ptr6;
+					}
+					ptr8=intext.indexOf("<br>", ptr7+2);
+					if (ptr8!=-1 && ptr8 < startNext) {
+						coverageCall3 = intext.substring(ptr7+2, ptr8);
+					}
+				}
+			}
+			if (coverageCall2 === -1 && coverageCall3 !== -1) {
+				coverageCall2 = coverageCall3;
+				coverageCall3 = -1;
+			}
+			//alert("Coverage: '" + coverageCall1 + "', '" + coverageCall2 + "', '" + coverageCall3 + "'");
 
 			if (startThis === 0) {
 				startThis=preptr;
@@ -2816,7 +2855,7 @@ function parsePBP(intext) {
 		}
 		
 		if (individualDefenderStats && (showBothTeams || correctAbbr(offAbbr, defAbbr, !showOffense) || bothTeamsValid) && (noPlay === 0 || withPens) &&
-			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo)) {
+			(downMin <= downInt) && (downMax >= downInt) && (distMin <= distToGo) && (distMax >= distToGo) && coverageMatchesExpected(coverageCall1, coverageCall2)) {
 			index = -1;
 			
 			// player ID, name, 1st opt passes, targets, yards, successes, GCOVs, INTs, Drops, dump passes, dist downfield, catches
@@ -3106,6 +3145,9 @@ function parsePBP(intext) {
 		GCOVerID=-1;
 		defPlaymakerpID = -1;
 		passDefenderpID = -1;
+		coverageCall1 = "";
+		coverageCall2 = "";
+		coverageCall3 = "";
 
 		startThis=startNext;
 		preptr=endptr+21;
@@ -3769,7 +3811,7 @@ function selectPreRegPost() {
 	newtd6.setAttribute('colspan', '3');
 	var newDiv6 = document.createElement('div');
 
-	var pre = document.createElement('input');
+	/*var pre = document.createElement('input');
 	pre.setAttribute("type", "checkbox");
 	pre.setAttribute("name", "season");
 	pre.setAttribute("id", "pre");
@@ -3784,7 +3826,7 @@ function selectPreRegPost() {
 	post.setAttribute("name", "season");
 	post.setAttribute("id", "post");
 	post.checked = false;
-	/*pre.insertAdjacentHTML(' Preseason ' + getGameDropdown("pre") + ' <br> ');
+	pre.insertAdjacentHTML(' Preseason ' + getGameDropdown("pre") + ' <br> ');
 	/*newDiv6.appendChild(pre);
 	reg.insertAdjacentHTML(' Regular season ' + getGameDropdown("reg") + ' <br> ');
 	newDiv6.appendChild(reg);
