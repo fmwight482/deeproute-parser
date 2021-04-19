@@ -1876,6 +1876,7 @@ function parsePBP(intext) {
 
 				var puntDistPtr1, puntDistPtr2, puntDecimalDistPtr1, puntDecimalDistPtr2, puntResultPtr;
 				var puntReturnDistPtr1, puntReturnDistPtr2, returnDecimalPtr1, returnDecimalPtr2;
+				var returnYards, returnDecimals;
 				var puntDistYards = 0;
 				var puntDistDecimals = 0;
 				var returnDistYards = 0;
@@ -1924,6 +1925,9 @@ function parsePBP(intext) {
 									puntReturnDistPtr2 = intext.indexOf(" yardline.", puntReturnDistPtr1);
 									if (puntReturnDistPtr2 != -1 && puntReturnDistPtr2 < endptr) {
 										puntReturnDistStr = intext.substring(puntReturnDistPtr1, puntReturnDistPtr2);
+										// punt return yards are currently innacurate, the are derrived from the imprecice yardlines
+										// instead of the much more precise listed return distances
+										//puntReturnYards = parseInt(FGDistYards) + parseInt(FGDistDecimals)/100;
 										if (puntReturnDistStr.includes("Midfield")) {
 											puntReturnSpot = 50;
 											puntReturnYardLine = "50";
