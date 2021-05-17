@@ -8,7 +8,7 @@
 // @include     http://deeproute.com/?js=scrimmine
 // @grant		GM_xmlhttpRequest
 // @connect	    deeproute.com
-// @version     1.6.8.1
+// @version     1.7.0
 // @description   a program to parse game logs for the deeproute.com football game
 // ==/UserScript==
 
@@ -3497,26 +3497,26 @@ function parseStanding(intext)
 function parseTeamStatsForAbbrs(intext) {
 	var ptr1, ptr2, ptr3, ptr4, name, abbr, idnum;
 
-	ptr1 = intext.indexOf("<th>STPG</th>", 0); 
+	ptr1 = intext.indexOf("<th>ANYA</th>", 0);
 	while (ptr1 >= 0) {
-		ptr2 = intext.indexOf("myteamno=", ptr1); 
+		ptr2 = intext.indexOf("myteamno=", ptr1);
 		if (ptr2 < 0) {
-			break; 
+			break;
 		}
 
-		ptr3 = intext.indexOf("\">", ptr2); 
-		idnum = intext.substring(ptr2+9, ptr3); 
-		ptr4 = intext.indexOf("</a>", ptr3); 
-		name = intext.substring(ptr3+2, ptr4); 
+		ptr3 = intext.indexOf("\">", ptr2);
+		idnum = intext.substring(ptr2+9, ptr3);
+		ptr4 = intext.indexOf("</a>", ptr3);
+		name = intext.substring(ptr3+2, ptr4);
 
-		ptr2 = intext.indexOf("<b>", ptr4); 
-		ptr3 = intext.indexOf("</b>", ptr2+3); 
-		abbr = intext.substring(ptr2+3, ptr3); 
+		ptr2 = intext.indexOf("<b>", ptr4);
+		ptr3 = intext.indexOf("</b>", ptr2+3);
+		abbr = intext.substring(ptr2+3, ptr3);
 
 		teamlist[idnum-1]=name;
 		abbrlist[idnum-1]=abbr;
 		
-		ptr1=ptr3+4; 
+		ptr1=ptr3+4;
 	}
 
 	startFunc();
@@ -4099,7 +4099,7 @@ window.setTimeout( function() {
 
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: 'http://deeproute.com/?sel=lgleaderbyteam&year=' + year + '&myleagueno=' + league + '&typer=X',
+			url: 'http://deeproute.com/?sel=lgleaderbyteam&year=' + year + '&myleagueno=' + league + '&typer=X&stat=2',
 			headers: {
 				 'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
 				 'Accept': 'application/atom+xml,application/xml,text/xml',
